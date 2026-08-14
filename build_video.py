@@ -7,7 +7,7 @@ ROOT = Path("/Users/srujansai/Desktop/SEBI")
 FR = ROOT / "video" / "frames"
 VO = ROOT / "video" / "vo"
 OUT = ROOT / "video" / "ControlPlane_ControlPlane-ai.mp4"
-TARGET = 137.2  # match the VO exactly — no time-stretch, no sluggish read
+TARGET = 145.2  # matches the VO exactly (atempo 1.000, no time-stretch)
 
 # Frame order grouped by beat (matches the 5 VO beats).
 BEATS = {
@@ -19,11 +19,11 @@ BEATS = {
     "b5": ["5a", "5b", "5c"],
 }
 # Audio duration per beat (seconds) — measured from vo/beat*.wav.
-BEAT_AUDIO = {"b1": 20.153288, "b2": 35.952608, "b3": 45.248345, "b4": 29.638322, "b5": 6.174875}
+BEAT_AUDIO = {"b1": 20.153288, "b2": 35.952608, "b3": 45.248345, "b4": 29.638322, "b5": 14.174875}
 TOTAL_AUDIO = sum(BEAT_AUDIO.values())  # 137.1674
 
 # Give the resolution frames a little extra dwell.
-EXTRA = {"3g": 1.5, "4a": 5.0, "4d": 1.0, "5b": 3.5, "5c": 0.8, "3c": 1.0, "1c": 0.8}
+EXTRA = {"3g": 1.5, "4a": 8.0, "4d": 1.0, "5b": 6.0, "5c": 0.8, "3c": 1.0, "1c": 0.8}
 
 
 def frame_durations():

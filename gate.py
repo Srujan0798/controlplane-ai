@@ -68,8 +68,16 @@ _a = np.frombuffer(_raw, dtype=np.int16).astype(float) / 32768
 _w = 8000
 _db = 20 * np.log10(np.array([np.sqrt((_a[i:i+_w] ** 2).mean() + 1e-12)
                               for i in range(0, len(_a) - _w, _w)]))
+# A dropout is silence INSIDE the narration. The tail is the frozen closing hold
+# ("End there. Say nothing after it." - STAGE5), so measure the body separately.
+_tail = 0
+for _v in (_db < -40)[::-1]:
+    if not _v:
+        break
+    _tail += 1
+_body = _db[:len(_db) - _tail] if _tail else _db
 _run = _best = 0
-for _v in _db < -40:
+for _v in _body < -40:
     _run = _run + 1 if _v else 0
     _best = max(_best, _run)
 
@@ -103,7 +111,9 @@ checks = [
  ("video 2:00-3:00", 120 <= dur <= 180, f"{int(dur//60)}:{int(dur%60):02d}"),
  ("S2 footer text clears AA", wcag("#A8A4AE", "#20242E") >= 4.5, f"{wcag('#A8A4AE','#20242E'):.1f}:1"),
  ("S1 capture label clears AA", wcag("#9A78D8", "#0E0F12") >= 4.5, f"{wcag('#9A78D8','#0E0F12'):.1f}:1"),
- ("audio: no dropout > 1.5s", _best * 0.5 <= 1.5, f"longest {_best*0.5:.1f}s · median {np.median(_db):.0f} dBFS"),
+ ("audio: no mid-film dropout > 1.5s", _best * 0.5 <= 1.5,
+  f"longest {_best*0.5:.1f}s · median {np.median(_body):.0f} dBFS"),
+ ("closing hold is silent (frozen)", _tail * 0.5 >= 3.0, f"{_tail*0.5:.1f}s held on the close"),
  ("video shows real slide 2", _vf["s2"] < 5, f"MAD {_vf['s2']:.1f} vs poster"),
  ("video shows real slide 3", _vf["s3"] < 5, f"MAD {_vf['s3']:.1f} vs poster"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),
