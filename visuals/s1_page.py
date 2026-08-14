@@ -65,7 +65,7 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
 .capture{{position:relative}}
 
 .step{{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:16px;
-  color:var(--bound)}}
+  color:#787D88}}
 .step i{{flex:0 0 24px;height:2px;background:var(--dim);font-style:normal}}
 .step.dead{{color:var(--dim)}}
 .step.dead i{{background:var(--red-rule)}}
@@ -80,16 +80,16 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
   border-right-color:var(--muted)}}
 
 .capture::before{{content:"";position:absolute;left:50%;top:0;bottom:-2px;
-  border-left:2px dashed var(--violet);opacity:.9}}
+  border-left:2px dashed var(--violet);opacity:.45}}
 .capture span{{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   writing-mode:vertical-rl;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;
-  color:var(--violet);white-space:nowrap;background:var(--ground);padding:10px 1px}}
+  color:#6E4A9E;white-space:nowrap;background:var(--ground);padding:10px 1px}}
 
-.span{{background:#15171D;border:1px solid #23262E;padding:12px 18px;
+.span{{background:#131519;border:1px solid #1E2128;padding:12px 18px;
   display:flex;flex-direction:column;justify-content:center;gap:9px}}
-.span .name{{font-family:var(--mono);font-size:23px;color:var(--ink)}}
+.span .name{{font-family:var(--mono);font-size:23px;color:#8E93A0}}
 .span .tags{{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}}
-.span .tag{{font-family:var(--mono);font-size:15px;color:var(--muted);background:#22252C;
+.span .tag{{font-family:var(--mono);font-size:15px;color:#61656F;background:#1B1E24;
   border:1px solid var(--rule-soft);padding:4px 0;text-align:center}}
 .span.breach{{background:var(--red-wash);border-color:var(--red)}}
 .span.breach .name{{color:var(--red-ink)}}
@@ -101,9 +101,9 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
   font-family:var(--mono);font-size:14px;color:#7A2A31;letter-spacing:.02em}}
 
 .link{{display:flex;align-items:center}}
-.link i{{flex:1;height:1px;background:var(--bound);opacity:.6;font-style:normal;position:relative}}
+.link i{{flex:1;height:1px;background:#6E7480;opacity:.5;font-style:normal;position:relative}}
 .link i::before,.link i::after{{content:"";position:absolute;top:-2.5px;width:6px;height:6px;
-  border-radius:50%;background:var(--bound)}}
+  border-radius:50%;background:#6E7480}}
 .link i::before{{left:0}} .link i::after{{right:0}}
 .link.none{{position:relative}}
 .link.none i{{background:var(--red);opacity:1;
@@ -114,38 +114,39 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
   transform:translate(-50%,-50%);font-family:var(--mono);font-size:13px;color:var(--red);
   letter-spacing:.04em;white-space:nowrap;background:var(--ground);padding:3px 7px}}
 
-.claim{{background:#15171D;border:1px solid #23262E;display:flex;align-items:center;
-  gap:13px;padding:0 20px;font-family:var(--mono);font-size:23px;color:var(--ink)}}
-.claim em{{width:7px;height:7px;border-radius:50%;background:var(--bound);flex:0 0 auto}}
-.claim.unbound{{background:#3A1014;border:3px solid var(--red);flex-direction:column;box-shadow:0 0 0 1px var(--ground),0 14px 46px rgba(232,32,40,.30);
+.claim{{background:#131519;border:1px solid #1E2128;display:flex;align-items:center;
+  gap:13px;padding:0 20px;font-family:var(--mono);font-size:23px;color:#8E93A0}}
+.claim em{{width:7px;height:7px;border-radius:50%;background:#5A5F6B;flex:0 0 auto}}
+.claim.unbound{{background:#3A1014;border:3px solid var(--red);flex-direction:column;box-shadow:0 0 0 2px var(--ground),0 18px 70px rgba(232,32,40,.55),0 0 34px rgba(232,32,40,.30);
   align-items:flex-start;justify-content:center;gap:5px}}
-.claim.unbound .t{{color:#FF6E74;font-size:30px;font-weight:700;letter-spacing:-.01em}}
-.claim.unbound .v{{font-size:13.5px;color:var(--red);letter-spacing:.14em}}
+.claim.unbound .t{{color:#FF7B80;font-size:36px;font-weight:700;letter-spacing:-.015em}}
+.claim.unbound .v{{font-size:14.5px;color:#FF5058;letter-spacing:.16em;font-weight:700}}
 
 .gate{{display:flex;align-items:center}}
 .gate i{{flex:1;height:1px;background:var(--dim);font-style:normal}}
 .gate.cut{{position:relative}}
 .gate.cut i{{background:var(--red-rule)}}
-.gate.cut::after{{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;
+.gate.cut::after{{content:"";position:absolute;left:50%;top:50%;width:58px;height:58px;
   transform:translate(-50%,-50%);
-  background:linear-gradient(45deg,transparent 44%,var(--red) 44% 56%,transparent 56%),
-             linear-gradient(-45deg,transparent 44%,var(--red) 44% 56%,transparent 56%)}}
+  background:linear-gradient(45deg,transparent 45%,var(--red) 45% 55%,transparent 55%),
+             linear-gradient(-45deg,transparent 45%,var(--red) 45% 55%,transparent 55%);
+  filter:drop-shadow(0 0 14px rgba(232,32,40,.6))}}
 
 .action{{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--red);
   padding:24px;display:flex;flex-direction:column;justify-content:center;gap:30px}}
-.action .lbl{{font-family:var(--mono);font-size:14px;letter-spacing:.2em;color:var(--muted)}}
+.action .lbl{{font-family:var(--mono);font-size:13px;letter-spacing:.2em;color:#61656F}}
 .action .amt{{font-family:var(--serif);font-size:66px;font-weight:700;letter-spacing:-.02em;
   line-height:1;margin-top:2px}}
-.action .route{{font-family:var(--mono);font-size:15px;color:var(--bound);margin-top:8px}}
+.action .route{{font-family:var(--mono);font-size:14px;color:#787D88;margin-top:8px}}
 .action .why{{font-family:var(--mono);font-size:15px;line-height:1.75}}
-.action .why u{{display:block;color:var(--dim);font-size:13.5px;letter-spacing:.16em;
+.action .why u{{display:block;color:#565A64;font-size:12px;letter-spacing:.18em;
   text-decoration:none;text-transform:uppercase}}
 .action .why b{{color:var(--red-ink);font-weight:700}}
-.action .why span{{color:var(--bound)}}
+.action .why span{{color:#8E93A0}}
 .held{{border:3px solid var(--red);background:#3A1014;padding:15px 18px;box-shadow:0 0 0 1px var(--ground),0 14px 46px rgba(232,32,40,.28)}}
 .held u{{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;
   color:var(--red);text-decoration:none;margin-bottom:3px}}
-.held b{{font-family:var(--mono);font-size:26px;color:#FF6E74;font-weight:700}}
+.held b{{font-family:var(--mono);font-size:27px;color:#FF7B80;font-weight:700;white-space:nowrap}}
 
 .reads{{display:grid;grid-template-columns:{COLS};margin-top:22px}}
 .read{{font-family:var(--sans);position:relative;padding-top:16px}}
