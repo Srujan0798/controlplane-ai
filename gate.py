@@ -73,6 +73,14 @@ for _v in _db < -40:
     _run = _run + 1 if _v else 0
     _best = max(_best, _run)
 
+import glob
+_vf = {}
+for _n, _p in (("s2", "posters/s2.png"), ("s3", "posters/s3.png")):
+    _pa = np.asarray(Image.open(_p).convert("RGB").resize((320, 180))).astype(int)
+    _fr = {"s2": "video/frames/4a.png", "s3": "video/frames/5b.png"}[_n]
+    _fa = np.asarray(Image.open(_fr).convert("RGB").resize((320, 180))).astype(int)
+    _vf[_n] = float(np.abs(_fa - _pa).mean())
+
 checks = [
  ("BRIEF Q1 · detect, three axes", bool(re.search(r'Unused Step.*Unentitled Span.*Unbound Claim', T)), ""),
  ("BRIEF Q2 · block/edit/escalate", "ESCALATE" in T and "BLOCK" in T, ""),
@@ -96,6 +104,8 @@ checks = [
  ("S2 footer text clears AA", wcag("#A8A4AE", "#20242E") >= 4.5, f"{wcag('#A8A4AE','#20242E'):.1f}:1"),
  ("S1 capture label clears AA", wcag("#9A78D8", "#0E0F12") >= 4.5, f"{wcag('#9A78D8','#0E0F12'):.1f}:1"),
  ("audio: no dropout > 1.5s", _best * 0.5 <= 1.5, f"longest {_best*0.5:.1f}s · median {np.median(_db):.0f} dBFS"),
+ ("video shows real slide 2", _vf["s2"] < 5, f"MAD {_vf['s2']:.1f} vs poster"),
+ ("video shows real slide 3", _vf["s3"] < 5, f"MAD {_vf['s3']:.1f} vs poster"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),
   " / ".join(f"{os.path.getsize(P+e)/1e6:.2f}" for e in (".pptx", ".pdf", ".mp4"))),
 ]

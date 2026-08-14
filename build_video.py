@@ -23,7 +23,7 @@ BEAT_AUDIO = {"b1": 20.153288, "b2": 35.952608, "b3": 45.248345, "b4": 29.638322
 TOTAL_AUDIO = sum(BEAT_AUDIO.values())  # 137.1674
 
 # Give the resolution frames a little extra dwell.
-EXTRA = {"3g": 1.5, "4d": 1.0, "5b": 1.2, "5c": 0.8, "3c": 1.0, "1c": 0.8}
+EXTRA = {"3g": 1.5, "4a": 5.0, "4d": 1.0, "5b": 3.5, "5c": 0.8, "3c": 1.0, "1c": 0.8}
 
 
 def frame_durations():

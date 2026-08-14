@@ -500,18 +500,8 @@ def video_frames():
     frames["3f"] = plate(bound=5, highlight="cost", show_cost_count=True)
     frames["3g"] = plate(bound=5, highlight="all")
 
-    frames["4a"] = _v(_card() + f"""
-      <div class="matrix-wrap">
-        <div class="h dark" style="font-size:30px;margin-bottom:4px">The same unproven claim annotates a draft and holds a payment.</div>
-        <table class="mx">
-          <tr><th></th><th>Contradicted / entitlement</th><th>Unsupported + categorical</th><th>Unsupported + hedged</th><th>Unknown</th></tr>
-          <tr><td class="rh">R3</td><td class="block">BLOCK</td><td class="esc">ESCALATE</td><td class="esc">ESCALATE</td><td class="esc">ESCALATE</td></tr>
-          <tr><td class="rh">R2</td><td class="block">BLOCK</td><td class="edit">EDIT</td><td class="edit">EDIT</td><td class="esc">ESCALATE</td></tr>
-          <tr><td class="rh">R1</td><td class="edit">EDIT</td><td class="edit">EDIT</td><td class="pass">PASS</td><td class="pass">PASS</td></tr>
-          <tr><td class="rh">R0</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr>
-        </table>
-        <div class="pin">clause 7.2 → escalate · ₹1,84,000 held</div>
-      </div>""", white=True)
+    # The matrix beat shows the deck's own slide 2, not a second matrix design.
+    frames["4a"] = poster_s2()
 
     frames["4b"] = _v(_card() + """
       <div class="panel">
@@ -568,6 +558,7 @@ def video_frames():
         <div class="bad" style="color:{BLUE}">held · Tue 14:06 · escalated</div>
         <div class="meta">clause 7.2 — no span</div>
       </div>""")
-    frames["5b"] = _v('<div class="closer">Now nothing acts until it can prove it should.</div>')
+    # ...and the close shows the deck's own slide 3.
+    frames["5b"] = poster_s3()
     frames["5c"] = _v('<div class="mark">ControlPlane.ai</div>')
     return frames
