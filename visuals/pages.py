@@ -127,13 +127,13 @@ def poster_s2():
       color:#E8E6EE; background:rgba(14,15,18,0.96); padding:4px 10px;
       border:1px solid #5A5C64; z-index: 6; pointer-events: none;
     }}
-    .foot {{ margin-top:20px; background:#14161C; padding:20px 30px;
-             flex: 0 0 auto; border-left:8px solid {RED};
+    .foot {{ margin-top:20px; background:#20242E; padding:19px 30px;
+             flex: 0 0 auto; border-left:8px solid {RED}; border-top:1px solid #4A5060;
              display:flex; flex-direction:column; justify-content:center; gap:9px; }}
     .foot .k {{ font-size:20px; font-weight:700; color:{WHITE}; letter-spacing:-0.02em; }}
     .foot .pin {{ font-size:15px; color:#C8C6CE; }}
     .foot .pin b {{ color:{RED}; }}
-    .foot .law {{ font-size:12px; color:#67646C; line-height:1.9; }}
+    .foot .law {{ font-size:12.5px; color:#A8A4AE; line-height:1.9; }}
     .foot .law b {{ color:#E0DEE6; }}
     """
     body = f"""

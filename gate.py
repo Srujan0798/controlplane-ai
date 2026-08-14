@@ -44,6 +44,26 @@ import fitz
 doc = fitz.open(P + ".pdf")
 emb = [doc.extract_image(i[0])["width"] for pg in doc for i in pg.get_images(full=True)]
 
+def wcag(fg, bg):
+    def L(h):
+        h = h.lstrip('#'); c = [int(h[i:i+2], 16) / 255 for i in (0, 2, 4)]
+        c = [(x / 12.92 if x <= .03928 else ((x + .055) / 1.055) ** 2.4) for x in c]
+        return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]
+    a, b_ = L(fg), L(bg)
+    return (max(a, b_) + .05) / (min(a, b_) + .05)
+
+# audio floor — reviewers heard the old hard [[slnc]] gaps as dropouts
+_raw = subprocess.run(["ffmpeg", "-v", "0", "-i", P + ".mp4", "-ac", "1", "-ar", "16000",
+                       "-f", "s16le", "-"], capture_output=True).stdout
+_a = np.frombuffer(_raw, dtype=np.int16).astype(float) / 32768
+_w = 8000
+_db = 20 * np.log10(np.array([np.sqrt((_a[i:i+_w] ** 2).mean() + 1e-12)
+                              for i in range(0, len(_a) - _w, _w)]))
+_run = _best = 0
+for _v in _db < -40:
+    _run = _run + 1 if _v else 0
+    _best = max(_best, _run)
+
 checks = [
  ("BRIEF Q1 · detect, three axes", bool(re.search(r'Unused Step.*Unentitled Span.*Unbound Claim', T)), ""),
  ("BRIEF Q2 · block/edit/escalate", "ESCALATE" in T and "BLOCK" in T, ""),
@@ -60,6 +80,9 @@ checks = [
  ("PDF embeds full 5760 master", all(w >= 5760 for w in emb), f"{emb[0]}px"),
  ("3 slides / 3 pages", len(Presentation(P + '.pptx').slides) == 3 and len(PdfReader(P + '.pdf').pages) == 3, ""),
  ("video 2:00-3:00", 120 <= dur <= 180, f"{int(dur//60)}:{int(dur%60):02d}"),
+ ("S2 footer text clears AA", wcag("#A8A4AE", "#20242E") >= 4.5, f"{wcag('#A8A4AE','#20242E'):.1f}:1"),
+ ("S1 capture label clears AA", wcag("#9A78D8", "#0E0F12") >= 4.5, f"{wcag('#9A78D8','#0E0F12'):.1f}:1"),
+ ("audio: no dropout > 1.5s", _best * 0.5 <= 1.5, f"longest {_best*0.5:.1f}s · median {np.median(_db):.0f} dBFS"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),
   " / ".join(f"{os.path.getsize(P+e)/1e6:.2f}" for e in (".pptx", ".pdf", ".mp4"))),
 ]

@@ -3,9 +3,9 @@ This response has two pending actions.
 Showing text to a customer — the unentitled span is edited out before they see it.
 Issuing a payment — the unproven claim holds it, escalated with the claim, the spans, and the verdict.
 Same response. Same matrix. Two different answers.
-[[slnc 1000]]
+[[slnc 450]]
 We don't block the text. The user reads the response.
 The gate is on the action.
-[[slnc 1000]]
+[[slnc 450]]
 And we publish our own miss rate. Per route.
 Not what we caught — what we missed.

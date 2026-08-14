@@ -83,7 +83,7 @@ h1{{font-family:var(--serif);font-size:52px;line-height:1.05;font-weight:700;
   border-left:1px dashed var(--violet);opacity:.30}}
 .capture span{{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   writing-mode:vertical-rl;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;
-  color:#5A4080;white-space:nowrap;background:var(--ground);padding:10px 1px}}
+  color:#9A78D8;white-space:nowrap;background:var(--ground);padding:10px 1px}}
 
 .span{{background:#131519;border:1px solid #1E2128;padding:12px 18px;
   display:flex;flex-direction:column;justify-content:center;gap:9px}}

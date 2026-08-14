@@ -3,11 +3,11 @@ Every span, with its source, its access rights, its hash.
 Outside the model.
 The model answers. We take the answer apart into claims.
 Every claim starts UNSUPPORTED.
-[[slnc 1000]]
+[[slnc 450]]
 Five find the span that proves them. One doesn't.
 Clause 7.2 has no span behind it.
 Not low confidence. Unproven.
-[[slnc 1500]]
+[[slnc 600]]
 Now read the same graph three times.
 Performance — a claim with no span.
 Responsibility — a span this caller was never entitled to read.

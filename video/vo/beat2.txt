@@ -1,17 +1,17 @@
 AI stopped answering and started acting.
 It used to be a bad paragraph. It is now an executed transaction.
-[[slnc 1500]]
+[[slnc 600]]
 An AI response is not text to be scored.
 It is a set of claims requesting permission to act.
-[[slnc 1000]]
+[[slnc 450]]
 Nothing in the current stack asks for that proof.
 A second model gives you an opinion.
-[[slnc 500]]
+[[slnc 350]]
 A filter checks banned words.
-[[slnc 500]]
+[[slnc 350]]
 A dashboard tells you on Friday.
-[[slnc 500]]
+[[slnc 350]]
 Confidence is the instrument that broke.
 All of them read the output. The evidence that could prove it existed before the model ran — at context assembly.
-[[slnc 2000]]
+[[slnc 700]]
 Everyone watches the exit. Nobody records the entrance.

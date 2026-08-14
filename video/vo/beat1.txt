@@ -1,7 +1,7 @@
 This is a refund an AI agent approved on Tuesday.
 One lakh eighty-four thousand rupees, under clause 7.2 of a vendor agreement.
-[[slnc 1500]]
+[[slnc 600]]
 Clause 7.2 does not exist. Every filter passed it.
 Confidence was point nine four. It was found on Friday.
-[[slnc 2000]]
+[[slnc 700]]
 The system didn't fail. It was never asked to prove anything.
