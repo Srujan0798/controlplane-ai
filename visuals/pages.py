@@ -154,7 +154,9 @@ def poster_s2():
           &nbsp;&nbsp;<b>ESCALATE</b> — inline hold; ships claim + spans + verdict.<br/>
           <b>Bias</b> — counterfactual flip rate, route-level, CI excludes zero.
           &nbsp;&nbsp;<b>Safety</b> — typed interlocks: tool × args × irreversibility.
-          &nbsp;&nbsp;Hard gate on actions, not tokens. Text streams with a short hold-back.
+          &nbsp;&nbsp;Hard gate on actions, not tokens. Text streams with a short hold-back.<br/>
+          <b>Latency</b> — <b>&le;40 ms p50 · &le;200 ms p95</b> added on read-only text;
+          action gating amortised inside the tool round-trip.
         </div>
       </div>
     </div>"""
@@ -230,7 +232,9 @@ def poster_s3():
     .closer p {{ font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:84px; white-space:nowrap; font-weight:700; color:{WHITE}; letter-spacing:-0.045em;
                   line-height:1.02; max-width:1740px; }}
     .closer p span {{ color:{RED}; }}
-    .closer .proof {{ margin-top:20px; font-size:19px; color:#9A9690; font-weight:500; }}
+    .closer .who {{ margin-bottom:20px; font-size:20px; color:#C8C6CE; font-weight:500; }}
+    .closer .who b {{ color:{WHITE}; font-weight:700; }}
+    .closer .proof {{ margin-top:14px; font-size:19px; color:#9A9690; font-weight:500; }}
     .closer .proof b {{ color:{WHITE}; }}
     """
     body = f"""
@@ -259,6 +263,8 @@ def poster_s3():
         </div>
       </div>
       <div class="closer">
+        <div class="who">For any team putting an agent on a <b>payment, a record, or a
+          customer</b> — where a wrong action costs more than a wrong sentence.</div>
         <p>Now nothing acts until it can <span>prove</span> it should.</p>
         <div class="proof"><b>no span → no execution</b>
           &nbsp;·&nbsp; hold / escalate &nbsp;·&nbsp; publish the miss</div>

@@ -71,7 +71,15 @@ def main():
     subprocess.run([
         "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
         "-fps_mode", "vfr", "-pix_fmt", "yuv420p",
-        "-vf", "scale=3840:2160,noise=alls=5:allf=t",
+        # 1.000 -> 1.035 push across the runtime so nothing reads as a frozen still.
+        # fps=25 must come first: zoompan maps 1:1 per input frame, and the concat
+        # demuxer only emits one frame per still, so without it the whole video
+        # collapses to 34 frames.
+        "-vf", ("fps=25,scale=4224:2376,"
+                f"zoompan=z='min(1.0+0.035*on/{int(TARGET*25)},1.035)':"
+                "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+                "d=1:s=3840x2160:fps=25,"
+                "noise=alls=5:allf=t"),
         "-c:v", "libx264", "-preset", "medium",
         "-b:v", "1500k", "-maxrate", "2000k", "-bufsize", "4000k",
         str(raw),

@@ -38,7 +38,7 @@ NAME = "ControlPlane_ControlPlane-ai"
 SW, SH = Inches(13.333333), Inches(7.5)
 CAP = 20_000_000
 JPEG_Q = 94
-MAX_EDGE = 3840
+MAX_EDGE = 5760
 
 PURPLE = RGBColor(0xA1, 0x00, 0xFF)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)

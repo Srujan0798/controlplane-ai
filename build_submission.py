@@ -26,7 +26,7 @@ POSTERS = [
 ]
 SW, SH = 13.333333, 7.5
 # Cap long edge so 8× agent renders still embed cleanly; 3× source stays as-is.
-MAX_EDGE = 3840
+MAX_EDGE = 5760
 JPEG_Q = 96
 
 
