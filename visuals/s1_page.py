@@ -44,8 +44,8 @@ html,body{{width:1920px;height:1080px;overflow:hidden;background:var(--ground);
 
 .kicker{{font-family:var(--mono);font-size:14px;letter-spacing:.15em;color:var(--muted);
   text-transform:uppercase;margin-bottom:16px}}
-h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
-  letter-spacing:-.02em;white-space:nowrap}}
+h1{{font-family:var(--serif);font-size:52px;line-height:1.05;font-weight:700;
+  letter-spacing:-.02em;white-space:nowrap;color:#C6CAD2}}
 
 .heads{{display:grid;grid-template-columns:{COLS};align-items:end;margin-top:34px;
   padding-bottom:11px;border-bottom:1px solid var(--rule)}}
@@ -68,10 +68,10 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
   color:#787D88}}
 .step i{{flex:0 0 24px;height:2px;background:var(--dim);font-style:normal}}
 .step.dead{{color:var(--dim)}}
-.step.dead i{{background:var(--red-rule)}}
+.step.dead i{{background:#3A3D45}}
 .step.dead span{{position:relative}}
 .step.dead span::after{{content:"";position:absolute;left:-3px;right:-3px;top:52%;
-  height:2px;background:var(--red)}}
+  height:2px;background:#565A64}}
 .costnote{{font-family:var(--sans);font-size:15px;color:var(--muted);display:flex;
   align-items:center;gap:9px;padding-top:12px}}
 .costnote b{{color:var(--ink);font-weight:600}}
@@ -80,10 +80,10 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
   border-right-color:var(--muted)}}
 
 .capture::before{{content:"";position:absolute;left:50%;top:0;bottom:-2px;
-  border-left:2px dashed var(--violet);opacity:.45}}
+  border-left:1px dashed var(--violet);opacity:.30}}
 .capture span{{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   writing-mode:vertical-rl;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;
-  color:#6E4A9E;white-space:nowrap;background:var(--ground);padding:10px 1px}}
+  color:#5A4080;white-space:nowrap;background:var(--ground);padding:10px 1px}}
 
 .span{{background:#131519;border:1px solid #1E2128;padding:12px 18px;
   display:flex;flex-direction:column;justify-content:center;gap:9px}}
@@ -91,12 +91,12 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
 .span .tags{{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}}
 .span .tag{{font-family:var(--mono);font-size:15px;color:#61656F;background:#1B1E24;
   border:1px solid var(--rule-soft);padding:4px 0;text-align:center}}
-.span.breach{{background:var(--red-wash);border-color:var(--red)}}
-.span.breach .name{{color:var(--red-ink)}}
+.span.breach{{background:#1C1216;border-color:#7A2A31}}
+.span.breach .name{{color:#C88A8E}}
 .span.breach .tags{{grid-template-columns:1fr auto 1fr}}
-.span.breach .tag{{background:transparent;border-color:var(--red-rule);color:var(--red-ink);
+.span.breach .tag{{background:transparent;border-color:#4A2126;color:#C88A8E;
   font-size:15px;padding:5px 10px}}
-.span.breach .neq{{border:none;color:var(--red);font-size:18px;font-weight:700;background:none}}
+.span.breach .neq{{border:none;color:#E05058;font-size:18px;font-weight:700;background:none}}
 .ghost{{border:1px dashed var(--red-rule);display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:14px;color:#7A2A31;letter-spacing:.02em}}
 
@@ -117,9 +117,9 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
 .claim{{background:#131519;border:1px solid #1E2128;display:flex;align-items:center;
   gap:13px;padding:0 20px;font-family:var(--mono);font-size:23px;color:#8E93A0}}
 .claim em{{width:7px;height:7px;border-radius:50%;background:#5A5F6B;flex:0 0 auto}}
-.claim.unbound{{background:#3A1014;border:3px solid var(--red);flex-direction:column;box-shadow:0 0 0 2px var(--ground),0 18px 70px rgba(232,32,40,.55),0 0 34px rgba(232,32,40,.30);
+.claim.unbound{{background:#3A1014;border:3px solid var(--red);flex-direction:column;box-shadow:0 0 0 2px var(--ground),0 24px 96px rgba(232,32,40,.75),0 0 44px rgba(232,32,40,.40);
   align-items:flex-start;justify-content:center;gap:5px}}
-.claim.unbound .t{{color:#FF7B80;font-size:36px;font-weight:700;letter-spacing:-.015em}}
+.claim.unbound .t{{color:#FF9095;font-size:46px;font-weight:700;letter-spacing:-.02em}}
 .claim.unbound .v{{font-size:14.5px;color:#FF5058;letter-spacing:.16em;font-weight:700}}
 
 .gate{{display:flex;align-items:center}}
@@ -132,11 +132,11 @@ h1{{font-family:var(--serif);font-size:54px;line-height:1.05;font-weight:700;
              linear-gradient(-45deg,transparent 45%,var(--red) 45% 55%,transparent 55%);
   filter:drop-shadow(0 0 14px rgba(232,32,40,.6))}}
 
-.action{{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--red);
+.action{{background:var(--panel);border:1px solid var(--rule);border-left:1px solid #3A3F4A;
   padding:24px;display:flex;flex-direction:column;justify-content:center;gap:30px}}
 .action .lbl{{font-family:var(--mono);font-size:13px;letter-spacing:.2em;color:#61656F}}
-.action .amt{{font-family:var(--serif);font-size:66px;font-weight:700;letter-spacing:-.02em;
-  line-height:1;margin-top:2px}}
+.action .amt{{font-family:var(--serif);font-size:60px;font-weight:700;letter-spacing:-.02em;
+  line-height:1;margin-top:2px;color:#C2C6CE}}
 .action .route{{font-family:var(--mono);font-size:14px;color:#787D88;margin-top:8px}}
 .action .why{{font-family:var(--mono);font-size:15px;line-height:1.75}}
 .action .why u{{display:block;color:#565A64;font-size:12px;letter-spacing:.18em;

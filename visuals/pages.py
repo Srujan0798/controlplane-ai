@@ -91,7 +91,7 @@ def poster_s2():
       display:grid;
       grid-template-columns: 220px repeat(4, 1fr);
       grid-template-rows: 52px repeat(4, 1fr);
-      gap: 12px;
+      gap: 7px;
     }}
     .hd {{ font-size:14px; font-weight:600; color:#9A9690; text-align:center;
             align-self:end; line-height:1.3; padding-bottom:4px; font-family:{MONO}; }}
@@ -103,10 +103,10 @@ def poster_s2():
           border:1px solid transparent; font-family:{MONO}; border-radius:2px;
           position: relative; }}
     .c small {{ font-size:12px; font-weight:600; letter-spacing:0.06em; margin-top:6px; opacity:0.85; }}
-    .b {{ background:#241014; color:#A85A5E; border-color:#33171B; }}
-    .e {{ background:#11162C; color:#65739F; border-color:#1A2038; }}
-    .d {{ background:#1A170A; color:#94722E; border-color:#2A230F; }}
-    .p {{ background:#131519; color:#4E4B54; border-color:#1C1F24; }}
+    .b {{ background:#3A181C; color:#D07A7E; border-color:#4E2226; }}
+    .e {{ background:#1A2244; color:#8593C4; border-color:#26304E; }}
+    .d {{ background:#2A2410; color:#C29840; border-color:#3E3418; }}
+    .p {{ background:#282A32; color:#8E8B94; border-color:#35383F; }}
     /* Thin bracket edges on column 2 cells (STAGE4 — proves the headline). */
     .col2 {{ box-shadow: inset 3px 0 0 #C8C6CE; }}
     .c2-top {{ box-shadow: inset 3px 0 0 #C8C6CE, inset 0 3px 0 #C8C6CE; }}
@@ -133,7 +133,7 @@ def poster_s2():
     .foot .k {{ font-size:20px; font-weight:700; color:{WHITE}; letter-spacing:-0.02em; }}
     .foot .pin {{ font-size:15px; color:#C8C6CE; }}
     .foot .pin b {{ color:{RED}; }}
-    .foot .law {{ font-size:12.5px; color:#7E7A84; line-height:1.85; }}
+    .foot .law {{ font-size:12px; color:#67646C; line-height:1.9; }}
     .foot .law b {{ color:#E0DEE6; }}
     """
     body = f"""
@@ -190,7 +190,7 @@ def poster_s3():
     .top {{ padding:44px 62px 28px; flex:1; min-height:0; display:grid;
             grid-template-columns: 1fr 1.05fr; grid-template-rows: auto auto 1fr;
             column-gap: 58px; }}
-    .h {{ grid-column:1 / -1; font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:42px; font-weight:700; color:{WHITE};
+    .h {{ grid-column:1 / -1; font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:40px; font-weight:700; color:#A8ADB8;
           line-height:1.05; letter-spacing:-0.035em; margin-bottom:0; padding-bottom:10px;
           border-bottom:1px solid #2E313A; }}
     .subline {{ grid-column:1 / -1; font-size:15px; color:#9A9690; margin:12px 0 18px; font-weight:500; }}
@@ -222,7 +222,7 @@ def poster_s3():
     .fnr {{ background:#3A1418; border:1px solid {RED}; margin:2px 0; }}
     .fnr .kk, .fnr .vv {{ color:#FFB0B4; font-size:18px; font-weight:700; }}
     .cap {{ font-size:13px; font-weight:600; color:#E0A030; margin-top:10px; }}
-    .closer {{ background:#12141A; height:410px; flex:0 0 410px; display:flex;
+    .closer {{ background:#12141A; height:352px; flex:0 0 352px; display:flex;
                 flex-direction:column; justify-content:center; padding:0 56px;
                 border-top:1px solid #2A2D34; position:relative; }}
     .closer::before {{ content:""; position:absolute; left:0; top:0; bottom:0; width:14px;
@@ -230,7 +230,7 @@ def poster_s3():
     .closer p {{ font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:84px; white-space:nowrap; font-weight:700; color:{WHITE}; letter-spacing:-0.045em;
                   line-height:1.02; max-width:1740px; }}
     .closer p span {{ color:{RED}; }}
-    .closer .proof {{ margin-top:26px; font-size:19px; color:#9A9690; font-weight:500; }}
+    .closer .proof {{ margin-top:20px; font-size:19px; color:#9A9690; font-weight:500; }}
     .closer .proof b {{ color:{WHITE}; }}
     """
     body = f"""
