@@ -90,7 +90,7 @@ def poster_s2():
       height: 100%;
       display:grid;
       grid-template-columns: 220px repeat(4, 1fr);
-      grid-template-rows: 52px repeat(4, 1fr);
+      grid-template-rows: 74px repeat(4, 1fr);
       gap: 7px;
     }}
     .hd {{ font-size:14px; font-weight:600; color:#9A9690; text-align:center;
@@ -120,7 +120,7 @@ def poster_s2():
     .brkt-lab {{
       position: absolute;
       left: calc(220px + 24px + 1.5 * ((100% - 220px - 48px) / 4));
-      top: 28px;
+      top: 0px;
       transform: translateX(-50%);
       white-space: nowrap;
       font-family:{MONO}; font-size:12px; font-weight:700; letter-spacing:0.03em;

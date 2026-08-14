@@ -44,8 +44,8 @@ html,body{{width:1920px;height:1080px;overflow:hidden;background:var(--ground);
 
 .kicker{{font-family:var(--mono);font-size:14px;letter-spacing:.15em;color:var(--muted);
   text-transform:uppercase;margin-bottom:16px}}
-h1{{font-family:var(--serif);font-size:52px;line-height:1.05;font-weight:700;
-  letter-spacing:-.02em;white-space:nowrap;color:#C6CAD2}}
+h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
+  letter-spacing:-.02em;white-space:nowrap;color:#A2A8B4}}
 
 .heads{{display:grid;grid-template-columns:{COLS};align-items:end;margin-top:34px;
   padding-bottom:11px;border-bottom:1px solid var(--rule)}}
@@ -119,8 +119,8 @@ h1{{font-family:var(--serif);font-size:52px;line-height:1.05;font-weight:700;
 .claim em{{width:7px;height:7px;border-radius:50%;background:#5A5F6B;flex:0 0 auto}}
 .claim.unbound{{background:#3A1014;border:3px solid var(--red);flex-direction:column;box-shadow:0 0 0 2px var(--ground),0 24px 96px rgba(232,32,40,.75),0 0 44px rgba(232,32,40,.40);
   align-items:flex-start;justify-content:center;gap:5px}}
-.claim.unbound .t{{color:#FF9095;font-size:46px;font-weight:700;letter-spacing:-.02em}}
-.claim.unbound .v{{font-size:14.5px;color:#FF5058;letter-spacing:.16em;font-weight:700}}
+.claim.unbound .t{{color:#FFF2F2;font-size:48px;font-weight:700;letter-spacing:-.02em}}
+.claim.unbound .v{{font-size:15px;color:#FFB8BB;letter-spacing:.16em;font-weight:700}}
 
 .gate{{display:flex;align-items:center}}
 .gate i{{flex:1;height:1px;background:var(--dim);font-style:normal}}
@@ -136,7 +136,7 @@ h1{{font-family:var(--serif);font-size:52px;line-height:1.05;font-weight:700;
   padding:24px;display:flex;flex-direction:column;justify-content:center;gap:30px}}
 .action .lbl{{font-family:var(--mono);font-size:13px;letter-spacing:.2em;color:#61656F}}
 .action .amt{{font-family:var(--serif);font-size:60px;font-weight:700;letter-spacing:-.02em;
-  line-height:1;margin-top:2px;color:#C2C6CE}}
+  line-height:1;margin-top:2px;color:#9BA0AA}}
 .action .route{{font-family:var(--mono);font-size:14px;color:#787D88;margin-top:8px}}
 .action .why{{font-family:var(--mono);font-size:15px;line-height:1.75}}
 .action .why u{{display:block;color:#565A64;font-size:12px;letter-spacing:.18em;
@@ -145,8 +145,8 @@ h1{{font-family:var(--serif);font-size:52px;line-height:1.05;font-weight:700;
 .action .why span{{color:#8E93A0}}
 .held{{border:3px solid var(--red);background:#3A1014;padding:15px 18px;box-shadow:0 0 0 1px var(--ground),0 14px 46px rgba(232,32,40,.28)}}
 .held u{{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;
-  color:var(--red);text-decoration:none;margin-bottom:3px}}
-.held b{{font-family:var(--mono);font-size:27px;color:#FF7B80;font-weight:700;white-space:nowrap}}
+  color:#FF8A8E;text-decoration:none;margin-bottom:3px}}
+.held b{{font-family:var(--mono);font-size:28px;color:#FFF2F2;font-weight:700;white-space:nowrap}}
 
 .reads{{display:grid;grid-template-columns:{COLS};margin-top:22px}}
 .read{{font-family:var(--sans);position:relative;padding-top:16px}}

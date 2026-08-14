@@ -18,6 +18,15 @@ cause, held, steps = rs(.47, .72, .70, .82), rs(.76, .99, .58, .72), rs(0, .16, 
 ys, xs = np.where(red)
 cx, cy = xs.mean() / W, ys.mean() / H
 
+# Saliency: a long line of dim text can out-count a small bright block on raw pixels
+# while losing the glance. Peak luminance and local density are the honest measures.
+Lp = 0.2126 * R + 0.7152 * G + 0.0722 * B
+def sal(x0, x1, y0, y1, thr=140):
+    reg = Lp[int(y0 * H):int(y1 * H), int(x0 * W):int(x1 * W)]
+    n = int((reg > thr).sum())
+    return (100 * n / reg.size, float(reg[reg > thr].mean()) if n else 0.0)
+s_head, s_fail, s_rup = sal(0, 1, .06, .16), sal(.47, .72, .70, .82), sal(.76, .99, .34, .46)
+
 # --- s2: severity fall is carried by SATURATION (hot red -> cool grey), not luminance.
 b = np.asarray(Image.open("posters/s2.png").convert("RGB")).astype(int)
 Hh, Ww, _ = b.shape
@@ -73,6 +82,10 @@ checks = [
  ("S1 cause outranks effect", cause > held, f"clause 7.2 {cause} vs HELD {held} red px"),
  ("S1 no false left hotspot", steps == 0, f"{steps} px"),
  ("S1 red centroid on failure", cx > .55 and cy > .60, f"x={cx:.2f} y={cy:.2f}"),
+ ("S1 failure is brightest", s_fail[1] > s_head[1] and s_fail[1] > s_rup[1],
+  f"L{s_fail[1]:.0f} vs headline L{s_head[1]:.0f} / rupee L{s_rup[1]:.0f}"),
+ ("S1 failure is densest", s_fail[0] > s_head[0] and s_fail[0] > s_rup[0],
+  f"{s_fail[0]:.1f}% vs {s_head[0]:.1f}% / {s_rup[0]:.1f}%"),
  ("S2 severity fall monotonic", blk[0] > edt[0] > pss[0], f"sat {blk[0]:.0f} > {edt[0]:.0f} > {pss[0]:.0f}"),
  ("S2 PASS visible on ground", pss[1] >= 15, f"dlum {pss[1]:.0f}"),
  ("S3 closer/title >= 1.4x", ratio >= 1.4, f"{ratio:.2f}x"),
