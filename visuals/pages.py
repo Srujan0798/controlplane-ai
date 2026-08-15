@@ -127,8 +127,8 @@ def poster_s2():
       color:#E8E6EE; background:rgba(14,15,18,0.96); padding:4px 10px;
       border:1px solid #5A5C64; z-index: 6; pointer-events: none;
     }}
-    .foot {{ margin-top:20px; background:#20242E; padding:19px 30px;
-             flex: 0 0 auto; border-left:8px solid {RED}; border-top:1px solid #4A5060;
+    .foot {{ margin-top:20px; background:#272C38; padding:19px 30px;
+             flex: 0 0 auto; border-left:8px solid {RED}; border-top:2px solid #5A6172;
              display:flex; flex-direction:column; justify-content:center; gap:9px; }}
     .foot .k {{ font-size:20px; font-weight:700; color:{WHITE}; letter-spacing:-0.02em; }}
     .foot .pin {{ font-size:15px; color:#C8C6CE; }}
@@ -155,7 +155,7 @@ def poster_s2():
           <b>Bias</b> — counterfactual flip rate, route-level, CI excludes zero.
           &nbsp;&nbsp;<b>Safety</b> — typed interlocks: tool × args × irreversibility.
           &nbsp;&nbsp;Hard gate on actions, not tokens. Text streams with a short hold-back.<br/>
-          <b>Latency</b> — <b>&le;40 ms p50 · &le;200 ms p95</b> added on read-only text;
+          <b style="font-size:13.5px">Latency</b> — <b style="font-size:13.5px">&le;40 ms p50 · &le;200 ms p95</b> added on read-only text;
           action gating amortised inside the tool round-trip.
         </div>
       </div>

@@ -89,6 +89,19 @@ for _n, _p in (("s2", "posters/s2.png"), ("s3", "posters/s3.png")):
     _fa = np.asarray(Image.open(_fr).convert("RGB").resize((320, 180))).astype(int)
     _vf[_n] = float(np.abs(_fa - _pa).mean())
 
+from scipy import ndimage as _nd
+_s1 = np.asarray(Image.open("posters/s1.png").convert("RGB")).astype(int)
+_rd = (_s1[..., 0] > 90) & (_s1[..., 0] - _s1[..., 1] > 40) & (_s1[..., 0] - _s1[..., 2] > 40)
+_lab, _n = _nd.label(_rd)
+_sz = _nd.sum(_rd, _lab, range(1, _n + 1))
+_Hs, _Ws = _rd.shape
+_chain = 0
+for _i in np.argsort(_sz)[::-1][:12]:
+    _ys, _xs = np.where(_lab == _i + 1)
+    if _xs.mean() / _Ws > .45 and _ys.mean() / _Hs > .55:   # clause 7.2 / X / HELD
+        _chain += _sz[_i]
+_share = 100 * _chain / _sz.sum()
+
 checks = [
  ("BRIEF Q1 · detect, three axes", bool(re.search(r'Unused Step.*Unentitled Span.*Unbound Claim', T)), ""),
  ("BRIEF Q2 · block/edit/escalate", "ESCALATE" in T and "BLOCK" in T, ""),
@@ -116,6 +129,7 @@ checks = [
  ("closing hold is silent (frozen)", _tail * 0.5 >= 3.0, f"{_tail*0.5:.1f}s held on the close"),
  ("video shows real slide 2", _vf["s2"] < 5, f"MAD {_vf['s2']:.1f} vs poster"),
  ("video shows real slide 3", _vf["s3"] < 5, f"MAD {_vf['s3']:.1f} vs poster"),
+ ("S1 red is on the failure chain", _share >= 65, f"{_share:.0f}% of red mass"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),
   " / ".join(f"{os.path.getsize(P+e)/1e6:.2f}" for e in (".pptx", ".pdf", ".mp4"))),
 ]
