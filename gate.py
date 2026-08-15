@@ -123,6 +123,14 @@ for _lo, _hi in ((52, 58), (95, 105), (131, 140)):
 _vc = subprocess.run(["python3", "verify_content.py"], capture_output=True, text=True)
 _vcok = "ALL CONTENT CHECKS: PASS" in _vc.stdout
 
+_lap = {}
+for _n in ("s1", "s2", "s3"):
+    _im = np.asarray(Image.open(f"posters/{_n}.png").convert("L")
+                     .resize((1400, 787), Image.LANCZOS)).astype(int)
+    # no text element should sit at hairline stroke with nothing bolder near it
+    _lap[_n] = float((_im > 100).sum()) / _im.size
+_vert = "writing-mode:vertical" in open("visuals/s1_page.py").read()
+
 checks = [
  ("frozen copy intact (verify_content)", _vcok, "" if _vcok else "run verify_content.py"),
  ("BRIEF Q1 · detect, three axes", bool(re.search(r'Unused Step.*Unentitled Span.*Unbound Claim', T)), ""),
@@ -155,6 +163,7 @@ checks = [
  ("S2 latency row out-reads glossary", _lat > _law, f"{_lat} vs {_law} bright px @1400"),
  ("video: every held card moves", _vm and min(_vm) >= 1.5, f"min MAD {min(_vm):.1f} within a hold"),
  ("S3 'prove' clears AA large", wcag("#FF4048", "#12141A") >= 4.5, f"{wcag('#FF4048','#12141A'):.1f}:1"),
+ ("no sideways text on s1", not _vert, "capture label is horizontal"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),
   " / ".join(f"{os.path.getsize(P+e)/1e6:.2f}" for e in (".pptx", ".pdf", ".mp4"))),
 ]

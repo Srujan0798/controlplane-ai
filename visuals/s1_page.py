@@ -80,10 +80,10 @@ h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
   border-right-color:var(--muted)}}
 
 .capture::before{{content:"";position:absolute;left:50%;top:0;bottom:-2px;
-  border-left:1px dashed var(--violet);opacity:.30}}
-.capture span{{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  writing-mode:vertical-rl;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;
-  color:#9A78D8;white-space:nowrap;background:var(--ground);padding:10px 1px}}
+  border-left:2px dashed var(--violet);opacity:.55}}
+.capture span{{display:none}}
+.cap-h{{display:block;font-family:var(--mono);font-size:13px;letter-spacing:.04em;
+  color:#9A78D8;font-weight:400;text-transform:none;margin-top:5px}}
 
 .span{{background:#131519;border:1px solid #1E2128;padding:12px 18px;
   display:flex;flex-direction:column;justify-content:center;gap:9px}}
@@ -111,8 +111,8 @@ h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
   mask-image:repeating-linear-gradient(90deg,#000 0 7px,transparent 7px 15px)}}
 .link.none i::before,.link.none i::after{{display:none}}
 .link.none::after{{content:"no span";position:absolute;left:50%;top:50%;
-  transform:translate(-50%,-50%);font-family:var(--mono);font-size:13px;color:var(--red);
-  letter-spacing:.04em;white-space:nowrap;background:var(--ground);padding:3px 7px}}
+  transform:translate(-50%,-50%);font-family:var(--mono);font-size:15px;font-weight:700;
+  color:#FF6A70;letter-spacing:.04em;white-space:nowrap;background:var(--ground);padding:3px 8px}}
 
 .claim{{background:#131519;border:1px solid #1E2128;display:flex;align-items:center;
   gap:13px;padding:0 20px;font-family:var(--mono);font-size:23px;color:#8E93A0}}
@@ -250,7 +250,7 @@ def s1_body(bound: int = 5, span_n: int = 5, show_claims: bool = True,
 <div class="slide">{head}
   <div class="heads">
     <div class="hd">Step<small>tool &middot; retrieval</small></div><div></div>
-    <div class="hd">Span<span class="chip">14</span><small>source &middot; ACL &middot; hash</small></div><div></div>
+    <div class="hd">Span<span class="chip">14</span><small>source &middot; ACL &middot; hash</small><span class="cap-h">&larr; context assembly &mdash; captured here, outside the model</span></div><div></div>
     <div class="hd"><span class="model">model &middot; consumes spans &middot; emits claims</span>Claim<small>default: UNSUPPORTED</small></div><div></div>
     <div class="hd">Action<small>irreversible &middot; R3</small></div>
   </div>
