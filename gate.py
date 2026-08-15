@@ -151,9 +151,10 @@ checks = [
  ("closing hold is silent (frozen)", _tail * 0.5 >= 3.0, f"{_tail*0.5:.1f}s held on the close"),
  ("video shows real slide 2", _vf["s2"] < 5, f"MAD {_vf['s2']:.1f} vs poster"),
  ("video shows real slide 3", _vf["s3"] < 5, f"MAD {_vf['s3']:.1f} vs poster"),
- ("S1 red is on the failure chain", _share >= 65, f"{_share:.0f}% of red mass"),
+ ("S1 red is on the failure chain", _share >= 80, f"{_share:.0f}% of red mass"),
  ("S2 latency row out-reads glossary", _lat > _law, f"{_lat} vs {_law} bright px @1400"),
  ("video: every held card moves", _vm and min(_vm) >= 1.5, f"min MAD {min(_vm):.1f} within a hold"),
+ ("S3 'prove' clears AA large", wcag("#FF4048", "#12141A") >= 4.5, f"{wcag('#FF4048','#12141A'):.1f}:1"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),
   " / ".join(f"{os.path.getsize(P+e)/1e6:.2f}" for e in (".pptx", ".pdf", ".mp4"))),
 ]

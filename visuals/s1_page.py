@@ -91,10 +91,10 @@ h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
 .span .tags{{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}}
 .span .tag{{font-family:var(--mono);font-size:15px;color:#61656F;background:#1B1E24;
   border:1px solid var(--rule-soft);padding:4px 0;text-align:center}}
-.span.breach{{background:#1C1216;border-color:#7A2A31}}
-.span.breach .name{{color:#C88A8E}}
+.span.breach{{background:#15171D;border-color:#5A5C64}}
+.span.breach .name{{color:#C8C6CE}}
 .span.breach .tags{{grid-template-columns:1fr auto 1fr}}
-.span.breach .tag{{background:transparent;border-color:#4A2126;color:#C88A8E;
+.span.breach .tag{{background:transparent;border-color:#3A3D45;color:#C8C6CE;
   font-size:15px;padding:5px 10px}}
 .span.breach .neq{{border:none;color:#E05058;font-size:18px;font-weight:700;background:none}}
 .ghost{{border:1px dashed #4A4F58;display:flex;align-items:center;justify-content:center;

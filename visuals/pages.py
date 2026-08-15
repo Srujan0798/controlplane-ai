@@ -234,8 +234,8 @@ def poster_s3():
                         background:{RED}; }}
     .closer p {{ font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:84px; white-space:nowrap; font-weight:700; color:{WHITE}; letter-spacing:-0.045em;
                   line-height:1.02; max-width:1740px; }}
-    .closer p span {{ color:{RED}; }}
-    .closer .who {{ margin-bottom:20px; font-size:20px; color:#C8C6CE; font-weight:500; }}
+    .closer p span {{ color:#FF4048; }}
+    .closer .who {{ margin-bottom:16px; font-size:20px; color:#C8C6CE; font-weight:500; }}
     .closer .who b {{ color:{WHITE}; font-weight:700; }}
     .closer .proof {{ margin-top:14px; font-size:19px; color:#9A9690; font-weight:500; }}
     .closer .proof b {{ color:{WHITE}; }}
