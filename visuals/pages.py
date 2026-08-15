@@ -135,6 +135,9 @@ def poster_s2():
     .foot .pin b {{ color:{RED}; }}
     .foot .law {{ font-size:12.5px; color:#A8A4AE; line-height:1.9; }}
     .foot .law b {{ color:#E0DEE6; }}
+    .foot .lat {{ font-size:15px; color:#D8D5DE; letter-spacing:0.01em;
+                  border-top:1px solid #454B58; padding-top:11px; margin-top:3px; }}
+    .foot .lat b {{ color:#FFFFFF; font-weight:700; }}
     """
     body = f"""
     <div class="s">
@@ -154,10 +157,10 @@ def poster_s2():
           &nbsp;&nbsp;<b>ESCALATE</b> — inline hold; ships claim + spans + verdict.<br/>
           <b>Bias</b> — counterfactual flip rate, route-level, CI excludes zero.
           &nbsp;&nbsp;<b>Safety</b> — typed interlocks: tool × args × irreversibility.
-          &nbsp;&nbsp;Hard gate on actions, not tokens. Text streams with a short hold-back.<br/>
-          <b style="font-size:13.5px">Latency</b> — <b style="font-size:13.5px">&le;40 ms p50 · &le;200 ms p95</b> added on read-only text;
-          action gating amortised inside the tool round-trip.
         </div>
+        <div class="lat"><b>&le;40 ms p50</b> &nbsp;·&nbsp; <b>&le;200 ms p95</b>
+          &nbsp;&nbsp;added on read-only text &nbsp;·&nbsp; Hard gate on actions, not tokens.
+          Text streams with a short hold-back.</div>
       </div>
     </div>"""
     return _doc(body, bg=PLATE, extra=extra)

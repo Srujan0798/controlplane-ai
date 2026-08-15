@@ -97,8 +97,8 @@ h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
 .span.breach .tag{{background:transparent;border-color:#4A2126;color:#C88A8E;
   font-size:15px;padding:5px 10px}}
 .span.breach .neq{{border:none;color:#E05058;font-size:18px;font-weight:700;background:none}}
-.ghost{{border:1px dashed var(--red-rule);display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:14px;color:#7A2A31;letter-spacing:.02em}}
+.ghost{{border:1px dashed #4A4F58;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;color:#6E737E;letter-spacing:.02em}}
 
 .link{{display:flex;align-items:center}}
 .link i{{flex:1;height:1px;background:#6E7480;opacity:.5;font-style:normal;position:relative}}

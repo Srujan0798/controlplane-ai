@@ -74,8 +74,8 @@ def main():
         # fps=25 must come first: zoompan maps 1:1 per input frame, and the concat
         # demuxer only emits one frame per still, so without it the whole video
         # collapses to 34 frames.
-        "-vf", ("fps=25,scale=4224:2376,"
-                f"zoompan=z='min(1.0+0.035*on/{int(TARGET*25)},1.035)':"
+        "-vf", ("fps=25,scale=4480:2520,"
+                f"zoompan=z='min(1.0+0.08*on/{int(TARGET*25)},1.08)':"
                 "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
                 "d=1:s=3840x2160:fps=25,"
                 "noise=alls=5:allf=t"),

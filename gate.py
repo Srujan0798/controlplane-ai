@@ -1,5 +1,5 @@
 """Ship gate — every check measured from rendered pixels, not from source."""
-import html, os, re, subprocess
+import html, io, os, re, subprocess
 import numpy as np
 from PIL import Image
 from pypdf import PdfReader
@@ -102,7 +102,29 @@ for _i in np.argsort(_sz)[::-1][:12]:
         _chain += _sz[_i]
 _share = 100 * _chain / _sz.sum()
 
+_s2r = Image.open("posters/s2.png").convert("RGB").resize((1400, 787), Image.LANCZOS)
+_s2n = np.asarray(_s2r).astype(int)
+_s2L = 0.2126 * _s2n[..., 0] + 0.7152 * _s2n[..., 1] + 0.0722 * _s2n[..., 2]
+_h2, _w2 = _s2L.shape
+_lat = int((_s2L[int(.945*_h2):int(.985*_h2), int(.06*_w2):int(.90*_w2)] > 110).sum())
+_law = int((_s2L[int(.895*_h2):int(.945*_h2), int(.06*_w2):int(.90*_w2)] > 110).sum())
+
+_vm = []
+for _lo, _hi in ((52, 58), (95, 105), (131, 140)):
+    _fs = []
+    for _t in (_lo, _hi):
+        _r = subprocess.run(["ffmpeg", "-v", "0", "-ss", str(_t), "-i", P + ".mp4", "-frames:v", "1",
+                             "-vf", "scale=640:-1", "-f", "image2pipe", "-vcodec", "png", "-"],
+                            capture_output=True).stdout
+        _fs.append(np.asarray(Image.open(io.BytesIO(_r)).convert("L")).astype(int) if _r else None)
+    if all(f is not None for f in _fs):
+        _vm.append(float(np.abs(_fs[0] - _fs[1]).mean()))
+
+_vc = subprocess.run(["python3", "verify_content.py"], capture_output=True, text=True)
+_vcok = "ALL CONTENT CHECKS: PASS" in _vc.stdout
+
 checks = [
+ ("frozen copy intact (verify_content)", _vcok, "" if _vcok else "run verify_content.py"),
  ("BRIEF Q1 · detect, three axes", bool(re.search(r'Unused Step.*Unentitled Span.*Unbound Claim', T)), ""),
  ("BRIEF Q2 · block/edit/escalate", "ESCALATE" in T and "BLOCK" in T, ""),
  ("BRIEF Q3 · latency on-slide", bool(re.search(r'40 ms p50', T)), "<=40ms p50 / <=200ms p95"),
@@ -130,6 +152,8 @@ checks = [
  ("video shows real slide 2", _vf["s2"] < 5, f"MAD {_vf['s2']:.1f} vs poster"),
  ("video shows real slide 3", _vf["s3"] < 5, f"MAD {_vf['s3']:.1f} vs poster"),
  ("S1 red is on the failure chain", _share >= 65, f"{_share:.0f}% of red mass"),
+ ("S2 latency row out-reads glossary", _lat > _law, f"{_lat} vs {_law} bright px @1400"),
+ ("video: every held card moves", _vm and min(_vm) >= 1.5, f"min MAD {min(_vm):.1f} within a hold"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),
   " / ".join(f"{os.path.getsize(P+e)/1e6:.2f}" for e in (".pptx", ".pdf", ".mp4"))),
 ]
