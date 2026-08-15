@@ -16,6 +16,8 @@ video/vo/*.wav
 
 # Local noise
 __pycache__/
+/__pycache__
+.ruff_cache/
 *.py[cod]
 .DS_Store
 .claude/
