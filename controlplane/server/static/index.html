@@ -3,371 +3,757 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ControlPlane.ai — Admission Control</title>
+  <title>ControlPlane · Clearance bay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink: #070b12;
-      --panel: #0d1522;
-      --panel-2: #121c2c;
-      --line: #1e2d45;
-      --mute: #7f92ad;
-      --text: #e7eef9;
-      --signal: #ffb020;      /* hold / escalate */
-      --verified: #2ee6a6;    /* pass / chain ok */
-      --danger: #ff4d6d;      /* block / violation */
-      --cyan: #4cc9f0;        /* spans / links */
-      --violet: #9b5de5;      /* claims */
+      --bay: #1c1f24;
+      --bay-raised: #262a31;
+      --bay-edge: #333842;
+      --strip: #f4f0e6;
+      --strip-ink: #1a1c1f;
+      --strip-mute: #5c616a;
+      --flap: #0e0f12;
+      --flap-letter: #f7f4ec;
+      --amber: #e8a317;
+      --amber-dim: #8a6412;
+      --orange: #ff5a1f;
+      --orange-ink: #1a0a00;
+      --hold: #c62828;
+      --clear: #1b7a4a;
+      --line: rgba(244, 240, 230, 0.12);
+      --focus: #ff5a1f;
+      --radius: 2px;
+      --font: "Public Sans", system-ui, -apple-system, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
+
     * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: var(--ink); color: var(--text); }
+    html, body { margin: 0; min-height: 100%; }
     body {
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: 13px;
-      line-height: 1.45;
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.4;
+      color: var(--flap-letter);
+      background: var(--bay);
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--orange); color: var(--orange-ink); }
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .shell {
       min-height: 100vh;
-      background:
-        radial-gradient(1200px 600px at 10% -10%, #14233a 0%, transparent 55%),
-        radial-gradient(900px 500px at 100% 0%, #1a1030 0%, transparent 50%),
-        var(--ink);
-    }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 20px 64px; }
-    header {
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: end;
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 18px;
-      margin-bottom: 22px;
+      grid-template-rows: auto 1fr;
     }
-    .brand {
-      font-family: Syne, system-ui, sans-serif;
-      font-weight: 800;
-      font-size: clamp(28px, 4vw, 42px);
-      letter-spacing: -0.03em;
-      line-height: 1;
+
+    /* —— top rail —— */
+    .rail {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 20px;
+      padding: 14px 20px;
+      background: var(--bay-raised);
+      border-bottom: 1px solid var(--bay-edge);
     }
-    .brand span { color: var(--signal); }
-    .tag {
-      color: var(--mute);
-      margin-top: 8px;
-      max-width: 54ch;
+    .mark {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+      color: var(--strip);
     }
-    .status-pill {
+    .mark em {
+      font-style: normal;
+      color: var(--orange);
+    }
+    .rail-status {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      border: 1px solid var(--line);
-      background: var(--panel);
-      padding: 8px 12px;
-      border-radius: 999px;
-      color: var(--mute);
+      font-size: 12px;
+      color: var(--strip-mute);
+      margin-left: auto;
     }
-    .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--verified);
-      box-shadow: 0 0 12px var(--verified);
+    .lamp {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--amber-dim);
     }
-    .grid {
+    .lamp.on {
+      background: var(--amber);
+      box-shadow: 0 0 0 3px rgba(232, 163, 23, 0.18);
+    }
+    .lamp.bad { background: var(--hold); box-shadow: none; }
+
+    /* —— workspace —— */
+    .workspace {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: minmax(260px, 320px) 1fr;
+      min-height: 0;
+    }
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    .desk {
+      padding: 20px;
+      border-right: 1px solid var(--bay-edge);
+      background: linear-gradient(180deg, #22262d 0%, var(--bay) 100%);
+      display: flex;
+      flex-direction: column;
       gap: 16px;
     }
-    @media (max-width: 920px) {
-      .grid { grid-template-columns: 1fr; }
-      header { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .desk { border-right: 0; border-bottom: 1px solid var(--bay-edge); }
     }
-    .panel {
-      background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px;
-    }
-    .panel h2 {
-      font-family: Syne, system-ui, sans-serif;
-      font-size: 14px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin: 0 0 12px;
-      color: var(--mute);
+
+    .desk h1 {
+      margin: 0;
+      font-size: 22px;
       font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--strip);
+      line-height: 1.15;
     }
-    label { display: block; color: var(--mute); margin: 10px 0 6px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
-    select, button, input {
+    .desk p.lede {
+      margin: 0;
+      color: var(--strip-mute);
+      font-size: 13px;
+      max-width: 34ch;
+    }
+
+    .field { display: grid; gap: 6px; }
+    .field span {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--strip-mute);
+    }
+    select {
+      appearance: none;
       width: 100%;
       font: inherit;
-      color: var(--text);
-      background: var(--ink);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px 12px;
-    }
-    button {
+      font-weight: 500;
+      color: var(--strip-ink);
+      background: var(--strip) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231a1c1f' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 12px center;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 11px 36px 11px 12px;
       cursor: pointer;
-      background: linear-gradient(180deg, #243552, #18253a);
-      margin-top: 12px;
-      font-weight: 600;
-      transition: border-color .15s, transform .1s;
     }
-    button.primary {
-      background: linear-gradient(180deg, #ffc14d, #e89400);
-      color: #1a1200;
-      border-color: #ffd27a;
+    select:hover { border-color: var(--amber); }
+
+    .admit {
+      margin-top: 4px;
+      width: 100%;
+      border: 0;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font: inherit;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--orange-ink);
+      background: var(--orange);
+      cursor: pointer;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+      transition: filter 120ms ease, transform 100ms ease;
     }
-    button:hover { border-color: var(--cyan); }
-    button:active { transform: translateY(1px); }
-    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .metrics {
+    .admit:hover { filter: brightness(1.05); }
+    .admit:active { transform: translateY(1px); }
+    .admit:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: none;
+    }
+
+    .meter-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
-      margin-top: 14px;
+      margin-top: auto;
     }
-    .metric {
-      background: var(--ink);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px;
+    .meter {
+      background: var(--flap);
+      border: 1px solid var(--bay-edge);
+      border-radius: var(--radius);
+      padding: 10px 12px;
     }
-    .metric .n {
-      font-family: Syne, system-ui, sans-serif;
-      font-size: 22px;
-      font-weight: 700;
+    .meter b {
+      display: block;
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--strip);
     }
-    .metric .l { color: var(--mute); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
-    .primitive {
+    .meter small {
+      color: var(--strip-mute);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* —— strip bay —— */
+    .bay {
+      padding: 20px;
+      overflow: auto;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 47px,
+          rgba(255,255,255,0.015) 47px,
+          rgba(255,255,255,0.015) 48px
+        ),
+        var(--bay);
+    }
+
+    .bay-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px 16px;
+      align-items: baseline;
+      margin-bottom: 14px;
+    }
+    .bay-head h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--strip-mute);
+    }
+    .bay-meta {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--strip-mute);
+    }
+    .bay-meta strong { color: var(--amber); font-weight: 600; }
+
+    .chain {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       align-items: center;
-      margin: 0 0 14px;
-      font-size: 12px;
+      margin-bottom: 18px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--strip-mute);
     }
-    .chip {
-      border: 1px solid var(--line);
+    .chain .node {
       padding: 4px 8px;
-      border-radius: 999px;
-      background: var(--ink);
+      background: var(--flap);
+      border: 1px solid var(--bay-edge);
+      color: var(--flap-letter);
     }
-    .chip.step { border-color: #35507a; color: #a9c2e8; }
-    .chip.span { border-color: #1f6f84; color: var(--cyan); }
-    .chip.claim { border-color: #6b3d9b; color: #d2a8ff; }
-    .chip.action { border-color: #8a6a1f; color: var(--signal); }
-    .arrow { color: var(--mute); }
-    .decisions { display: grid; gap: 10px; margin-bottom: 14px; }
-    .decision {
-      border: 1px solid var(--line);
-      border-left-width: 4px;
-      border-radius: 10px;
-      padding: 12px;
-      background: var(--ink);
+    .chain .node.live {
+      border-color: var(--amber);
+      color: var(--amber);
     }
-    .decision.Edit { border-left-color: var(--signal); }
-    .decision.Escalate { border-left-color: var(--signal); }
-    .decision.Block { border-left-color: var(--danger); }
-    .decision.Pass, .decision.Pass\ \+\ annotate { border-left-color: var(--verified); }
-    .decision .act {
-      font-family: Syne, system-ui, sans-serif;
-      font-size: 20px;
+
+    .strips {
+      display: grid;
+      gap: 10px;
+      max-width: 920px;
+    }
+
+    .strip {
+      background: var(--strip);
+      color: var(--strip-ink);
+      border-radius: var(--radius);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 8px 18px rgba(0,0,0,0.28);
+      display: grid;
+      grid-template-columns: 10px 1fr auto;
+      min-height: 88px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+    .strip.show {
+      opacity: 1;
+      transform: none;
+    }
+    .strip.empty {
+      opacity: 1;
+      background: transparent;
+      color: var(--strip-mute);
+      box-shadow: none;
+      border: 1px dashed var(--bay-edge);
+      min-height: 72px;
+      place-items: center;
+      grid-template-columns: 1fr;
+      font-size: 13px;
+    }
+    .strip-tab {
+      background: var(--flap);
+    }
+    .strip.Edit .strip-tab,
+    .strip.Escalate .strip-tab { background: var(--orange); }
+    .strip.Block .strip-tab { background: var(--hold); }
+    .strip.Pass .strip-tab,
+    .strip.\30Pass\ \+\ annotate .strip-tab,
+    .strip[data-actuator^="Pass"] .strip-tab { background: var(--clear); }
+
+    .strip-body {
+      padding: 12px 14px 14px;
+      display: grid;
+      gap: 6px;
+      align-content: center;
+    }
+    .strip-id {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--strip-mute);
+    }
+    .strip-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .strip-cell {
+      font-size: 12px;
+      color: var(--strip-mute);
+    }
+    .strip-cell code {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--strip-ink);
+      background: rgba(0,0,0,0.06);
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    .flap {
+      min-width: 132px;
+      background: var(--flap);
+      color: var(--flap-letter);
+      display: grid;
+      place-items: center;
+      padding: 10px 14px;
+      border-left: 1px solid #000;
+      position: relative;
+    }
+    .flap::before {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; top: 50%;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .flap-word {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.1;
+    }
+    .flap-word.flip {
+      animation: flap 420ms steps(4, end);
+    }
+    @keyframes flap {
+      0% { transform: rotateX(0); opacity: 1; }
+      40% { transform: rotateX(-90deg); opacity: 0.2; }
+      60% { transform: rotateX(90deg); opacity: 0.2; }
+      100% { transform: rotateX(0); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .strip { transition: none; transform: none; opacity: 1; }
+      .flap-word.flip { animation: none; }
+    }
+
+    .overlay-card {
+      margin-top: 16px;
+      max-width: 920px;
+      background: var(--strip);
+      color: var(--strip-ink);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+      display: none;
+    }
+    .overlay-card.show { display: block; }
+    .overlay-card .k {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--strip-mute);
+      margin-bottom: 6px;
+    }
+    .overlay-card .text {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .overlay-card .hold {
+      color: var(--hold);
       font-weight: 700;
     }
-    .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; }
-    @media (max-width: 920px) { .cols { grid-template-columns: 1fr; } }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
-    th { color: var(--mute); font-weight: 500; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
-    .badge {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      font-size: 11px;
+    .overlay-card a {
+      color: var(--orange);
+      font-weight: 600;
+      text-decoration: none;
     }
-    .SUPPORTED { color: var(--verified); border-color: #1f6b52; }
-    .UNSUPPORTED { color: var(--signal); border-color: #7a5a14; }
-    .UNKNOWN { color: var(--mute); }
-    .CONTRADICTED { color: var(--danger); border-color: #7a2438; }
-    .viol { color: var(--danger); }
-    .ok { color: var(--verified); }
-    .overlay {
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 10px;
-      background: #0a1018;
-      border: 1px dashed var(--line);
-      white-space: pre-wrap;
-    }
-    .overlay strong { color: var(--signal); }
-    footer {
+    .overlay-card a:hover { text-decoration: underline; }
+
+    details.receipts {
       margin-top: 18px;
-      color: var(--mute);
-      font-size: 11px;
-      border-top: 1px solid var(--line);
-      padding-top: 12px;
+      max-width: 920px;
+      border: 1px solid var(--bay-edge);
+      border-radius: var(--radius);
+      background: var(--bay-raised);
     }
-    .empty { color: var(--mute); padding: 24px 8px; }
+    details.receipts summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--strip);
+      list-style: none;
+    }
+    details.receipts summary::-webkit-details-marker { display: none; }
+    details.receipts[open] summary {
+      border-bottom: 1px solid var(--bay-edge);
+    }
+    .receipt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    @media (max-width: 720px) {
+      .receipt-grid { grid-template-columns: 1fr; }
+    }
+    .receipt-pane {
+      padding: 12px 14px;
+      border-right: 1px solid var(--bay-edge);
+      overflow: auto;
+      max-height: 280px;
+    }
+    .receipt-pane:last-child { border-right: 0; }
+    @media (max-width: 720px) {
+      .receipt-pane { border-right: 0; border-bottom: 1px solid var(--bay-edge); }
+      .receipt-pane:last-child { border-bottom: 0; }
+    }
+    .receipt-pane h3 {
+      margin: 0 0 8px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--strip-mute);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      text-align: left;
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      color: var(--strip-mute);
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 2px;
+      border: 1px solid var(--bay-edge);
+    }
+    .tag.SUPPORTED { color: #7dcea0; border-color: #1b7a4a; }
+    .tag.UNSUPPORTED { color: var(--amber); border-color: var(--amber-dim); }
+    .tag.UNKNOWN { color: var(--strip-mute); }
+    .viol { color: #ff8a80; font-weight: 600; }
+
+    .err {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #3a1515;
+      border: 1px solid var(--hold);
+      color: #ffc9c4;
+      border-radius: var(--radius);
+      display: none;
+    }
+    .err.show { display: block; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <div class="brand">Control<span>Plane</span>.ai</div>
-        <div class="tag">Admission control for AI that acts — every claim must bind to a span the caller is entitled to read before an action fires.</div>
+  <!--
+    THESIS: Admission control as a flight-strip bay — pending ACTIONs are physical strips that flap to their actuator; refuse metric-dashboard hero.
+    OWN-WORLD: Graphite bay, cream paper strips, matte-black flap faces, condensed mono letters, safety-orange Admit, amber lamps; raised by split-flap cascade + hardware orange key.
+    STORY: Judge chooses scenario, hits Admit, watches strips cascade into Edit + Escalate with matrix cells and downloadable receipts.
+    FIRST VIEWPORT: Left desk (scenario + orange Admit); right bay with empty strip slots; after run, two dominant strips own the bay.
+    FORM: ATC strip bay (assigned #4, seed 27b2e849) + split-flap cascade raise + orange action key raise.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+  -->
+  <div class="shell">
+    <header class="rail">
+      <div class="mark">Control<em>Plane</em></div>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
       </div>
-      <div class="status-pill"><span class="dot" id="healthDot"></span><span id="healthText">booting</span></div>
     </header>
 
-    <div class="grid">
-      <aside class="panel">
-        <h2>Run a gate</h2>
-        <label>Scenario</label>
-        <select id="scenario">
-          <option value="refund">Refund agent (R1 Edit + R3 Escalate)</option>
-          <option value="support">Customer support (R1)</option>
-          <option value="copilot">Internal copilot (R2)</option>
-        </select>
-        <label>Mode</label>
-        <select id="mode">
-          <option value="enforce">Enforce</option>
-          <option value="shadow">Shadow (counterfactual only)</option>
-        </select>
-        <div class="btn-row">
-          <button class="primary" id="runBtn">Run gate</button>
-          <button id="metricsBtn">Refresh metrics</button>
+    <div class="workspace">
+      <aside class="desk">
+        <h1>Clearance bay</h1>
+        <p class="lede">Run a gate. Pending actions arrive as strips. Claims must earn their flap.</p>
+
+        <label class="field">
+          <span>Traffic</span>
+          <select id="scenario" aria-label="Scenario">
+            <option value="refund">Refund agent · dual action</option>
+            <option value="support">Customer support · R1</option>
+            <option value="copilot">Internal copilot · R2</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Stance</span>
+          <select id="mode" aria-label="Mode">
+            <option value="enforce">Enforce</option>
+            <option value="shadow">Shadow (counterfactual only)</option>
+          </select>
+        </label>
+
+        <button type="button" class="admit" id="admit">Admit</button>
+
+        <div class="meter-row" aria-live="polite">
+          <div class="meter"><b id="mTotal">—</b><small>Decisions</small></div>
+          <div class="meter"><b id="mHold">—</b><small>Would hold</small></div>
+          <div class="meter"><b id="mFnr">—</b><small>Labeled FNR</small></div>
+          <div class="meter"><b id="mLat">—</b><small>Last ms</small></div>
         </div>
-        <div class="metrics" id="metrics">
-          <div class="metric"><div class="n" id="mTotal">—</div><div class="l">Decisions</div></div>
-          <div class="metric"><div class="n" id="mHold">—</div><div class="l">Would hold</div></div>
-          <div class="metric"><div class="n" id="mFnr">—</div><div class="l">Published FNR</div></div>
-          <div class="metric"><div class="n" id="mLat">—</div><div class="l">Last latency ms</div></div>
-        </div>
-        <footer>
-          Lane 1 is deterministic only. Matrix transcribed, never redrawn.<br/>
-          OpenAI path: <code>POST /v1/chat/completions</code>
-        </footer>
       </aside>
 
-      <main class="panel" id="main">
-        <div class="primitive">
-          <span class="chip step">STEP</span><span class="arrow">→</span>
-          <span class="chip span">SPAN</span><span class="arrow">→</span>
-          <span class="chip claim">CLAIM</span><span class="arrow">→</span>
-          <span class="chip action">ACTION</span>
+      <main class="bay" id="bay" aria-live="polite">
+        <div class="bay-head">
+          <h2>Active strips</h2>
+          <div class="bay-meta" id="bayMeta">No request on the board</div>
         </div>
-        <div id="view" class="empty">Run a scenario to populate the evidence ledger.</div>
+
+        <div class="chain" aria-hidden="true">
+          <span class="node" data-n="step">Step</span>→
+          <span class="node" data-n="span">Span</span>→
+          <span class="node" data-n="claim">Claim</span>→
+          <span class="node" data-n="action">Action</span>
+        </div>
+
+        <div class="strips" id="strips">
+          <div class="strip empty">Awaiting clearance. Press Admit.</div>
+        </div>
+
+        <div class="overlay-card" id="overlay"></div>
+        <div class="err" id="err" role="alert"></div>
+
+        <details class="receipts" id="receipts" hidden>
+          <summary>Evidence receipts</summary>
+          <div class="receipt-grid">
+            <div class="receipt-pane">
+              <h3>Claims</h3>
+              <div id="claimTable"></div>
+            </div>
+            <div class="receipt-pane">
+              <h3>Spans</h3>
+              <div id="spanTable"></div>
+            </div>
+          </div>
+        </details>
       </main>
     </div>
   </div>
 
   <script>
     const $ = (id) => document.getElementById(id);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     async function refreshHealth() {
       try {
-        const r = await fetch('/healthz');
+        const r = await fetch("/healthz");
         const j = await r.json();
-        $('healthText').textContent = `online · uptime ${j.uptime_s}s · lane1 deterministic`;
+        $("lamp").className = "lamp on";
+        $("healthText").textContent = `lane 1 · ${j.uptime_s}s up`;
       } catch {
-        $('healthText').textContent = 'offline';
-        $('healthDot').style.background = '#ff4d6d';
+        $("lamp").className = "lamp bad";
+        $("healthText").textContent = "bay offline";
       }
     }
 
     async function refreshMetrics() {
-      const r = await fetch('/v1/controlplane/metrics');
-      const j = await r.json();
-      $('mTotal').textContent = j.total_decisions ?? 0;
-      $('mHold').textContent = j.would_have_held ?? 0;
-      $('mFnr').textContent = j.published_fnr == null ? 'n/a' : (j.published_fnr * 100).toFixed(1) + '%';
+      try {
+        const j = await (await fetch("/v1/controlplane/metrics")).json();
+        $("mTotal").textContent = j.total_decisions ?? 0;
+        $("mHold").textContent = j.would_have_held ?? 0;
+        $("mFnr").textContent = j.published_fnr == null ? "n/a" : `${(j.published_fnr * 100).toFixed(0)}%`;
+      } catch { /* meters stay */ }
     }
 
-    function badge(v) {
-      return `<span class="badge ${v}">${v}</span>`;
+    function setChain(stage) {
+      document.querySelectorAll(".chain .node").forEach((n) => {
+        n.classList.toggle("live", n.dataset.n === stage);
+      });
     }
 
-    function render(data) {
+    function renderStrips(data) {
       const decisions = Object.values(data.decisions || {});
-      const findings = data.findings || {};
-      $('mLat').textContent = (data.latency_ms ?? 0).toFixed(2);
+      const host = $("strips");
+      host.innerHTML = "";
 
-      const decisionHtml = decisions.map(d => `
-        <div class="decision ${d.actuator}">
-          <div class="act">${d.actuator}</div>
-          <div>${d.action_id} · <span style="color:var(--mute)">${d.matrix_row} × ${d.matrix_col}</span></div>
-          <div style="margin-top:6px;color:var(--mute)">driving: ${(d.driving_claim_ids || []).join(', ') || '—'}</div>
-        </div>
-      `).join('');
+      if (!decisions.length) {
+        host.innerHTML = `<div class="strip empty">No actuators on this run</div>`;
+        return;
+      }
 
-      const claimRows = (data.claims || []).map(c => {
-        const f = findings[c.claim_id];
-        const viol = f && f.violated;
-        return `<tr>
-          <td>${c.claim_id}</td>
-          <td>${c.text}</td>
-          <td>${badge(c.binding?.verdict || '—')}</td>
-          <td class="${viol ? 'viol' : 'ok'}">${viol ? 'ENTITLEMENT VIOLATION' : 'ok'}</td>
-        </tr>`;
-      }).join('');
-
-      const spanRows = (data.spans || []).map(s => `
-        <tr>
-          <td>${s.span_id}</td>
-          <td>${s.source_id}</td>
-          <td>${(s.acl || []).join(', ')}</td>
-          <td>${s.content}</td>
-        </tr>
-      `).join('');
-
-      const overlay = data.response_overlay || {};
-      $('view').innerHTML = `
-        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
-          <div>
-            <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:700">${data.use_case} · ${data.mode}</div>
-            <div style="color:var(--mute)">${data.request_id} · policy ${data.policy_version} · chain ${data.chain_valid ? 'VALID' : 'BROKEN'}</div>
+      decisions.forEach((d, i) => {
+        const el = document.createElement("article");
+        el.className = `strip ${d.actuator}`;
+        el.dataset.actuator = d.actuator;
+        el.innerHTML = `
+          <div class="strip-tab" aria-hidden="true"></div>
+          <div class="strip-body">
+            <div class="strip-id">${d.action_id}</div>
+            <div class="strip-title">${d.action_id.replaceAll("_", " ")}</div>
+            <div class="strip-cell">${d.matrix_row} × <code>${d.matrix_col || "—"}</code>
+              · driving ${(d.driving_claim_ids || []).join(", ") || "—"}</div>
           </div>
-          <a style="color:var(--cyan)" href="/v1/controlplane/requests/${data.request_id}/audit.jsonl">Download audit.jsonl</a>
-        </div>
-        <div class="decisions">${decisionHtml || '<div class="empty">No decisions</div>'}</div>
-        <div class="overlay"><strong>User-visible / hold overlay</strong>\n${overlay.user_visible_text || ''}\n\naction_allowed=${overlay.action_allowed}\n${overlay.note || ''}</div>
-        <div class="cols" style="margin-top:16px">
-          <div>
-            <h2>Claims</h2>
-            <table><thead><tr><th>ID</th><th>Text</th><th>Verdict</th><th>Entitlement</th></tr></thead>
-            <tbody>${claimRows}</tbody></table>
+          <div class="flap" aria-label="Actuator ${d.actuator}">
+            <div class="flap-word">${d.actuator}</div>
           </div>
-          <div>
-            <h2>Spans (provenance set)</h2>
-            <table><thead><tr><th>ID</th><th>Source</th><th>ACL</th><th>Content</th></tr></thead>
-            <tbody>${spanRows}</tbody></table>
-          </div>
+        `;
+        host.appendChild(el);
+        const show = () => {
+          el.classList.add("show");
+          const word = el.querySelector(".flap-word");
+          if (!reduceMotion) {
+            word.classList.remove("flip");
+            void word.offsetWidth;
+            word.classList.add("flip");
+          }
+        };
+        if (reduceMotion) show();
+        else setTimeout(show, 90 + i * 160);
+      });
+    }
+
+    function renderOverlay(data) {
+      const o = data.response_overlay || {};
+      const card = $("overlay");
+      const hold = o.action_allowed === false;
+      card.classList.add("show");
+      card.innerHTML = `
+        <div class="k">${data.mode} · user-visible</div>
+        <div class="text">${o.user_visible_text || "—"}</div>
+        <div>${hold ? `<span class="hold">HOLD. Irreversible action not released.</span>` : "Downstream may proceed"}
+          · <a href="/v1/controlplane/requests/${data.request_id}/audit.jsonl">Download audit.jsonl</a>
         </div>
       `;
     }
 
-    $('runBtn').onclick = async () => {
-      $('runBtn').disabled = true;
+    function renderReceipts(data) {
+      const findings = data.findings || {};
+      const claims = data.claims || [];
+      const spans = data.spans || [];
+      $("receipts").hidden = false;
+
+      $("claimTable").innerHTML = `
+        <table>
+          <thead><tr><th>ID</th><th>Text</th><th>Verdict</th><th>ACL</th></tr></thead>
+          <tbody>
+            ${claims.map((c) => {
+              const f = findings[c.claim_id];
+              const viol = f && f.violated;
+              return `<tr>
+                <td>${c.claim_id}</td>
+                <td>${c.text}</td>
+                <td><span class="tag ${c.binding?.verdict || ""}">${c.binding?.verdict || "—"}</span></td>
+                <td class="${viol ? "viol" : ""}">${viol ? "violation" : "ok"}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>`;
+
+      $("spanTable").innerHTML = `
+        <table>
+          <thead><tr><th>ID</th><th>Source</th><th>ACL</th><th>Content</th></tr></thead>
+          <tbody>
+            ${spans.map((s) => `<tr>
+              <td>${s.span_id}</td>
+              <td>${s.source_id}</td>
+              <td>${(s.acl || []).join(", ")}</td>
+              <td>${s.content}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table>`;
+    }
+
+    async function admit() {
+      const btn = $("admit");
+      const err = $("err");
+      err.classList.remove("show");
+      btn.disabled = true;
+      btn.textContent = "Clearing…";
+      setChain("step");
+
       try {
-        const scenario = $('scenario').value;
-        const mode = $('mode').value;
-        const r = await fetch(`/v1/controlplane/demo/${scenario}?mode=${encodeURIComponent(mode)}`, { method: 'POST' });
+        const scenario = $("scenario").value;
+        const mode = $("mode").value;
+        setTimeout(() => setChain("span"), 120);
+        setTimeout(() => setChain("claim"), 240);
+        const r = await fetch(
+          `/v1/controlplane/demo/${scenario}?mode=${encodeURIComponent(mode)}`,
+          { method: "POST" }
+        );
         if (!r.ok) throw new Error(await r.text());
         const data = await r.json();
-        render(data);
+        setChain("action");
+        $("bayMeta").innerHTML = `<strong>${data.request_id}</strong> · ${data.use_case} · chain ${data.chain_valid ? "VALID" : "BROKEN"}`;
+        $("mLat").textContent = (data.latency_ms ?? 0).toFixed(2);
+        renderStrips(data);
+        renderOverlay(data);
+        renderReceipts(data);
         await refreshMetrics();
       } catch (e) {
-        $('view').innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+        err.textContent = `Gate failed: ${e.message}. Check the server, then Admit again.`;
+        err.classList.add("show");
+        setChain("");
       } finally {
-        $('runBtn').disabled = false;
+        btn.disabled = false;
+        btn.textContent = "Admit";
       }
-    };
+    }
 
-    $('metricsBtn').onclick = refreshMetrics;
+    $("admit").addEventListener("click", admit);
     refreshHealth();
     refreshMetrics();
+    setInterval(refreshHealth, 15000);
   </script>
 </body>
 </html>
