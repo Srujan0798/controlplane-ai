@@ -10,13 +10,21 @@ verification budget in proportion to what the response is about to do.
 - Python ≥ 3.11
 - Stdlib-first core (pytest for tests)
 
-## Setup
+## Round 2 quickstart
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pytest -q
+python3 examples/refund_trace_demo.py
+python3 examples/multi_usecase_demo.py
 ```
+
+## Docs
+
+- [docs/ROUND2-PROPOSAL.md](docs/ROUND2-PROPOSAL.md) — business proposal
+- [docs/ROUND2-PITCH.md](docs/ROUND2-PITCH.md) — pitch narrative
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system architecture
 
 ## Package
 
