@@ -178,10 +178,17 @@ Pretty routes + nav: **this commit**.
 
 Still open from the 125: upstream passthrough, multi-turn ledger, hold-back buffer, Playwright E2E, proposal PDF, SBOM, webhook escalations, Lane 2 NLI.
 
-## Wave 4 (in flight — parallel agents)
+## Wave 4 (SHIPPED — parallel agents)
 
 - 4A upstream + webhook + signed audit
 - 4B multi-turn session + hold-back
 - 4C side-by-side ungated/gated + dead-compute + evidence packet UI
 - 4D e2e smoke + proposal PDF + non-root docker + SBOM
 - Monitor: healthz + pytest every 3 min
+
+### Wave 4 outcomes
+- Upstream hook + escalate webhook + signed audits (`844832d`)
+- Multi-turn sessions + hold-back (`09fc25e`)
+- Side-by-side ungated/gated + dead-compute + evidence packet UI (`a7d1dee`)
+- E2E smoke + proposal PDF + non-root Docker + SBOM (`8e18885`…`b1bfe12`)
+- Tests: **89 passed**, 1 skipped (Playwright optional)
