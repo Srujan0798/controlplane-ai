@@ -13,6 +13,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+e2e = ["playwright"]
+pdf = ["reportlab"]
 
 [project.scripts]
 controlplane = "controlplane.server.app:main"

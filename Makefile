@@ -1,4 +1,4 @@
-.PHONY: test bench run judge
+.PHONY: test bench run judge e2e pdf sbom
 
 test:
 	pytest -q
@@ -16,3 +16,12 @@ judge:
 	@echo "  uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787"
 	@echo "Health: curl -s http://127.0.0.1:8787/healthz"
 	@echo "Refund: curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'"
+
+e2e:
+	pytest -q tests/test_e2e_console.py
+
+pdf:
+	python3 scripts/build_proposal_pdf.py
+
+sbom:
+	bash scripts/sbom.sh
