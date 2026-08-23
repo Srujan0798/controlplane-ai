@@ -168,3 +168,12 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 **Wave 4 — Make the room win:** judge script, side-by-side ungated/gated, evidence packet UI, proposal PDF, tag release.
 
 Anything not in Wave 1–3 stays listed so we never pretend it shipped.
+
+## Session progress (auto)
+
+Wave 1 UI multi-page: **SHIPPED** (`beb9725`) — Clearance/Policies/Metrics/Audit/Matrix/Architecture/Runbook.  
+Wave 2 backend security+sqlite: **SHIPPED** (`3f2ebe8`).  
+Wave 3 bench+threat+runbook: **SHIPPED** (`8fb7e24`, `7387a88`) — gate p50≈0.05ms p95≈0.17ms on N=200.  
+Pretty routes + nav: **this commit**.
+
+Still open from the 125: upstream passthrough, multi-turn ledger, hold-back buffer, Playwright E2E, proposal PDF, SBOM, webhook escalations, Lane 2 NLI.

@@ -137,15 +137,42 @@ def create_app(
             response.headers[key] = value
         return response
 
-    if STATIC.exists():
-        app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
+    def _page(name: str) -> HTMLResponse:
+        path = STATIC / name
+        if not path.exists():
+            return HTMLResponse(f"<h1>Missing {name}</h1>", status_code=500)
+        return HTMLResponse(path.read_text(encoding="utf-8"))
 
     @app.get("/", response_class=HTMLResponse)
     def console() -> HTMLResponse:
-        index = STATIC / "index.html"
-        if not index.exists():
-            return HTMLResponse("<h1>ControlPlane console missing</h1>", status_code=500)
-        return HTMLResponse(index.read_text(encoding="utf-8"))
+        return _page("index.html")
+
+    @app.get("/policies", response_class=HTMLResponse)
+    def page_policies() -> HTMLResponse:
+        return _page("policies.html")
+
+    @app.get("/metrics", response_class=HTMLResponse)
+    def page_metrics() -> HTMLResponse:
+        return _page("metrics.html")
+
+    @app.get("/audit", response_class=HTMLResponse)
+    def page_audit() -> HTMLResponse:
+        return _page("audit.html")
+
+    @app.get("/matrix", response_class=HTMLResponse)
+    def page_matrix() -> HTMLResponse:
+        return _page("matrix.html")
+
+    @app.get("/architecture", response_class=HTMLResponse)
+    def page_architecture() -> HTMLResponse:
+        return _page("architecture.html")
+
+    @app.get("/runbook", response_class=HTMLResponse)
+    def page_runbook() -> HTMLResponse:
+        return _page("runbook.html")
+
+    if STATIC.exists():
+        app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
 
     @app.get("/healthz")
     def healthz() -> dict[str, Any]:

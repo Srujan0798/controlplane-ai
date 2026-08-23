@@ -2,12 +2,12 @@
 (function (global) {
   const NAV = [
     { id: "clearance", href: "/", label: "Clearance" },
-    { id: "policies", href: "/static/policies.html", label: "Policies" },
-    { id: "metrics", href: "/static/metrics.html", label: "Metrics" },
-    { id: "audit", href: "/static/audit.html", label: "Audit" },
-    { id: "matrix", href: "/static/matrix.html", label: "Matrix" },
-    { id: "architecture", href: "/static/architecture.html", label: "Architecture" },
-    { id: "runbook", href: "/static/runbook.html", label: "Runbook" },
+    { id: "policies", href: "/policies", label: "Policies" },
+    { id: "metrics", href: "/metrics", label: "Metrics" },
+    { id: "audit", href: "/audit", label: "Audit" },
+    { id: "matrix", href: "/matrix", label: "Matrix" },
+    { id: "architecture", href: "/architecture", label: "Architecture" },
+    { id: "runbook", href: "/runbook", label: "Runbook" },
   ];
 
   const SCENARIOS = {
