@@ -1,5 +1,0 @@
-file '/Users/srujansai/Desktop/SEBI/video/vo/beat1.wav'
-file '/Users/srujansai/Desktop/SEBI/video/vo/beat2.wav'
-file '/Users/srujansai/Desktop/SEBI/video/vo/beat3.wav'
-file '/Users/srujansai/Desktop/SEBI/video/vo/beat4.wav'
-file '/Users/srujansai/Desktop/SEBI/video/vo/beat5.wav'
