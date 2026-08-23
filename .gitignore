@@ -4,9 +4,11 @@
 #   archive/video/vo/*.wav — 28 MB of recorded voiceover; NOT regenerable, do not delete
 archive/
 
-# The 3 submission deliverables are large binaries — keep on disk, not in git.
-submission/
+# Large pitch binaries stay local; allowlisted submission artifacts are tracked.
+submission/*
 !submission/latency_bench.json
+!submission/ControlPlane_Round2_Proposal.pdf
+!submission/sbom-pip-freeze.txt
 
 # graphify's index. Regenerated from docs/ in seconds by `graphify extract .
 # --code-only`, and rebuilt automatically by the post-commit hook.
