@@ -385,3 +385,23 @@ No LLM and no network on the critical path. That is a fidelity choice, not a mis
 ---
 
 *Design is closed in [ARCHITECTURE.md](ARCHITECTURE.md). This proposal is a rendering of that file for Round 2, plus evidence that the keystone runs.*
+
+## Appendix B — Live control plane (production elevation)
+
+The core mechanism is no longer CLI-only. On branch `feature/round2-controlplane`:
+
+```bash
+uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787
+# Judge console: http://127.0.0.1:8787
+# Or: docker compose up --build  → http://localhost:8080
+```
+
+| Surface | Proof |
+|---|---|
+| OpenAI-compatible gate | `POST /v1/chat/completions` with `scenario=refund` returns Edit+Escalate in `controlplane` extension |
+| Enforce overlay | User-visible text strips clause 7.2; irreversible refund `action_allowed=false` |
+| Shadow / FNR | `GET /v1/controlplane/metrics` publishes would-have counters and labeled FNR shape |
+| Policy packs | `policies/*.yaml` — support / copilot / decision-support |
+| Audit | `GET /v1/controlplane/requests/{id}/audit.jsonl` |
+
+Lane 1 remains deterministic. No LLM on the critical path. Matrix transcribed, never redrawn.
