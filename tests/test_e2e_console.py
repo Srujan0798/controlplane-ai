@@ -41,6 +41,31 @@ def test_demo_refund_enforce_edit_and_escalate(client: TestClient) -> None:
     assert body["decisions"]["issue_refund"]["actuator"] == "Escalate"
 
 
+def test_clearance_reset_session_favicon(client: TestClient) -> None:
+    page = client.get("/").text
+    assert 'id="reset"' in page
+    assert "Reset room" in page
+    assert 'id="session"' in page
+    assert 'href="/static/favicon.svg"' in page
+
+    icon = client.get("/static/favicon.svg")
+    assert icon.status_code == 200
+    assert "svg" in icon.headers.get("content-type", "")
+    assert "#ff5a1f" in icon.text
+
+    js = client.get("/static/js/bay.js").text
+    assert "injectFavicon" in js
+    assert "injectProjector" in js
+    assert "session_id" in js
+
+    css = client.get("/static/css/bay.css").text
+    assert "body.projector" in css
+
+    for path in CONSOLE_ROUTES:
+        html = client.get(path).text
+        assert 'href="/static/favicon.svg"' in html, path
+
+
 def test_audit_list_non_error(client: TestClient) -> None:
     page = client.get("/audit")
     assert page.status_code == 200

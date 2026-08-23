@@ -117,6 +117,24 @@ body {
   color: var(--strip-mute);
   margin-left: auto;
 }
+.proj-toggle {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--strip-mute);
+  background: transparent;
+  border: 1px solid var(--bay-edge);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.proj-toggle:hover { color: var(--strip); border-color: var(--amber-dim); }
+.proj-toggle[aria-pressed="true"] {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+}
 .lamp {
   width: 8px;
   height: 8px;
@@ -201,6 +219,22 @@ select {
 }
 select:hover { border-color: var(--amber); }
 
+input[type="text"],
+input[type="search"] {
+  width: 100%;
+  font: inherit;
+  font-weight: 500;
+  color: var(--strip-ink);
+  background: var(--strip);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 11px 12px;
+}
+input[type="text"]:hover,
+input[type="search"]:hover { border-color: var(--amber); }
+input[type="text"]::placeholder,
+input[type="search"]::placeholder { color: var(--strip-mute); }
+
 .admit {
   margin-top: 4px;
   width: 100%;
@@ -229,6 +263,7 @@ select:hover { border-color: var(--amber); }
   filter: none;
 }
 .admit.inline { width: auto; padding: 12px 18px; margin: 0; }
+.desk .btn { width: 100%; }
 
 .btn {
   border: 1px solid var(--bay-edge);
@@ -1089,3 +1124,45 @@ details.drawer .tag.UNKNOWN { color: var(--strip-mute); }
 @media (max-width: 720px) {
   .duo-grid { grid-template-columns: 1fr; }
 }
+
+/* Projector: larger type for a room screen. Tokens stay DESIGN.md. */
+body.projector { font-size: 19px; }
+body.projector .mark { font-size: 18px; }
+body.projector .nav a { font-size: 15px; padding: 10px 12px; }
+body.projector .mode-stamp { font-size: 11px; }
+body.projector .rail-status { font-size: 14px; }
+body.projector .proj-toggle { font-size: 12px; padding: 5px 10px; }
+body.projector .desk h1 { font-size: 28px; }
+body.projector .page h1 { font-size: 34px; }
+body.projector .desk p.lede { font-size: 16px; max-width: 40ch; }
+body.projector p.lede { font-size: 17px; }
+body.projector .field span,
+body.projector .kicker,
+body.projector .bay-head h2 { font-size: 13px; }
+body.projector .hint { font-size: 13px; }
+body.projector .admit { font-size: 18px; padding: 16px 18px; }
+body.projector .btn { font-size: 15px; padding: 12px 16px; }
+body.projector .meter b { font-size: 24px; }
+body.projector .meter small { font-size: 13px; }
+body.projector .bay-meta { font-size: 14px; }
+body.projector .strip { min-height: 108px; }
+body.projector .strip-title { font-size: 22px; }
+body.projector .strip-id,
+body.projector .strip-cell { font-size: 14px; }
+body.projector .flap { min-width: 168px; }
+body.projector .flap-word { font-size: 20px; }
+body.projector .compare-pane .text { font-size: 19px; }
+body.projector .compare .hold { font-size: 16px; }
+body.projector .claim-shape p { font-size: 20px; }
+body.projector .paper h3 { font-size: 20px; }
+body.projector .paper p { font-size: 15px; }
+body.projector .explain h3 { font-size: 24px; }
+body.projector .beat-body h3 { font-size: 19px; }
+body.projector .beat-body p { font-size: 17px; }
+body.projector .clock { font-size: 28px; }
+body.projector .law span { font-size: 18px; }
+body.projector .station { font-size: 15px; padding: 16px 18px; }
+body.projector table { font-size: 14px; }
+body.projector .cell .face { font-size: 15px; min-width: 140px; }
+body.projector .packet-card h3 { font-size: 18px; }
+body.projector .colophon { font-size: 13px; }

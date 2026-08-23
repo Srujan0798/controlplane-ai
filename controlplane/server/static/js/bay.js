@@ -69,6 +69,7 @@
         autorun: q.get("autorun") === "1",
         request: q.get("request") || "",
         cell: q.get("cell") || "",
+        session: q.get("session_id") || "",
       };
     },
 
@@ -170,8 +171,55 @@
       return /clause\s*7\.2/i.test(text || "");
     },
 
+    injectFavicon() {
+      if (document.querySelector('link[rel="icon"], link[rel="shortcut icon"]')) return;
+      const link = document.createElement("link");
+      link.rel = "icon";
+      link.type = "image/svg+xml";
+      link.href = "/static/favicon.svg";
+      document.head.appendChild(link);
+    },
+
+    projectorOn() {
+      try {
+        return localStorage.getItem("cp.projector") === "1";
+      } catch {
+        return false;
+      }
+    },
+
+    applyProjector(on) {
+      if (document.body) document.body.classList.toggle("projector", on);
+      try {
+        localStorage.setItem("cp.projector", on ? "1" : "0");
+      } catch { /* private mode */ }
+      const btn = this.$("projectorToggle");
+      if (btn) {
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.textContent = on ? "Projector on" : "Projector";
+      }
+    },
+
+    injectProjector() {
+      const on = this.projectorOn();
+      this.applyProjector(on);
+      const rail = document.querySelector(".rail-status");
+      if (!rail || this.$("projectorToggle")) return;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "projectorToggle";
+      btn.className = "proj-toggle";
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.setAttribute("aria-label", "Toggle projector mode");
+      btn.textContent = on ? "Projector on" : "Projector";
+      btn.addEventListener("click", () => this.applyProjector(!this.projectorOn()));
+      rail.appendChild(btn);
+    },
+
     boot() {
+      this.injectFavicon();
       this.markNav();
+      this.injectProjector();
       this.health();
       setInterval(() => this.health(), 15000);
     },

@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/bay.css" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
   <script src="/static/js/bay.js"></script>
 </head>
 <body>
@@ -62,8 +63,14 @@
           </select>
         </label>
 
+        <label class="field">
+          <span>Session (optional)</span>
+          <input type="text" id="session" name="session" autocomplete="off" spellcheck="false" placeholder="judge-1" aria-label="Session ID" />
+        </label>
+
         <button type="button" class="admit" id="admit">Admit</button>
-        <p class="hint">1 refund · 2 support · 3 copilot · A admit · deep link <code>?scenario=&amp;mode=&amp;autorun=1</code></p>
+        <button type="button" class="btn danger" id="reset">Reset room</button>
+        <p class="hint">1 refund · 2 support · 3 copilot · A admit · deep link <code>?scenario=&amp;mode=&amp;session_id=&amp;autorun=1</code></p>
 
         <div class="meter-row" aria-live="polite">
           <div class="meter"><b id="mTotal">—</b><small>Decisions</small></div>
@@ -354,13 +361,49 @@
         </table>`;
     }
 
+    function sessionId() {
+      return ($("session").value || "").trim();
+    }
+
     function rememberLink(scenario, mode, keepAutorun) {
       const url = new URL(location.href);
       url.searchParams.set("scenario", scenario);
       url.searchParams.set("mode", mode);
+      const session = sessionId();
+      if (session) url.searchParams.set("session_id", session);
+      else url.searchParams.delete("session_id");
       if (keepAutorun) url.searchParams.set("autorun", "1");
       else url.searchParams.delete("autorun");
       history.replaceState(null, "", url);
+    }
+
+    function clearBay() {
+      $("strips").innerHTML = `<div class="strip empty">Awaiting clearance. Press Admit.</div>`;
+      $("compare").classList.remove("show");
+      $("compare").innerHTML = "";
+      const packet = $("packet");
+      packet.hidden = true;
+      packet.open = false;
+      $("packetBody").innerHTML = "";
+      $("packetKicker").textContent = "";
+      $("receipts").hidden = true;
+      $("err").classList.remove("show");
+      $("bayMeta").textContent = "No request on the board";
+      $("mLat").textContent = "—";
+      setChain("");
+    }
+
+    async function resetRoom() {
+      if (!confirm("Reset room? Shadow counters clear. Strips leave the board. Ledger history stays.")) return;
+      try {
+        await Bay.post("/v1/controlplane/metrics/reset");
+        clearBay();
+        await refreshMetrics();
+      } catch (e) {
+        const err = $("err");
+        err.textContent = `Reset failed: ${e.message}`;
+        err.classList.add("show");
+      }
     }
 
     let admitting = false;
@@ -380,11 +423,23 @@
         rememberLink(scenario, mode, false);
         setTimeout(() => setChain("span"), 120);
         setTimeout(() => setChain("claim"), 240);
+        const params = new URLSearchParams({ mode });
+        const session = sessionId();
+        if (session) params.set("session_id", session);
         const data = await Bay.post(
-          `/v1/controlplane/demo/${encodeURIComponent(scenario)}?mode=${encodeURIComponent(mode)}`
+          `/v1/controlplane/demo/${encodeURIComponent(scenario)}?${params}`
         );
         setChain("action");
-        $("bayMeta").innerHTML = `<strong>${esc(data.request_id)}</strong> · ${esc(data.use_case)} · chain ${data.chain_valid ? "VALID" : "BROKEN"}`;
+        const risk = data.compounding_risk;
+        let extra = "";
+        if (data.session_id) {
+          extra = ` · session <strong>${esc(data.session_id)}</strong>`;
+          if (risk) {
+            extra += ` · turns ${risk.request_count ?? 0}`;
+            if (risk.compounded) extra += " · compounded";
+          }
+        }
+        $("bayMeta").innerHTML = `<strong>${esc(data.request_id)}</strong> · ${esc(data.use_case)} · chain ${data.chain_valid ? "VALID" : "BROKEN"}${extra}`;
         $("mLat").textContent = Bay.fmtMs(data.latency_ms);
         renderStrips(data);
         renderCompare(data);
@@ -410,10 +465,12 @@
       const mode = Bay.normalizeMode(link.mode);
       if (scenario) $("scenario").value = scenario;
       if (mode) $("mode").value = mode;
+      if (link.session) $("session").value = link.session;
       if (link.autorun) admit();
     }
 
     $("admit").addEventListener("click", admit);
+    $("reset").addEventListener("click", resetRoom);
     document.addEventListener("keydown", (ev) => {
       if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
       if (Bay.isTyping(ev.target)) return;
