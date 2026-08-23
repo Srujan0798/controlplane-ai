@@ -6,6 +6,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
+from controlplane.bias import probe_acl_skew
 from controlplane.binder import bind_claims
 from controlplane.entitlement import audit_claim
 from controlplane.interlock import decide
@@ -105,6 +106,9 @@ class GateResult:
                 for aid, d in self.decisions.items()
             },
             "response_overlay": self.response_overlay,
+            "responsibility": {
+                "bias_probe": probe_acl_skew(self.ledger),
+            },
         }
 
 
@@ -158,6 +162,7 @@ class ControlPlaneGate:
 
         overlay = self._overlay(decisions, ungated_text=ungated_text, enforced=enforced)
         latency_ms = (time.perf_counter() - t0) * 1000.0
+        self.metrics.record_latency(latency_ms)
         result = GateResult(
             request_id=ledger.request_id,
             use_case=use_case,

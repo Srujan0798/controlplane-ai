@@ -121,15 +121,56 @@ class MetricsStore:
     def __init__(self) -> None:
         self._lock = Lock()
         self.counters = ShadowCounters()
+        self._gate_latency_ms: float = 0.0
+        self._gate_latency_sum_ms: float = 0.0
+        self._gate_latency_count: int = 0
 
     def record(self, **kwargs: Any) -> None:
         with self._lock:
             self.counters.record(**kwargs)
 
+    def record_latency(self, latency_ms: float) -> None:
+        with self._lock:
+            self._gate_latency_ms = float(latency_ms)
+            self._gate_latency_sum_ms += float(latency_ms)
+            self._gate_latency_count += 1
+
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
-            return self.counters.snapshot()
+            snap = self.counters.snapshot()
+            snap["gate_latency_ms"] = self._gate_latency_ms
+            snap["gate_latency_count"] = self._gate_latency_count
+            if self._gate_latency_count:
+                snap["gate_latency_mean_ms"] = (
+                    self._gate_latency_sum_ms / self._gate_latency_count
+                )
+            else:
+                snap["gate_latency_mean_ms"] = None
+            return snap
+
+    def prometheus_text(self) -> str:
+        """Prometheus text exposition (plain text; scrapable)."""
+        with self._lock:
+            decisions = self.counters.total_decisions
+            would_hold = self.counters.would_have_held
+            latency = self._gate_latency_ms
+        lines = [
+            "# HELP controlplane_decisions_total Total control-plane decisions recorded",
+            "# TYPE controlplane_decisions_total counter",
+            f"controlplane_decisions_total {decisions}",
+            "# HELP controlplane_would_hold_total Decisions that would hold (Edit/Escalate/Block)",
+            "# TYPE controlplane_would_hold_total counter",
+            f"controlplane_would_hold_total {would_hold}",
+            "# HELP controlplane_gate_latency_ms Last gate latency in milliseconds",
+            "# TYPE controlplane_gate_latency_ms gauge",
+            f"controlplane_gate_latency_ms {latency}",
+            "",
+        ]
+        return "\n".join(lines)
 
     def reset(self) -> None:
         with self._lock:
             self.counters = ShadowCounters()
+            self._gate_latency_ms = 0.0
+            self._gate_latency_sum_ms = 0.0
+            self._gate_latency_count = 0

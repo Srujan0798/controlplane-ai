@@ -312,6 +312,14 @@ def create_app(
         gate.metrics.reset()
         return {"status": "reset"}
 
+    @app.get("/prometheus", response_class=PlainTextResponse)
+    def prometheus_metrics() -> PlainTextResponse:
+        """Prometheus text exposition — separate from HTML GET /metrics."""
+        return PlainTextResponse(
+            gate.metrics.prometheus_text(),
+            media_type="text/plain; version=0.0.4; charset=utf-8",
+        )
+
     @app.get("/v1/controlplane/requests")
     def list_requests(limit: int = 50, offset: int = 0) -> dict[str, Any]:
         return {"requests": _list_requests(limit=limit, offset=offset)}
