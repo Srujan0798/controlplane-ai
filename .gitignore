@@ -23,3 +23,6 @@ __pycache__/
 # Isolated feature worktrees
 .worktrees/
 .superpowers/
+
+*.egg-info/
+.venv/

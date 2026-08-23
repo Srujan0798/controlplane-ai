@@ -1,0 +1,12 @@
+policy_version: pack-support-v1
+use_case: customer-support
+description: Customer-facing chatbot — user-visible text, low irreversibility
+default_tier: R1
+mode: enforce
+latency_budget_ms_p50: 40
+latency_budget_ms_p95: 200
+fail_stance: open_annotate
+actions:
+  show_reply:
+    tier: R1
+    irreversibility: false

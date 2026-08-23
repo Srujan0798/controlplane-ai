@@ -1,0 +1,15 @@
+policy_version: pack-copilot-v1
+use_case: internal-copilot
+description: Internal knowledge assistant — external send is R2
+default_tier: R1
+mode: enforce
+latency_budget_ms_p50: 40
+latency_budget_ms_p95: 200
+fail_stance: open_annotate
+actions:
+  draft_partner_email:
+    tier: R2
+    irreversibility: false
+  show_draft:
+    tier: R1
+    irreversibility: false
