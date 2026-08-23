@@ -6,6 +6,7 @@ archive/
 
 # The 3 submission deliverables are large binaries — keep on disk, not in git.
 submission/
+!submission/latency_bench.json
 
 # graphify's index. Regenerated from docs/ in seconds by `graphify extract .
 # --code-only`, and rebuilt automatically by the post-commit hook.
