@@ -18,3 +18,7 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .claude/
+
+# Isolated feature worktrees
+.worktrees/
+.superpowers/
