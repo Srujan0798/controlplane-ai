@@ -13,8 +13,17 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from controlplane.persist import AuditStore
 from controlplane.pipeline import ControlPlaneGate
 from controlplane.policy import PolicyRegistry
+from controlplane.security import (
+    MAX_BODY_SIZE,
+    SECURITY_HEADERS,
+    RateLimiter,
+    api_key_authorized,
+    client_ip,
+    content_length_ok,
+)
 from controlplane.shadow import MetricsStore
 from controlplane.scenarios.multi_usecase import (
     run_customer_support,
@@ -45,11 +54,18 @@ def create_app(
     *,
     gate: ControlPlaneGate | None = None,
     enable_upstream: bool = False,
+    store: AuditStore | None = None,
 ) -> FastAPI:
     policies = PolicyRegistry()
     policies.load_dir(ROOT / "policies")
     metrics = MetricsStore()
     gate = gate or ControlPlaneGate(policies=policies, metrics=metrics)
+    if store is None:
+        try:
+            store = AuditStore.from_env()
+        except Exception:
+            store = None
+    limiter = RateLimiter()
 
     app = FastAPI(
         title="ControlPlane.ai",
@@ -60,7 +76,66 @@ def create_app(
         version="0.2.0",
     )
     app.state.gate = gate
+    app.state.store = store
     app.state.started_at = time.time()
+
+    def _persist(public_dict: dict[str, Any]) -> None:
+        if store is None:
+            return
+        try:
+            store.save(public_dict)
+        except Exception:
+            return
+
+    def _lookup(request_id: str) -> dict[str, Any] | None:
+        if store is not None:
+            try:
+                found = store.get(request_id)
+                if found is not None:
+                    return found
+            except Exception:
+                pass
+        return gate.get(request_id)
+
+    def _list_requests(limit: int, offset: int) -> list[dict[str, Any]]:
+        if store is not None:
+            try:
+                if store.count() > 0:
+                    return store.list(limit=limit, offset=offset)
+            except Exception:
+                pass
+        return gate.history(limit=limit)
+
+    @app.middleware("http")
+    async def enterprise_guards(request: Request, call_next):
+        if not content_length_ok(request.headers, MAX_BODY_SIZE):
+            return JSONResponse(
+                {"detail": "payload too large"},
+                status_code=413,
+                headers=dict(SECURITY_HEADERS),
+            )
+        path = request.url.path
+        if not api_key_authorized(request.headers, path, request.method):
+            return JSONResponse(
+                {"detail": "unauthorized"},
+                status_code=401,
+                headers=dict(SECURITY_HEADERS),
+            )
+        if path.startswith("/v1/"):
+            ip = client_ip(
+                request.headers,
+                request.client.host if request.client else None,
+            )
+            if not limiter.allow(ip):
+                return JSONResponse(
+                    {"detail": "rate limit exceeded"},
+                    status_code=429,
+                    headers={**SECURITY_HEADERS, "Retry-After": "60"},
+                )
+        response = await call_next(request)
+        for key, value in SECURITY_HEADERS.items():
+            response.headers[key] = value
+        return response
 
     if STATIC.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
@@ -74,12 +149,20 @@ def create_app(
 
     @app.get("/healthz")
     def healthz() -> dict[str, Any]:
+        db_ok = False
+        if store is not None:
+            try:
+                db_ok = store.ok()
+            except Exception:
+                db_ok = False
         return {
             "ok": True,
             "service": "controlplane",
             "uptime_s": round(time.time() - app.state.started_at, 1),
             "mode_default": "shadow_or_enforce_per_pack",
             "lane1": "deterministic_only",
+            "db_ok": db_ok,
+            "policies_count": len(gate.policies.list()),
         }
 
     @app.get("/v1/models")
@@ -110,19 +193,29 @@ def create_app(
         return {"status": "reset"}
 
     @app.get("/v1/controlplane/requests")
-    def list_requests(limit: int = 50) -> dict[str, Any]:
-        return {"requests": gate.history(limit=limit)}
+    def list_requests(limit: int = 50, offset: int = 0) -> dict[str, Any]:
+        return {"requests": _list_requests(limit=limit, offset=offset)}
 
     @app.get("/v1/controlplane/requests/{request_id}")
     def get_request(request_id: str) -> dict[str, Any]:
-        found = gate.get(request_id)
+        found = _lookup(request_id)
         if not found:
             raise HTTPException(status_code=404, detail="request not found")
         return found
 
+    @app.get("/v1/controlplane/ledger/{request_id}/verify")
+    def verify_ledger(request_id: str) -> dict[str, Any]:
+        found = _lookup(request_id)
+        if not found:
+            raise HTTPException(status_code=404, detail="request not found")
+        return {
+            "request_id": request_id,
+            "chain_valid": bool(found.get("chain_valid")),
+        }
+
     @app.get("/v1/controlplane/requests/{request_id}/audit.jsonl")
     def audit_export(request_id: str) -> StreamingResponse:
-        found = gate.get(request_id)
+        found = _lookup(request_id)
         if not found:
             raise HTTPException(status_code=404, detail="request not found")
         # Rebuild a minimal JSONL audit from public dict
@@ -156,7 +249,9 @@ def create_app(
     @app.post("/v1/controlplane/demo/{scenario}")
     def run_demo(scenario: str, mode: str | None = None) -> dict[str, Any]:
         result = _run_scenario(gate, scenario, mode_override=mode)
-        return result.public_dict()
+        pub = result.public_dict()
+        _persist(pub)
+        return pub
 
     @app.post("/v1/chat/completions")
     async def chat_completions(
@@ -179,6 +274,7 @@ def create_app(
         if scenario:
             result = _run_scenario(gate, scenario, mode_override=mode)
             pub = result.public_dict()
+            _persist(pub)
             content = pub["response_overlay"].get("user_visible_text") or (
                 body.messages[-1].content if body.messages else ""
             )

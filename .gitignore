@@ -27,3 +27,6 @@ __pycache__/
 
 *.egg-info/
 .venv/
+
+# Local SQLite audit store (CONTROLPLANE_DB default)
+.data/
