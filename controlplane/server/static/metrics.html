@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
+  <title>ControlPlane · Metrics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <script src="/static/js/bay.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to cockpit</a>
+  <div class="shell">
+    <header class="rail">
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
+      </div>
+    </header>
+
+    <main class="page" id="main">
+      <h1>FNR cockpit</h1>
+      <p class="lede">Not a vanity dashboard. The publishable claim is the miss rate — empty until labels arrive. That emptiness is the credibility play. Never quote 40ms as p95.</p>
+
+      <div class="claim-shape">
+        <p id="claimShape">On this route we catch &lt;measured&gt;% of ungrounded claims at 40ms p50 — and here is the &lt;measured&gt;% we don't.</p>
+        <small>Labeled FNR is n/a until the adjudicator (Lane 3) marks ground truth. Would-hold is the shadow counterfactual, not a true-positive count.</small>
+      </div>
+
+      <div class="meter-row four" aria-live="polite">
+        <div class="meter"><b id="mFnr">n/a</b><small>Labeled FNR</small></div>
+        <div class="meter"><b id="mFpr">n/a</b><small>Labeled FPR</small></div>
+        <div class="meter"><b id="mHold">0</b><small>Would hold</small></div>
+        <div class="meter"><b id="mPass">0</b><small>Would pass</small></div>
+      </div>
+
+      <div class="meter-row four tight">
+        <div class="meter"><b id="mTotal">0</b><small>Decisions</small></div>
+        <div class="meter"><b id="mEnfHold">0</b><small>Enforced holds</small></div>
+        <div class="meter"><b id="mEnfPass">0</b><small>Enforced passes</small></div>
+        <div class="meter"><b id="mLabeled">0</b><small>Labeled holds</small></div>
+      </div>
+
+      <h2>By use case</h2>
+      <div class="paper" id="byUse">No traffic yet.</div>
+
+      <h2>By actuator</h2>
+      <div class="paper" id="byAct">No actuators yet.</div>
+
+      <p class="note" id="note"></p>
+
+      <div class="toolbar">
+        <button type="button" class="btn danger" id="reset">Reset room</button>
+        <span class="hint">Clears shadow counters on this process. Request history is untouched.</span>
+      </div>
+      <div class="err" id="err" role="alert"></div>
+    </main>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
+  </div>
+  <script>
+    function render(j) {
+      Bay.$("claimShape").textContent = j.fnr_claim_shape || Bay.$("claimShape").textContent;
+      Bay.$("mFnr").textContent = Bay.fmtFnr(j.published_fnr);
+      Bay.$("mFpr").textContent = Bay.fmtFnr(j.published_fpr);
+      Bay.$("mHold").textContent = j.would_have_held ?? 0;
+      Bay.$("mPass").textContent = j.would_have_passed ?? 0;
+      Bay.$("mTotal").textContent = j.total_decisions ?? 0;
+      Bay.$("mEnfHold").textContent = j.enforced_holds ?? 0;
+      Bay.$("mEnfPass").textContent = j.enforced_passes ?? 0;
+      Bay.$("mLabeled").textContent = j.labeled_holds ?? 0;
+
+      const uses = j.by_use_case || {};
+      const useRows = Object.entries(uses);
+      Bay.$("byUse").innerHTML = useRows.length
+        ? `<table><thead><tr><th>Use case</th><th>Total</th><th>Would hold</th><th>Enforced hold</th></tr></thead><tbody>${
+            useRows.map(([k, v]) => `<tr><td>${Bay.escape(k)}</td><td>${v.total ?? 0}</td><td>${v.would_hold ?? 0}</td><td>${v.enforced_hold ?? 0}</td></tr>`).join("")
+          }</tbody></table>`
+        : "No traffic yet.";
+
+      const acts = j.by_actuator || {};
+      const actRows = Object.entries(acts);
+      Bay.$("byAct").innerHTML = actRows.length
+        ? `<table><thead><tr><th>Actuator</th><th>Count</th></tr></thead><tbody>${
+            actRows.map(([k, v]) => `<tr><td>${Bay.escape(k)}</td><td>${v}</td></tr>`).join("")
+          }</tbody></table>`
+        : "No actuators yet.";
+
+      Bay.$("note").textContent = j.note || "";
+    }
+
+    async function load() {
+      try {
+        render(await Bay.get("/v1/controlplane/metrics"));
+      } catch (e) {
+        const err = Bay.$("err");
+        err.textContent = `Cockpit failed: ${e.message}`;
+        err.classList.add("show");
+      }
+    }
+
+    Bay.$("reset").addEventListener("click", async () => {
+      if (!confirm("Reset room counters? Shadow metrics on this process clear. Ledger history stays.")) return;
+      try {
+        await Bay.post("/v1/controlplane/metrics/reset");
+        await load();
+      } catch (e) {
+        const err = Bay.$("err");
+        err.textContent = `Reset failed: ${e.message}`;
+        err.classList.add("show");
+      }
+    });
+
+    load();
+    setInterval(load, 5000);
+  </script>
+</body>
+</html>

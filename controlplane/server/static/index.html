@@ -3,506 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
   <title>ControlPlane · Clearance bay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bay: #1c1f24;
-      --bay-raised: #262a31;
-      --bay-edge: #333842;
-      --strip: #f4f0e6;
-      --strip-ink: #1a1c1f;
-      --strip-mute: #5c616a;
-      --flap: #0e0f12;
-      --flap-letter: #f7f4ec;
-      --amber: #e8a317;
-      --amber-dim: #8a6412;
-      --orange: #ff5a1f;
-      --orange-ink: #1a0a00;
-      --hold: #c62828;
-      --clear: #1b7a4a;
-      --line: rgba(244, 240, 230, 0.12);
-      --focus: #ff5a1f;
-      --radius: 2px;
-      --font: "Public Sans", system-ui, -apple-system, sans-serif;
-      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
-    body {
-      font-family: var(--font);
-      font-size: 15px;
-      line-height: 1.4;
-      color: var(--flap-letter);
-      background: var(--bay);
-      -webkit-font-smoothing: antialiased;
-    }
-    ::selection { background: var(--orange); color: var(--orange-ink); }
-    :focus-visible {
-      outline: 2px solid var(--focus);
-      outline-offset: 2px;
-    }
-
-    .shell {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-
-    /* —— top rail —— */
-    .rail {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px 20px;
-      padding: 14px 20px;
-      background: var(--bay-raised);
-      border-bottom: 1px solid var(--bay-edge);
-    }
-    .mark {
-      font-weight: 700;
-      font-size: 15px;
-      letter-spacing: 0.02em;
-      color: var(--strip);
-    }
-    .mark em {
-      font-style: normal;
-      color: var(--orange);
-    }
-    .rail-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--strip-mute);
-      margin-left: auto;
-    }
-    .lamp {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--amber-dim);
-    }
-    .lamp.on {
-      background: var(--amber);
-      box-shadow: 0 0 0 3px rgba(232, 163, 23, 0.18);
-    }
-    .lamp.bad { background: var(--hold); box-shadow: none; }
-
-    /* —— workspace —— */
-    .workspace {
-      display: grid;
-      grid-template-columns: minmax(260px, 320px) 1fr;
-      min-height: 0;
-    }
-    @media (max-width: 900px) {
-      .workspace { grid-template-columns: 1fr; }
-    }
-
-    .desk {
-      padding: 20px;
-      border-right: 1px solid var(--bay-edge);
-      background: linear-gradient(180deg, #22262d 0%, var(--bay) 100%);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    @media (max-width: 900px) {
-      .desk { border-right: 0; border-bottom: 1px solid var(--bay-edge); }
-    }
-
-    .desk h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--strip);
-      line-height: 1.15;
-    }
-    .desk p.lede {
-      margin: 0;
-      color: var(--strip-mute);
-      font-size: 13px;
-      max-width: 34ch;
-    }
-
-    .field { display: grid; gap: 6px; }
-    .field span {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--strip-mute);
-    }
-    select {
-      appearance: none;
-      width: 100%;
-      font: inherit;
-      font-weight: 500;
-      color: var(--strip-ink);
-      background: var(--strip) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231a1c1f' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 12px center;
-      border: 1px solid transparent;
-      border-radius: var(--radius);
-      padding: 11px 36px 11px 12px;
-      cursor: pointer;
-    }
-    select:hover { border-color: var(--amber); }
-
-    .admit {
-      margin-top: 4px;
-      width: 100%;
-      border: 0;
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      font: inherit;
-      font-weight: 700;
-      font-size: 15px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--orange-ink);
-      background: var(--orange);
-      cursor: pointer;
-      box-shadow: 0 1px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-      transition: filter 120ms ease, transform 100ms ease;
-    }
-    .admit:hover { filter: brightness(1.05); }
-    .admit:active { transform: translateY(1px); }
-    .admit:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      filter: none;
-    }
-
-    .meter-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: auto;
-    }
-    .meter {
-      background: var(--flap);
-      border: 1px solid var(--bay-edge);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-    }
-    .meter b {
-      display: block;
-      font-family: var(--mono);
-      font-size: 18px;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      color: var(--strip);
-    }
-    .meter small {
-      color: var(--strip-mute);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* —— strip bay —— */
-    .bay {
-      padding: 20px;
-      overflow: auto;
-      background:
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 47px,
-          rgba(255,255,255,0.015) 47px,
-          rgba(255,255,255,0.015) 48px
-        ),
-        var(--bay);
-    }
-
-    .bay-head {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 8px 16px;
-      align-items: baseline;
-      margin-bottom: 14px;
-    }
-    .bay-head h2 {
-      margin: 0;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--strip-mute);
-    }
-    .bay-meta {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--strip-mute);
-    }
-    .bay-meta strong { color: var(--amber); font-weight: 600; }
-
-    .chain {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-      margin-bottom: 18px;
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--strip-mute);
-    }
-    .chain .node {
-      padding: 4px 8px;
-      background: var(--flap);
-      border: 1px solid var(--bay-edge);
-      color: var(--flap-letter);
-    }
-    .chain .node.live {
-      border-color: var(--amber);
-      color: var(--amber);
-    }
-
-    .strips {
-      display: grid;
-      gap: 10px;
-      max-width: 920px;
-    }
-
-    .strip {
-      background: var(--strip);
-      color: var(--strip-ink);
-      border-radius: var(--radius);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,0.4) inset,
-        0 8px 18px rgba(0,0,0,0.28);
-      display: grid;
-      grid-template-columns: 10px 1fr auto;
-      min-height: 88px;
-      overflow: hidden;
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 180ms ease, transform 180ms ease;
-    }
-    .strip.show {
-      opacity: 1;
-      transform: none;
-    }
-    .strip.empty {
-      opacity: 1;
-      background: transparent;
-      color: var(--strip-mute);
-      box-shadow: none;
-      border: 1px dashed var(--bay-edge);
-      min-height: 72px;
-      place-items: center;
-      grid-template-columns: 1fr;
-      font-size: 13px;
-    }
-    .strip-tab {
-      background: var(--flap);
-    }
-    .strip.Edit .strip-tab,
-    .strip.Escalate .strip-tab { background: var(--orange); }
-    .strip.Block .strip-tab { background: var(--hold); }
-    .strip.Pass .strip-tab,
-    .strip.\30Pass\ \+\ annotate .strip-tab,
-    .strip[data-actuator^="Pass"] .strip-tab { background: var(--clear); }
-
-    .strip-body {
-      padding: 12px 14px 14px;
-      display: grid;
-      gap: 6px;
-      align-content: center;
-    }
-    .strip-id {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--strip-mute);
-    }
-    .strip-title {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-    .strip-cell {
-      font-size: 12px;
-      color: var(--strip-mute);
-    }
-    .strip-cell code {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--strip-ink);
-      background: rgba(0,0,0,0.06);
-      padding: 1px 5px;
-      border-radius: 2px;
-    }
-
-    .flap {
-      min-width: 132px;
-      background: var(--flap);
-      color: var(--flap-letter);
-      display: grid;
-      place-items: center;
-      padding: 10px 14px;
-      border-left: 1px solid #000;
-      position: relative;
-    }
-    .flap::before {
-      content: "";
-      position: absolute;
-      left: 0; right: 0; top: 50%;
-      height: 1px;
-      background: rgba(255,255,255,0.08);
-    }
-    .flap-word {
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 15px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      text-align: center;
-      line-height: 1.1;
-    }
-    .flap-word.flip {
-      animation: flap 420ms steps(4, end);
-    }
-    @keyframes flap {
-      0% { transform: rotateX(0); opacity: 1; }
-      40% { transform: rotateX(-90deg); opacity: 0.2; }
-      60% { transform: rotateX(90deg); opacity: 0.2; }
-      100% { transform: rotateX(0); opacity: 1; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .strip { transition: none; transform: none; opacity: 1; }
-      .flap-word.flip { animation: none; }
-    }
-
-    .overlay-card {
-      margin-top: 16px;
-      max-width: 920px;
-      background: var(--strip);
-      color: var(--strip-ink);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
-      display: none;
-    }
-    .overlay-card.show { display: block; }
-    .overlay-card .k {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--strip-mute);
-      margin-bottom: 6px;
-    }
-    .overlay-card .text {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .overlay-card .hold {
-      color: var(--hold);
-      font-weight: 700;
-    }
-    .overlay-card a {
-      color: var(--orange);
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .overlay-card a:hover { text-decoration: underline; }
-
-    details.receipts {
-      margin-top: 18px;
-      max-width: 920px;
-      border: 1px solid var(--bay-edge);
-      border-radius: var(--radius);
-      background: var(--bay-raised);
-    }
-    details.receipts summary {
-      cursor: pointer;
-      padding: 12px 14px;
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--strip);
-      list-style: none;
-    }
-    details.receipts summary::-webkit-details-marker { display: none; }
-    details.receipts[open] summary {
-      border-bottom: 1px solid var(--bay-edge);
-    }
-    .receipt-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-    }
-    @media (max-width: 720px) {
-      .receipt-grid { grid-template-columns: 1fr; }
-    }
-    .receipt-pane {
-      padding: 12px 14px;
-      border-right: 1px solid var(--bay-edge);
-      overflow: auto;
-      max-height: 280px;
-    }
-    .receipt-pane:last-child { border-right: 0; }
-    @media (max-width: 720px) {
-      .receipt-pane { border-right: 0; border-bottom: 1px solid var(--bay-edge); }
-      .receipt-pane:last-child { border-bottom: 0; }
-    }
-    .receipt-pane h3 {
-      margin: 0 0 8px;
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--strip-mute);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-    th, td {
-      text-align: left;
-      padding: 6px 4px;
-      border-bottom: 1px solid var(--line);
-      vertical-align: top;
-    }
-    th {
-      color: var(--strip-mute);
-      font-weight: 600;
-      font-size: 10px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    .tag {
-      display: inline-block;
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 1px 5px;
-      border-radius: 2px;
-      border: 1px solid var(--bay-edge);
-    }
-    .tag.SUPPORTED { color: #7dcea0; border-color: #1b7a4a; }
-    .tag.UNSUPPORTED { color: var(--amber); border-color: var(--amber-dim); }
-    .tag.UNKNOWN { color: var(--strip-mute); }
-    .viol { color: #ff8a80; font-weight: 600; }
-
-    .err {
-      margin-top: 12px;
-      padding: 12px 14px;
-      background: #3a1515;
-      border: 1px solid var(--hold);
-      color: #ffc9c4;
-      border-radius: var(--radius);
-      display: none;
-    }
-    .err.show { display: block; }
-  </style>
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <script src="/static/js/bay.js"></script>
 </head>
 <body>
   <!--
@@ -513,9 +20,20 @@
     FORM: ATC strip bay (assigned #4, seed 27b2e849) + split-flap cascade raise + orange action key raise.
     FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
   -->
+  <a class="skip" href="#bay">Skip to strips</a>
   <div class="shell">
     <header class="rail">
-      <div class="mark">Control<em>Plane</em></div>
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
       <div class="rail-status">
         <span class="lamp" id="lamp" aria-hidden="true"></span>
         <span id="healthText">checking bay...</span>
@@ -545,6 +63,7 @@
         </label>
 
         <button type="button" class="admit" id="admit">Admit</button>
+        <p class="hint">1 refund · 2 support · 3 copilot · A admit · deep link <code>?scenario=&amp;mode=&amp;autorun=1</code></p>
 
         <div class="meter-row" aria-live="polite">
           <div class="meter"><b id="mTotal">—</b><small>Decisions</small></div>
@@ -589,30 +108,20 @@
         </details>
       </main>
     </div>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
   </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    async function refreshHealth() {
-      try {
-        const r = await fetch("/healthz");
-        const j = await r.json();
-        $("lamp").className = "lamp on";
-        $("healthText").textContent = `lane 1 · ${j.uptime_s}s up`;
-      } catch {
-        $("lamp").className = "lamp bad";
-        $("healthText").textContent = "bay offline";
-      }
-    }
+    const $ = (id) => Bay.$(id);
+    const reduceMotion = Bay.reduceMotion;
+    const esc = (v) => Bay.escape(v);
 
     async function refreshMetrics() {
       try {
-        const j = await (await fetch("/v1/controlplane/metrics")).json();
+        const j = await Bay.get("/v1/controlplane/metrics");
         $("mTotal").textContent = j.total_decisions ?? 0;
         $("mHold").textContent = j.would_have_held ?? 0;
-        $("mFnr").textContent = j.published_fnr == null ? "n/a" : `${(j.published_fnr * 100).toFixed(0)}%`;
+        $("mFnr").textContent = Bay.fmtFnr(j.published_fnr);
       } catch { /* meters stay */ }
     }
 
@@ -639,13 +148,13 @@
         el.innerHTML = `
           <div class="strip-tab" aria-hidden="true"></div>
           <div class="strip-body">
-            <div class="strip-id">${d.action_id}</div>
-            <div class="strip-title">${d.action_id.replaceAll("_", " ")}</div>
-            <div class="strip-cell">${d.matrix_row} × <code>${d.matrix_col || "—"}</code>
-              · driving ${(d.driving_claim_ids || []).join(", ") || "—"}</div>
+            <div class="strip-id">${esc(d.action_id)}</div>
+            <div class="strip-title">${esc(String(d.action_id).replaceAll("_", " "))}</div>
+            <div class="strip-cell">${esc(d.matrix_row)} × <code>${esc(d.matrix_col || "—")}</code>
+              · driving ${esc((d.driving_claim_ids || []).join(", ") || "—")}</div>
           </div>
-          <div class="flap" aria-label="Actuator ${d.actuator}">
-            <div class="flap-word">${d.actuator}</div>
+          <div class="flap" aria-label="Actuator ${esc(d.actuator)}">
+            <div class="flap-word">${esc(d.actuator)}</div>
           </div>
         `;
         host.appendChild(el);
@@ -669,10 +178,11 @@
       const hold = o.action_allowed === false;
       card.classList.add("show");
       card.innerHTML = `
-        <div class="k">${data.mode} · user-visible</div>
-        <div class="text">${o.user_visible_text || "—"}</div>
+        <div class="k">${esc(data.mode)} · user-visible</div>
+        <div class="text">${esc(o.user_visible_text || "—")}</div>
         <div>${hold ? `<span class="hold">HOLD. Irreversible action not released.</span>` : "Downstream may proceed"}
-          · <a href="/v1/controlplane/requests/${data.request_id}/audit.jsonl">Download audit.jsonl</a>
+          · <a href="/v1/controlplane/requests/${encodeURIComponent(data.request_id)}/audit.jsonl">Download audit.jsonl</a>
+          · <a href="/static/audit.html?request=${encodeURIComponent(data.request_id)}">Open in Audit</a>
         </div>
       `;
     }
@@ -691,9 +201,9 @@
               const f = findings[c.claim_id];
               const viol = f && f.violated;
               return `<tr>
-                <td>${c.claim_id}</td>
-                <td>${c.text}</td>
-                <td><span class="tag ${c.binding?.verdict || ""}">${c.binding?.verdict || "—"}</span></td>
+                <td>${esc(c.claim_id)}</td>
+                <td>${esc(c.text)}</td>
+                <td><span class="tag ${esc(c.binding?.verdict || "")}">${esc(c.binding?.verdict || "—")}</span></td>
                 <td class="${viol ? "viol" : ""}">${viol ? "violation" : "ok"}</td>
               </tr>`;
             }).join("")}
@@ -705,13 +215,22 @@
           <thead><tr><th>ID</th><th>Source</th><th>ACL</th><th>Content</th></tr></thead>
           <tbody>
             ${spans.map((s) => `<tr>
-              <td>${s.span_id}</td>
-              <td>${s.source_id}</td>
-              <td>${(s.acl || []).join(", ")}</td>
-              <td>${s.content}</td>
+              <td>${esc(s.span_id)}</td>
+              <td>${esc(s.source_id)}</td>
+              <td>${esc((s.acl || []).join(", "))}</td>
+              <td>${esc(s.content)}</td>
             </tr>`).join("")}
           </tbody>
         </table>`;
+    }
+
+    function rememberLink(scenario, mode, keepAutorun) {
+      const url = new URL(location.href);
+      url.searchParams.set("scenario", scenario);
+      url.searchParams.set("mode", mode);
+      if (keepAutorun) url.searchParams.set("autorun", "1");
+      else url.searchParams.delete("autorun");
+      history.replaceState(null, "", url);
     }
 
     async function admit() {
@@ -725,17 +244,15 @@
       try {
         const scenario = $("scenario").value;
         const mode = $("mode").value;
+        rememberLink(scenario, mode, false);
         setTimeout(() => setChain("span"), 120);
         setTimeout(() => setChain("claim"), 240);
-        const r = await fetch(
-          `/v1/controlplane/demo/${scenario}?mode=${encodeURIComponent(mode)}`,
-          { method: "POST" }
+        const data = await Bay.post(
+          `/v1/controlplane/demo/${encodeURIComponent(scenario)}?mode=${encodeURIComponent(mode)}`
         );
-        if (!r.ok) throw new Error(await r.text());
-        const data = await r.json();
         setChain("action");
-        $("bayMeta").innerHTML = `<strong>${data.request_id}</strong> · ${data.use_case} · chain ${data.chain_valid ? "VALID" : "BROKEN"}`;
-        $("mLat").textContent = (data.latency_ms ?? 0).toFixed(2);
+        $("bayMeta").innerHTML = `<strong>${esc(data.request_id)}</strong> · ${esc(data.use_case)} · chain ${data.chain_valid ? "VALID" : "BROKEN"}`;
+        $("mLat").textContent = Bay.fmtMs(data.latency_ms);
         renderStrips(data);
         renderOverlay(data);
         renderReceipts(data);
@@ -750,10 +267,35 @@
       }
     }
 
+    function applyDeepLink() {
+      const link = Bay.parseDeepLink();
+      const scenario = Bay.normalizeScenario(link.scenario);
+      const mode = Bay.normalizeMode(link.mode);
+      if (scenario) $("scenario").value = scenario;
+      if (mode) $("mode").value = mode;
+      if (link.autorun) admit();
+    }
+
     $("admit").addEventListener("click", admit);
-    refreshHealth();
+    document.addEventListener("keydown", (ev) => {
+      if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+      const typing = ev.target.matches("input, textarea");
+      if (typing) return;
+      if (ev.key === "1") $("scenario").value = "refund";
+      if (ev.key === "2") $("scenario").value = "support";
+      if (ev.key === "3") $("scenario").value = "copilot";
+      if (ev.key === "e" || ev.key === "E") $("mode").value = "enforce";
+      if (ev.key === "s" || ev.key === "S") {
+        if (ev.target.matches("select")) return;
+        $("mode").value = "shadow";
+      }
+      if ((ev.key === "a" || ev.key === "A") && !ev.target.matches("select, button")) {
+        ev.preventDefault();
+        admit();
+      }
+    });
     refreshMetrics();
-    setInterval(refreshHealth, 15000);
+    applyDeepLink();
   </script>
 </body>
 </html>

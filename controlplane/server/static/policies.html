@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
+  <title>ControlPlane · Policies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <script src="/static/js/bay.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to packs</a>
+  <div class="shell">
+    <header class="rail">
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
+      </div>
+    </header>
+
+    <main class="page" id="main">
+      <h1>Policy packs</h1>
+      <p class="lede">Versioned packs, not nested conditionals. Fail stance belongs to the tier — R0/R1 fail open with annotation; R2/R3 fail closed or escalate. The matrix is never redrawn here.</p>
+      <div class="err" id="err" role="alert"></div>
+      <div class="pack-grid" id="packs">
+        <div class="strip empty">Loading packs…</div>
+      </div>
+    </main>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
+  </div>
+  <script>
+    const SCENARIO_FOR = {
+      "decision-support": "refund",
+      "customer-support": "support",
+      "internal-copilot": "copilot",
+    };
+
+    function packStrip(pack) {
+      const scenario = SCENARIO_FOR[pack.use_case] || pack.use_case;
+      const mode = pack.mode || "enforce";
+      const actions = Object.entries(pack.actions || {});
+      const tab = pack.default_tier === "R3" ? "Escalate" : pack.default_tier === "R2" ? "Edit" : "Pass";
+      return `
+        <div>
+        <article class="strip static" data-actuator="${tab}">
+          <div class="strip-tab" aria-hidden="true"></div>
+          <div class="strip-body">
+            <div class="strip-id">${Bay.escape(pack.policy_version)}</div>
+            <div class="strip-title">${Bay.escape(pack.use_case)}</div>
+            <div class="strip-cell">${Bay.escape(pack.description)}</div>
+            <dl>
+              <dt>Default tier</dt><dd>${Bay.escape(pack.default_tier)}</dd>
+              <dt>Fail stance</dt><dd>${Bay.escape(pack.fail_stance)}</dd>
+              <dt>Latency budget</dt><dd>≤${Bay.escape(pack.latency_budget_ms_p50)}ms p50 / ≤${Bay.escape(pack.latency_budget_ms_p95)}ms p95</dd>
+            </dl>
+            <div class="actions-row">
+              ${actions.map(([name, a]) => `
+                <span class="mini-flap">${Bay.escape(name)} · ${Bay.escape(a.tier)}${a.irreversibility ? " · irrev" : ""}</span>
+              `).join("")}
+            </div>
+          </div>
+          <div class="flap" aria-label="Mode ${Bay.escape(mode)}">
+            <div class="flap-word">${Bay.escape(mode)}</div>
+          </div>
+        </article>
+        <p class="toolbar">
+          <a class="admit inline" href="/?scenario=${encodeURIComponent(scenario)}&amp;mode=${encodeURIComponent(mode)}&amp;autorun=1">Admit this pack</a>
+        </p>
+        </div>
+      `;
+    }
+
+    (async function load() {
+      try {
+        const data = await Bay.get("/v1/controlplane/policies");
+        const packs = data.policies || [];
+        const host = Bay.$("packs");
+        if (!packs.length) {
+          host.innerHTML = `<div class="strip empty">No packs loaded</div>`;
+          return;
+        }
+        host.innerHTML = packs.map(packStrip).join("");
+      } catch (e) {
+        const err = Bay.$("err");
+        err.textContent = `Could not list packs: ${e.message}`;
+        err.classList.add("show");
+        Bay.$("packs").innerHTML = "";
+      }
+    })();
+  </script>
+</body>
+</html>

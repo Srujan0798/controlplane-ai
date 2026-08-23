@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
+  <title>ControlPlane · Audit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <script src="/static/js/bay.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to ledger</a>
+  <div class="shell">
+    <header class="rail">
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
+      </div>
+    </header>
+
+    <main class="page wide" id="main">
+      <h1>Audit bay</h1>
+      <p class="lede">Append-only request history on this process. Pick a strip, read the dual actuators, download the evidence packet as audit.jsonl.</p>
+      <div class="err" id="err" role="alert"></div>
+      <div class="split">
+        <aside>
+          <div class="bay-head">
+            <h2>Requests</h2>
+            <button type="button" class="btn" id="reload">Reload</button>
+          </div>
+          <div class="req-list" id="list"></div>
+        </aside>
+        <section id="detail">
+          <div class="strip empty">No request selected. Admit a run from Clearance, then come back.</div>
+        </section>
+      </div>
+    </main>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
+  </div>
+  <script>
+    let cache = [];
+    let selected = "";
+
+    function tabClass(decisions) {
+      const acts = Object.values(decisions || {}).map((d) => d.actuator);
+      if (acts.includes("Block")) return "Block";
+      if (acts.includes("Escalate")) return "Escalate";
+      if (acts.includes("Edit")) return "Edit";
+      return "Pass";
+    }
+
+    function renderList() {
+      const host = Bay.$("list");
+      if (!cache.length) {
+        host.innerHTML = `<div class="strip empty">Empty board. <a class="ink" href="/?scenario=refund&amp;mode=enforce&amp;autorun=1">Admit refund</a></div>`;
+        return;
+      }
+      const newest = cache.slice().reverse();
+      host.innerHTML = newest.map((r) => {
+        const acts = Object.values(r.decisions || {}).map((d) => d.actuator).join(" · ") || "—";
+        const on = r.request_id === selected ? " on" : "";
+        return `
+          <button type="button" class="req${on}" data-id="${Bay.escape(r.request_id)}">
+            <span class="strip-tab ${tabClass(r.decisions)}" aria-hidden="true"></span>
+            <span class="body">
+              <span class="id">${Bay.escape(r.request_id)}</span>
+              <span class="ttl">${Bay.escape(r.use_case)} · ${Bay.escape(r.mode)}</span>
+              <span class="id">${Bay.escape(acts)} · ${Bay.fmtMs(r.latency_ms)} ms</span>
+            </span>
+          </button>`;
+      }).join("");
+      host.querySelectorAll(".req").forEach((btn) => {
+        btn.addEventListener("click", () => select(btn.dataset.id));
+      });
+    }
+
+    function renderDetail(r) {
+      const decisions = Object.values(r.decisions || {});
+      const overlay = r.response_overlay || {};
+      const hold = overlay.action_allowed === false;
+      const strips = decisions.length
+        ? decisions.map((d) => `
+            <article class="strip static" data-actuator="${Bay.escape(d.actuator)}">
+              <div class="strip-tab"></div>
+              <div class="strip-body">
+                <div class="strip-id">${Bay.escape(d.action_id)}</div>
+                <div class="strip-title">${Bay.escape(String(d.action_id).replaceAll("_", " "))}</div>
+                <div class="strip-cell">${Bay.escape(d.matrix_row)} × <code>${Bay.escape(d.matrix_col || "—")}</code>
+                  · driving ${Bay.escape((d.driving_claim_ids || []).join(", ") || "—")}</div>
+              </div>
+              <div class="flap"><div class="flap-word">${Bay.escape(d.actuator)}</div></div>
+            </article>`).join("")
+        : `<div class="strip empty">No actuators</div>`;
+
+      const claims = (r.claims || []).map((c) => {
+        const f = (r.findings || {})[c.claim_id];
+        return `<tr>
+          <td>${Bay.escape(c.claim_id)}</td>
+          <td>${Bay.escape(c.text)}</td>
+          <td><span class="tag ${Bay.escape(c.binding?.verdict || "")}">${Bay.escape(c.binding?.verdict || "—")}</span></td>
+          <td class="${f && f.violated ? "viol" : ""}">${f && f.violated ? "violation" : "ok"}</td>
+        </tr>`;
+      }).join("");
+
+      Bay.$("detail").innerHTML = `
+        <div class="bay-head">
+          <h2>Request</h2>
+          <div class="bay-meta"><strong>${Bay.escape(r.request_id)}</strong> · chain ${r.chain_valid ? "VALID" : "BROKEN"}</div>
+        </div>
+        <p class="hint">${Bay.escape(r.use_case)} · ${Bay.escape(r.mode)} · ${Bay.escape(r.policy_version)} · ${Bay.fmtMs(r.latency_ms)} ms</p>
+        <div class="strips">${strips}</div>
+        <div class="overlay-card show">
+          <div class="k">user-visible</div>
+          <div class="text">${Bay.escape(overlay.user_visible_text || "—")}</div>
+          <div>${hold ? `<span class="hold">HOLD. Irreversible action not released.</span>` : "Downstream may proceed"}
+            · <a href="/v1/controlplane/requests/${encodeURIComponent(r.request_id)}/audit.jsonl">Download audit.jsonl</a>
+          </div>
+        </div>
+        <details class="receipts" open>
+          <summary>Claims on this ledger</summary>
+          <div class="receipt-pane">
+            <table>
+              <thead><tr><th>ID</th><th>Text</th><th>Verdict</th><th>ACL</th></tr></thead>
+              <tbody>${claims || `<tr><td colspan="4">None</td></tr>`}</tbody>
+            </table>
+          </div>
+        </details>
+      `;
+    }
+
+    async function select(id) {
+      selected = id;
+      const url = new URL(location.href);
+      url.searchParams.set("request", id);
+      history.replaceState(null, "", url);
+      renderList();
+      try {
+        const r = await Bay.get(`/v1/controlplane/requests/${encodeURIComponent(id)}`);
+        renderDetail(r);
+      } catch (e) {
+        const found = cache.find((x) => x.request_id === id);
+        if (found) renderDetail(found);
+        else {
+          const err = Bay.$("err");
+          err.textContent = `Request missing: ${e.message}`;
+          err.classList.add("show");
+        }
+      }
+    }
+
+    async function load() {
+      try {
+        const data = await Bay.get("/v1/controlplane/requests?limit=50");
+        cache = data.requests || [];
+        renderList();
+        const want = selected || Bay.parseDeepLink().request;
+        if (want && cache.some((r) => r.request_id === want)) select(want);
+        else if (!selected && cache.length) select(cache[cache.length - 1].request_id);
+      } catch (e) {
+        const err = Bay.$("err");
+        err.textContent = `Audit list failed: ${e.message}`;
+        err.classList.add("show");
+      }
+    }
+
+    Bay.$("reload").addEventListener("click", load);
+    selected = Bay.parseDeepLink().request;
+    load();
+  </script>
+</body>
+</html>

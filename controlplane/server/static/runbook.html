@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
+  <title>ControlPlane · Runbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <script src="/static/js/bay.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to script</a>
+  <div class="shell">
+    <header class="rail">
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
+      </div>
+    </header>
+
+    <main class="page" id="main">
+      <h1>60-second judge script</h1>
+      <p class="lede">What to say while clicking. Every line names a claim, a graph, an action or a measurement. One trace — the ₹1,84,000 refund — start to close. Do not cycle three shallow scenarios.</p>
+
+      <div class="toolbar">
+        <a class="admit inline" href="/?scenario=refund&amp;mode=enforce&amp;autorun=1">Open bay and Admit</a>
+        <button type="button" class="btn" id="start">Cue 60s</button>
+        <span class="clock" id="clock" aria-live="polite">1:00</span>
+      </div>
+
+      <div class="beats" id="beats">
+        <article class="beat" data-t="0" data-d="8">
+          <div class="beat-t">0–8s</div>
+          <div class="beat-body">
+            <h3>Hook — stand on Clearance, refund + enforce already selected</h3>
+            <p><strong>Say:</strong> “A refund agent emitted: Approved. Refund of ₹1,84,000 issued under clause 7.2. Confidence point-nine-four. Money moved Tuesday, found Friday. Clause 7.2 does not exist. The company wrongly paid. The system didn't fail. It was never asked to prove anything.”</p>
+            <p><strong>Click:</strong> nothing yet. Let the sentence land.</p>
+            <p class="do">Do not say: the customer lost money. Do not say the refund was denied. Do not say clause 7.2 caps or doesn't cover.</p>
+          </div>
+        </article>
+        <article class="beat" data-t="8" data-d="10">
+          <div class="beat-t">8–18s</div>
+          <div class="beat-body">
+            <h3>Admit — orange key</h3>
+            <p><strong>Say:</strong> “We do not score the paragraph. We check whether the claim is a member of the evidence the model was actually given. Everyone watches the exit. Nobody records the entrance.”</p>
+            <p><strong>Click:</strong> Admit. Watch STEP → SPAN → CLAIM → ACTION lamps, then the strips cascade.</p>
+            <p class="do">Do not say: we detect hallucinations. Do not say we read the model's mind.</p>
+          </div>
+        </article>
+        <article class="beat" data-t="18" data-d="17">
+          <div class="beat-t">18–35s</div>
+          <div class="beat-body">
+            <h3>Dual action — point at the two flaps</h3>
+            <p><strong>Say:</strong> “Two pending actions on one ledger. Show text is R1 × entitlement — Edit, stripped. Issue refund is R3 × unsupported-categorical — Escalate, held with the evidence packet. Both correct at once. Proof scales with consequence.”</p>
+            <p><strong>Click:</strong> the two strips. Optionally open Evidence receipts.</p>
+            <p class="do">Do not say “blocked” about the refund. Say held and escalated with the packet.</p>
+          </div>
+        </article>
+        <article class="beat" data-t="35" data-d="13">
+          <div class="beat-t">35–48s</div>
+          <div class="beat-body">
+            <h3>Mechanism — clause absence, not conflict</h3>
+            <p><strong>Say:</strong> “Clause 7.2 does not exist — absence of evidence, not conflicting evidence. That is why this cell is Escalate, not Block. Default verdict is UNSUPPORTED. A claim must earn SUPPORTED. Not low confidence. Unproven.”</p>
+            <p><strong>Click:</strong> Matrix, already on R3 × Unsupported + categorical. Or stay on receipts and name <span class="mono">clause_72</span> spans=(none).</p>
+            <p class="do">Do not redraw the matrix. Do not invent STREAM / Kill Span / Terminate Step.</p>
+          </div>
+        </article>
+        <article class="beat" data-t="48" data-d="12">
+          <div class="beat-t">48–60s</div>
+          <div class="beat-body">
+            <h3>Honesty — FNR empty on purpose</h3>
+            <p><strong>Say:</strong> “We publish our own miss rate. Per route. Not what we caught — what we missed. Right now the schema is empty. That emptiness is the credibility play. Lane 1 is deterministic. Latency target is ≤40 milliseconds p50 and ≤200 milliseconds p95 on R0/R1. Now nothing acts until it can prove it should.”</p>
+            <p><strong>Click:</strong> Metrics cockpit, then download audit.jsonl from the overlay or Audit.</p>
+            <p class="do">Do not quote 40ms as p95. Do not invent an FNR percentage. Do not drop bias if asked — counterfactual flip rate, route-level, async.</p>
+          </div>
+        </article>
+      </div>
+
+      <h2>If they ask to poke it</h2>
+      <div class="paper">
+        <p>Support and copilot are there to show the same matrix on R1 and R2 — not a second story. Keys: 1 refund · 2 support · 3 copilot · A admit. Deep link: <span class="mono">/?scenario=refund&amp;mode=enforce&amp;autorun=1</span></p>
+      </div>
+    </main>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
+  </div>
+  <script>
+    const beats = [...document.querySelectorAll(".beat")];
+    let timer = null;
+    let started = 0;
+
+    function fmt(remain) {
+      const s = Math.max(0, remain);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}:${String(r).padStart(2, "0")}`;
+    }
+
+    function paint(elapsed) {
+      beats.forEach((el) => {
+        const t = Number(el.dataset.t);
+        const d = Number(el.dataset.d);
+        el.classList.toggle("live", elapsed >= t && elapsed < t + d);
+      });
+      Bay.$("clock").textContent = fmt(60 - elapsed);
+    }
+
+    Bay.$("start").addEventListener("click", () => {
+      if (timer) clearInterval(timer);
+      started = Date.now();
+      paint(0);
+      if (Bay.reduceMotion) {
+        Bay.$("clock").textContent = "1:00";
+        return;
+      }
+      timer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - started) / 1000);
+        paint(elapsed);
+        if (elapsed >= 60) {
+          clearInterval(timer);
+          timer = null;
+          beats.forEach((el) => el.classList.remove("live"));
+          Bay.$("clock").textContent = "0:00";
+        }
+      }, 200);
+    });
+  </script>
+</body>
+</html>
