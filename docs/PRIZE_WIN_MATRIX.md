@@ -177,3 +177,11 @@ Wave 3 bench+threat+runbook: **SHIPPED** (`8fb7e24`, `7387a88`) — gate p50≈0
 Pretty routes + nav: **this commit**.
 
 Still open from the 125: upstream passthrough, multi-turn ledger, hold-back buffer, Playwright E2E, proposal PDF, SBOM, webhook escalations, Lane 2 NLI.
+
+## Wave 4 (in flight — parallel agents)
+
+- 4A upstream + webhook + signed audit
+- 4B multi-turn session + hold-back
+- 4C side-by-side ungated/gated + dead-compute + evidence packet UI
+- 4D e2e smoke + proposal PDF + non-root docker + SBOM
+- Monitor: healthz + pytest every 3 min
