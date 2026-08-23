@@ -78,8 +78,8 @@ def screenshot_grouped():
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
-        # 3× retina: sharp for 16:9 judges; 8× was 15360px bloat with no display gain.
-        hi = browser.new_page(viewport={"width": 1920, "height": 1080}, device_scale_factor=3)
+        # 4× master: 7680×4320. Cap is 20 MB — spend it on type edges / 1px hairlines.
+        hi = browser.new_page(viewport={"width": 1920, "height": 1080}, device_scale_factor=4)
         for name in ("s1", "s2", "s3", "sv"):
             html = HTML_OUT / f"{name}.html"
             png = POSTERS / f"{name}.png"

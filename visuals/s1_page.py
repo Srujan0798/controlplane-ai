@@ -30,10 +30,10 @@ COLS = "236px 62px 470px 96px 428px 86px 1fr"
 
 CSS = f"""
 :root{{
-  --ground:#0E0F12; --panel:#1A1C22; --rule:#2A2D34; --rule-soft:#212429;
+  /* Slightly lifted ground so failure red survives thumbnail (review fix 2). */
+  --ground:#14161A; --panel:#1C1E24; --rule:#2A2D34; --rule-soft:#212429;
   --ink:#F5F4F0; --muted:#9A9690; --bound:#C4C2CA; --dim:#6E6A72;
   --red:#E82028; --red-ink:#FF5A61; --red-wash:#2A0F13; --red-rule:#5A1319;
-  --violet:#A56BFF;
   --serif:Charter,'Iowan Old Style',Georgia,serif;
   --sans:{DISPLAY}; --mono:{MONO};
 }}
@@ -44,8 +44,9 @@ html,body{{width:1920px;height:1080px;overflow:hidden;background:var(--ground);
 
 .kicker{{font-family:var(--mono);font-size:14px;letter-spacing:.15em;color:var(--muted);
   text-transform:uppercase;margin-bottom:16px}}
-h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
-  letter-spacing:-.02em;white-space:nowrap;color:#A2A8B4}}
+/* Cool headline — failure card owns glance (densest/brightest checks). */
+h1{{font-family:var(--serif);font-size:42px;line-height:1.05;font-weight:700;
+  letter-spacing:-.02em;white-space:nowrap;color:#9AA0A8}}
 
 .heads{{display:grid;grid-template-columns:{COLS};align-items:end;margin-top:34px;
   padding-bottom:11px;border-bottom:1px solid var(--rule)}}
@@ -55,8 +56,11 @@ h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
   text-transform:none;font-weight:400;color:var(--muted);margin-top:5px}}
 .model{{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;
   color:var(--dim);font-weight:400;margin-bottom:6px;text-transform:uppercase}}
+/* A count badge carries no verdict, so it gets no hue. Four colours have jobs on this deck —
+   red=unproven, blue=escalate, amber=edit, grey=bound/pass. Violet had none. */
 .chip{{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;
-  background:var(--violet);color:#12081F;padding:2px 7px;margin-left:8px;vertical-align:2px}}
+  background:#2E323B;color:#C8CCD6;border:1px solid #3E434E;
+  padding:2px 7px;margin-left:8px;vertical-align:2px}}
 
 .body{{flex:1;min-height:0;display:grid;grid-template-columns:{COLS};padding-top:16px}}
 .col{{display:grid;min-height:0}}
@@ -67,11 +71,11 @@ h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
 .step{{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:16px;
   color:#787D88}}
 .step i{{flex:0 0 24px;height:2px;background:var(--dim);font-style:normal}}
-.step.dead{{color:var(--dim)}}
-.step.dead i{{background:#3A3D45}}
-.step.dead span{{position:relative}}
-.step.dead span::after{{content:"";position:absolute;left:-3px;right:-3px;top:52%;
-  height:2px;background:#565A64}}
+.step.dead{{color:#4A4F58}}
+.step.dead i{{background:#2E3138}}
+.step.dead span{{position:relative;opacity:.85}}
+/* No strikethrough — grey mute is enough; lines read as noise at thumbnail. */
+.step.dead span::after{{display:none}}
 .costnote{{font-family:var(--sans);font-size:15px;color:var(--muted);display:flex;
   align-items:center;gap:9px;padding-top:12px}}
 .costnote b{{color:var(--ink);font-weight:600}}
@@ -79,79 +83,99 @@ h1{{font-family:var(--serif);font-size:48px;line-height:1.05;font-weight:700;
 .aback::before{{content:"";position:absolute;left:0;top:-3px;border:3.5px solid transparent;
   border-right-color:var(--muted)}}
 
-.capture::before{{content:"";position:absolute;left:50%;top:0;bottom:-2px;
-  border-left:2px dashed var(--violet);opacity:.55}}
+/* Capture note lives in the Span header only — no vertical pillar stealing mid-graph focus. */
+.capture::before{{display:none}}
 .capture span{{display:none}}
-.cap-h{{display:block;font-family:var(--mono);font-size:13px;letter-spacing:.04em;
-  color:#9A78D8;font-weight:400;text-transform:none;margin-top:5px}}
+/* Structural annotation — a dimension line's label, not a third accent colour.
+   #6E657A measured 3.5:1 on the ground and failed AA; this is 8.6:1. */
+.cap-h{{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;
+  color:#A9AEBA;font-weight:400;text-transform:none;margin-top:5px}}
 
-.span{{background:#131519;border:1px solid #1E2128;padding:12px 18px;
+.span{{background:#161A20;border:1px solid #252A32;padding:12px 18px;
   display:flex;flex-direction:column;justify-content:center;gap:9px}}
-.span .name{{font-family:var(--mono);font-size:23px;color:#8E93A0}}
+.span .name{{font-family:var(--mono);font-size:23px;color:#A8ADB8}}
 .span .tags{{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}}
-.span .tag{{font-family:var(--mono);font-size:15px;color:#61656F;background:#1B1E24;
+.span .tag{{font-family:var(--mono);font-size:15px;color:#6E737E;background:#1B1E24;
   border:1px solid var(--rule-soft);padding:4px 0;text-align:center}}
-.span.breach{{background:#15171D;border-color:#5A5C64}}
-.span.breach .name{{color:#C8C6CE}}
+/* Billing mismatch is secondary evidence — keep cool, not failure-red. */
+.span.breach{{background:#15171D;border-color:#3A3D45}}
+.span.breach .name{{color:#A8ADB8}}
 .span.breach .tags{{grid-template-columns:1fr auto 1fr}}
-.span.breach .tag{{background:transparent;border-color:#3A3D45;color:#C8C6CE;
+.span.breach .tag{{background:transparent;border-color:#2E3138;color:#8E93A0;
   font-size:15px;padding:5px 10px}}
-.span.breach .neq{{border:none;color:#E05058;font-size:18px;font-weight:700;background:none}}
-.ghost{{border:1px dashed #4A4F58;display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:14px;color:#6E737E;letter-spacing:.02em}}
+.span.breach .neq{{border:none;color:#8A909A;font-size:18px;font-weight:700;background:none}}
+.ghost{{border:1px dashed #3A3D45;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;color:#5A5F6B;letter-spacing:.02em}}
 
 .link{{display:flex;align-items:center}}
-.link i{{flex:1;height:1px;background:#6E7480;opacity:.5;font-style:normal;position:relative}}
-.link i::before,.link i::after{{content:"";position:absolute;top:-2.5px;width:6px;height:6px;
-  border-radius:50%;background:#6E7480}}
+/* The slide's whole claim is "one graph". At opacity .5 these edges resolved to ~#414650
+   and vanished at laptop scale — the bindings have to be visible or there is no graph. */
+.link i{{flex:1;height:2px;background:#7A8090;font-style:normal;position:relative}}
+.link i::before,.link i::after{{content:"";position:absolute;top:-3px;width:8px;height:8px;
+  border-radius:50%;background:#9AA0B0}}
 .link i::before{{left:0}} .link i::after{{right:0}}
 .link.none{{position:relative}}
-.link.none i{{background:var(--red);opacity:1;
+.link.none i{{height:3px;background:var(--red);opacity:1;
   -webkit-mask-image:repeating-linear-gradient(90deg,#000 0 7px,transparent 7px 15px);
   mask-image:repeating-linear-gradient(90deg,#000 0 7px,transparent 7px 15px)}}
 .link.none i::before,.link.none i::after{{display:none}}
 .link.none::after{{content:"no span";position:absolute;left:50%;top:50%;
-  transform:translate(-50%,-50%);font-family:var(--mono);font-size:15px;font-weight:700;
-  color:#FF6A70;letter-spacing:.04em;white-space:nowrap;background:var(--ground);padding:3px 8px}}
+  transform:translate(-50%,-50%);font-family:var(--mono);font-size:18px;font-weight:800;
+  color:#FF8A90;letter-spacing:.04em;white-space:nowrap;background:var(--ground);padding:5px 10px;
+  border:1px solid #6A282C}}
 
-.claim{{background:#131519;border:1px solid #1E2128;display:flex;align-items:center;
-  gap:13px;padding:0 20px;font-family:var(--mono);font-size:23px;color:#8E93A0}}
-.claim em{{width:7px;height:7px;border-radius:50%;background:#5A5F6B;flex:0 0 auto}}
-.claim.unbound{{background:#3A1014;border:3px solid var(--red);flex-direction:column;box-shadow:0 0 0 2px var(--ground),0 24px 96px rgba(232,32,40,.75),0 0 44px rgba(232,32,40,.40);
-  align-items:flex-start;justify-content:center;gap:5px}}
-.claim.unbound .t{{color:#FFF2F2;font-size:48px;font-weight:700;letter-spacing:-.02em}}
-.claim.unbound .v{{font-size:15px;color:#FFB8BB;letter-spacing:.16em;font-weight:700}}
+.claim{{background:#161A20;border:1px solid #252A32;display:flex;align-items:center;
+  gap:13px;padding:0 20px;font-family:var(--mono);font-size:22px;color:#8E939E}}
+.claim em{{width:7px;height:7px;border-radius:50%;background:#6A7080;flex:0 0 auto}}
+/* Emphasis is structural — fill, keyline, scale, dark moat. No bloom.
+   Thumb force: failure type scale is what survives at 400px, not glow. */
+/* Failure is glance hit — fits the claim column, no overflow. */
+.claim.unbound{{background:#9A1E28;border:6px solid #FF2030;flex-direction:column;
+  box-shadow:0 0 0 6px var(--ground);
+  align-items:flex-start;justify-content:center;gap:4px;padding:14px 16px;
+  overflow:hidden;min-width:0}}
+.claim.unbound .t{{color:#FFFFFF;font-size:48px;font-weight:800;letter-spacing:-.02em;
+  line-height:1.05;max-width:100%}}
+.claim.unbound .v{{font-size:14px;color:#FFF0F1;letter-spacing:.12em;font-weight:700}}
 
 .gate{{display:flex;align-items:center}}
-.gate i{{flex:1;height:1px;background:var(--dim);font-style:normal}}
+.gate i{{flex:1;height:2px;background:#4A4F58;font-style:normal}}
+/* Open circuit: red trace stops at a solid end-cap — no glyph restating HELD. */
 .gate.cut{{position:relative}}
-.gate.cut i{{background:var(--red-rule)}}
-.gate.cut::after{{content:"";position:absolute;left:50%;top:50%;width:58px;height:58px;
-  transform:translate(-50%,-50%);
-  background:linear-gradient(45deg,transparent 45%,var(--red) 45% 55%,transparent 55%),
-             linear-gradient(-45deg,transparent 45%,var(--red) 45% 55%,transparent 55%);
-  filter:drop-shadow(0 0 14px rgba(232,32,40,.6))}}
+.gate.cut i{{height:6px;background:linear-gradient(90deg,#FF2030 0 74%,transparent 74%)}}
+.gate.cut::after{{content:"";position:absolute;left:74%;top:50%;width:8px;height:52px;
+  transform:translate(-50%,-50%);background:#FF2030;border-radius:1px}}
 
-.action{{background:var(--panel);border:1px solid var(--rule);border-left:1px solid #3A3F4A;
-  padding:24px;display:flex;flex-direction:column;justify-content:center;gap:30px}}
+/* Anchored, not floated: centring three blocks in the tallest plate on the slide left a
+   ~130px void top and bottom. space-between seats the amount at the top and lands HELD on
+   the plate's own bottom edge, which is where the eye finishes the chain. */
+.action{{background:var(--panel);border:1px solid var(--rule);border-left:1px solid #2A2D34;
+  padding:30px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}}
 .action .lbl{{font-family:var(--mono);font-size:13px;letter-spacing:.2em;color:#61656F}}
-.action .amt{{font-family:var(--serif);font-size:60px;font-weight:700;letter-spacing:-.02em;
-  line-height:1;margin-top:2px;color:#9BA0AA}}
-.action .route{{font-family:var(--mono);font-size:14px;color:#787D88;margin-top:8px}}
+.action .amt{{font-family:var(--serif);font-size:52px;font-weight:700;letter-spacing:-.02em;
+  line-height:1;margin-top:2px;color:#7E848E}}
+.action .route{{font-family:var(--mono);font-size:14px;color:#6E737E;margin-top:8px}}
 .action .why{{font-family:var(--mono);font-size:15px;line-height:1.75}}
 .action .why u{{display:block;color:#565A64;font-size:12px;letter-spacing:.18em;
   text-decoration:none;text-transform:uppercase}}
-.action .why b{{color:var(--red-ink);font-weight:700}}
+.action .why b{{color:#FF5A61;font-weight:800;font-size:16px}}
 .action .why span{{color:#8E93A0}}
-.held{{border:3px solid var(--red);background:#3A1014;padding:15px 18px;box-shadow:0 0 0 1px var(--ground),0 14px 46px rgba(232,32,40,.28)}}
-.held u{{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;
-  color:#FF8A8E;text-decoration:none;margin-bottom:3px}}
-.held b{{font-family:var(--mono);font-size:28px;color:#FFF2F2;font-weight:700;white-space:nowrap}}
+/* Quieter than the clause card — cause outranks effect (HANDOFF-NEXT). */
+/* HELD quieter than clause card — cause outranks effect. */
+.held{{border:2px solid #8A3038;background:#2A1014;padding:12px 14px;
+  box-shadow:0 0 0 3px var(--ground)}}
+.held u{{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+  color:#A8787C;text-decoration:none;margin-bottom:3px}}
+.held b{{font-family:var(--mono);font-size:22px;color:#C8B8B8;font-weight:700;white-space:nowrap}}
 
 .reads{{display:grid;grid-template-columns:{COLS};margin-top:22px}}
+/* Each axis label is bracketed to the column it measures by a rule spanning that column's
+   full width. As orphan 12px ticks the row read as unfinished; as measured spans it reads
+   as axis annotation — and ACTION carrying no rule then parses as deliberate (it is the
+   outcome, not an axis) rather than as a fourth label someone forgot to write. */
 .read{{font-family:var(--sans);position:relative;padding-top:16px}}
-.read::before{{content:"";position:absolute;left:0;top:0;width:1px;height:12px;
-  background:var(--muted)}}
+.read::before{{content:"";position:absolute;left:0;top:0;width:100%;height:2px;
+  background:#4E535E}}
 .read u{{display:block;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;
   color:var(--muted);text-decoration:none;margin-bottom:4px}}
 .read b{{font-size:20px;font-weight:600;color:var(--ink)}}

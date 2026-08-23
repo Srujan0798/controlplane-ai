@@ -1,9 +1,16 @@
 """All 16:9 pages: three posters, video frames, video-slide poster."""
 
+from pathlib import Path
+
 from .tokens import (
     PAGE, INK, PURPLE, MUTED, HAIR, PLATE, PLATE_2, LINE, RED, WHITE, BLUE, BLUE_SOFT,
     AMBER, AMBER_SOFT, RED_SOFT, PASS_BG, PASS_FG, DISPLAY, MONO, VIOLET,
 )
+
+# Pure square crops only (no AI). Used on s3 team strip so they land in the real PPTX/PDF.
+_TEAM_DIR = Path(__file__).resolve().parents[1] / "assets" / "team"
+_PHOTO_YOU = (_TEAM_DIR / "srujan_400.jpg").resolve().as_uri()
+_PHOTO_HER = (_TEAM_DIR / "dhrithika_400.jpg").resolve().as_uri()
 
 
 def _doc(body, bg=PAGE, extra=""):
@@ -74,11 +81,12 @@ def poster_s2():
     extra = f"""
     .s {{ width:1920px; height:1080px; padding:36px 56px 24px; display:flex; flex-direction:column;
           background:{PLATE}; }}
-    .h {{ font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:44px; font-weight:700; color:{WHITE}; line-height:1.04; letter-spacing:-0.02em;
+    /* Title cooler — punch cell wins the glance, not the sentence. */
+    .h {{ font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:36px; font-weight:700; color:#9A969E; line-height:1.04; letter-spacing:-0.02em;
           max-width:1700px; padding-bottom:10px;
           border-bottom:1px solid #2E313A; }}
-    .ann {{ margin:14px 0 0; font-size:15px; font-weight:500; color:#9A9690; }}
-    .ann b {{ color:{WHITE}; font-weight:700; }}
+    .ann {{ margin:14px 0 0; font-size:15px; font-weight:500; color:#8A8690; }}
+    .ann b {{ color:#E8E6EE; font-weight:700; }}
     .grid-wrap {{
       margin-top:18px;
       flex: 1 1 auto;
@@ -90,54 +98,72 @@ def poster_s2():
       height: 100%;
       display:grid;
       grid-template-columns: 220px repeat(4, 1fr);
-      grid-template-rows: 74px repeat(4, 1fr);
+      /* Header row is 96px, not 74px, so the bracket's callout label has clear air under the
+         column headings instead of clipping the second line of "Unsupported + categorical". */
+      grid-template-rows: 96px repeat(4, 1fr);
       gap: 7px;
     }}
     .hd {{ font-size:14px; font-weight:600; color:#9A9690; text-align:center;
-            align-self:end; line-height:1.3; padding-bottom:4px; font-family:{MONO}; }}
+            align-self:end; line-height:1.3; padding-bottom:28px; font-family:{MONO}; }}
     .rh {{ display:flex; flex-direction:column; justify-content:center; padding-right:8px; }}
     .tier {{ font-size:32px; font-weight:700; color:{WHITE}; letter-spacing:-0.03em; }}
     .desc {{ font-size:13px; color:#9A9690; margin-top:5px; }}
     .c {{ display:flex; flex-direction:column; align-items:center; justify-content:center;
-          font-size:30px; font-weight:700; letter-spacing:0.12em;
+          font-size:32px; font-weight:700; letter-spacing:0.12em;
           border:1px solid transparent; font-family:{MONO}; border-radius:2px;
           position: relative; }}
-    .c small {{ font-size:12px; font-weight:600; letter-spacing:0.06em; margin-top:6px; opacity:0.85; }}
-    .b {{ background:#3A181C; color:#D07A7E; border-color:#4E2226; }}
-    .e {{ background:#1A2244; color:#8593C4; border-color:#26304E; }}
-    .d {{ background:#2A2410; color:#C29840; border-color:#3E3418; }}
-    .p {{ background:#282A32; color:#8E8B94; border-color:#35383F; }}
-    /* Thin bracket edges on column 2 cells (STAGE4 — proves the headline). */
-    .col2 {{ box-shadow: inset 3px 0 0 #C8C6CE; }}
-    .c2-top {{ box-shadow: inset 3px 0 0 #C8C6CE, inset 0 3px 0 #C8C6CE; }}
-    .c2-bot {{ box-shadow: inset 3px 0 0 #C8C6CE, inset 0 -3px 0 #C8C6CE; }}
-    .punch {{ background:#3350F5 !important; color:#FFFFFF !important; font-size:54px;
-              border:5px solid {RED} !important; letter-spacing:0.15em; z-index:3;
-              box-shadow: 0 0 0 3px #0E0F12, 0 26px 88px rgba(51,80,245,0.70),
-                          0 0 70px rgba(232,32,40,0.50),
-                          inset 3px 0 0 #C8C6CE, inset 0 3px 0 #C8C6CE !important; }}
-    /* Label for the bracket — under col-2 header, proves the headline. */
+    .c small {{ font-size:12px; font-weight:600; letter-spacing:0.06em; margin-top:6px; opacity:0.9; }}
+    /* Non-punch cells quieter so blue punch is the only saturated hit. */
+    .b {{ background:#2E1418; color:#C8888C; border-color:#4A2428; }}
+    .e {{ background:#161E38; color:#9AA8D8; border-color:#2A3860; }}
+    .d {{ background:#282018; color:#C8A860; border-color:#3A3020; }}
+    .p {{ background:#262A32; color:#A8A4AE; border-color:#3A3E48; }}
+    /* ONE continuous bracket around column 2, outset from the cells and drawn over the grid.
+       Four `inset 3px` edges on four cells split by a 7px gap rendered as four disconnected
+       bars — a seam, not a bracket. --cw mirrors the grid: 4 cols, 4 gaps, 220px row header. */
+    .colmark {{
+      position:absolute; pointer-events:none; z-index:4;
+      --cw: calc((100% - 248px) / 4);
+      left: calc(230px + var(--cw)); width: calc(var(--cw) + 8px);
+      top:99px; bottom:-4px; border:2px solid #C8C6CE;
+    }}
+    .col2, .c2-top, .c2-bot {{ box-shadow:none; }}
+    /* Blue fill, white type, and the bracket's own keyline. The previous hero put a 5px red
+       border and a red bloom on a saturated blue fill — two accent hues fighting on the one
+       object the slide is built to deliver. Red stays on s1, where failure lives. */
+    /* Moat only — no bloom. Scale + fill + keyline is the glance weapon. */
+    /* Story cell — BLUE, fits inside cell (no overflow scale). */
+    .punch {{ background:#2A4CFF !important; color:#FFFFFF !important; font-size:52px;
+              letter-spacing:0.1em; z-index:5; font-weight:800;
+              border:3px solid #FFFFFF !important;
+              box-shadow: 0 0 0 5px #0E0F12 !important;
+              overflow:hidden; }}
+    /* Callout label straddling the bracket's top edge, the way a dimension line is labelled. */
     .brkt-lab {{
       position: absolute;
-      left: calc(220px + 24px + 1.5 * ((100% - 220px - 48px) / 4));
-      top: 0px;
-      transform: translateX(-50%);
+      --cw2: calc((100% - 248px) / 4);
+      left: calc(234px + 1.5 * var(--cw2));
+      top: 86px;
+      transform: translate(-50%,-50%);
       white-space: nowrap;
       font-family:{MONO}; font-size:12px; font-weight:700; letter-spacing:0.03em;
-      color:#E8E6EE; background:rgba(14,15,18,0.96); padding:4px 10px;
-      border:1px solid #5A5C64; z-index: 6; pointer-events: none;
+      color:#F0EEF4; background:{PLATE}; padding:4px 12px;
+      border:1px solid #3A3F4A;
+      z-index: 6; pointer-events: none;
     }}
-    .foot {{ margin-top:20px; background:#272C38; padding:19px 30px;
-             flex: 0 0 auto; border-left:8px solid {RED}; border-top:2px solid #5A6172;
-             display:flex; flex-direction:column; justify-content:center; gap:9px; }}
-    .foot .k {{ font-size:20px; font-weight:700; color:{WHITE}; letter-spacing:-0.02em; }}
-    .foot .pin {{ font-size:15px; color:#C8C6CE; }}
-    .foot .pin b {{ color:{RED}; }}
-    .foot .law {{ font-size:12.5px; color:#A8A4AE; line-height:1.9; }}
-    .foot .law b {{ color:#E0DEE6; }}
-    .foot .lat {{ font-size:15px; color:#D8D5DE; letter-spacing:0.01em;
-                  border-top:1px solid #454B58; padding-top:11px; margin-top:3px; }}
-    .foot .lat b {{ color:#FFFFFF; font-weight:700; }}
+    /* Footer readable at thumb, still quieter than punch. */
+    .foot {{ margin-top:14px; background:#252B38; padding:14px 26px 12px;
+             flex: 0 0 auto; border-left:8px solid {RED}; border-top:2px solid #4A5464;
+             display:flex; flex-direction:column; justify-content:center; gap:4px; }}
+    .foot .k {{ font-size:26px; font-weight:700; color:#FFFFFF; letter-spacing:-0.02em; }}
+    .foot .pin {{ font-size:16px; color:#E0DCE6; }}
+    .foot .pin b {{ color:#FF6A70; }}
+    .foot .gloss {{ font-size:12px; color:#A8A4AE; line-height:1.5; }}
+    .foot .gloss b {{ color:#B8B4BE; font-weight:600; }}
+    .foot .lat {{ font-size:22px; color:#FFFFFF; letter-spacing:0.01em;
+                  border-top:1px solid #5A6474; padding-top:10px; margin-top:2px;
+                  font-weight:600; }}
+    .foot .lat b {{ color:#FFFFFF; font-weight:800; }}
     """
     body = f"""
     <div class="s">
@@ -146,13 +172,14 @@ def poster_s2():
         &nbsp;·&nbsp; <b>no span → action does not execute</b></div>
       <div class="grid-wrap">
         <div class="grid">{''.join(grid)}</div>
+        <div class="colmark"></div>
         <div class="brkt-lab">one unproven claim — four outcomes</div>
       </div>
       <div class="foot">
         <div class="k">R3 × Unsupported + categorical = ESCALATE</div>
         <div class="pin"><b>clause 7.2 → escalate · ₹1,84,000 held</b>
           &nbsp;·&nbsp; never “block” the refund</div>
-        <div class="law">
+        <div class="gloss">
           <b>EDIT</b> — strip or re-ground the named span, never a rewrite.
           &nbsp;&nbsp;<b>ESCALATE</b> — inline hold; ships claim + spans + verdict.<br/>
           <b>Bias</b> — counterfactual flip rate, route-level, CI excludes zero.
@@ -181,6 +208,10 @@ def poster_s3():
         ("“99% accuracy across bias, safety and risk.”",
          "One number over three failure modes is a demo artifact."),
     ]
+    # STAGE4 shape: claim at reduced weight + a small `refused` marker + correction at full
+    # weight. The marker is doing real work — without it each row parses as quote-then-remark,
+    # and only the headline says these are refusals. Four items, four separate reads, and
+    # Round 1 has no Q&A to repair the misread. Removed once as "stamp spam"; restored.
     left = "".join(
         f"""<div class="item">
               <div class="mark">REFUSED</div>
@@ -192,53 +223,62 @@ def poster_s3():
     # Closer owns the slide. Refuse + FNR are secondary instruments.
     extra = f"""
     .s {{ width:1920px; height:1080px; display:flex; flex-direction:column; background:{PLATE}; color:{WHITE}; }}
-    .top {{ padding:44px 62px 28px; flex:1; min-height:0; display:grid;
+    .top {{ padding:36px 62px 16px; flex:1; min-height:0; display:grid;
             grid-template-columns: 1fr 1.05fr; grid-template-rows: auto auto 1fr;
             column-gap: 58px; }}
-    .h {{ grid-column:1 / -1; font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:40px; font-weight:700; color:#A8ADB8;
-          line-height:1.05; letter-spacing:-0.035em; margin-bottom:0; padding-bottom:10px;
-          border-bottom:1px solid #2E313A; }}
-    .subline {{ grid-column:1 / -1; font-size:15px; color:#9A9690; margin:12px 0 18px; font-weight:500; }}
-    .subline b {{ color:{WHITE}; }}
+    /* Top quieter — closer white line is the only large element. */
+    .h {{ grid-column:1 / -1; font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:30px; font-weight:700; color:#7A808A;
+          line-height:1.05; letter-spacing:-0.035em; margin-bottom:0; padding-bottom:8px;
+          border-bottom:1px solid #2A2D34; }}
+    .subline {{ grid-column:1 / -1; font-size:13px; color:#7A7680; margin:8px 0 10px; font-weight:500; }}
+    .subline b {{ color:#B0ACB4; }}
     .col {{ display:flex; flex-direction:column; min-height:0; }}
-    .list {{ flex:1; min-height:0; display:grid; grid-template-rows:repeat(4, 1fr); gap:22px; }}
-    .item {{ background:transparent; padding:2px 0 2px 22px;
-             border-left:3px solid #5A282C;
+    .list {{ flex:1; min-height:0; display:grid; grid-template-rows:repeat(4, 1fr); gap:10px; }}
+    .item {{ background:transparent; padding:1px 0 1px 14px;
+             border-left:2px solid #32353C;
              display:flex; flex-direction:column; justify-content:center; }}
-    .mark {{ font-family:{MONO}; font-size:11.5px; font-weight:700; letter-spacing:0.2em;
-             color:{RED}; margin-bottom:4px; }}
-    .claim {{ font-size:15px; color:#6A6770; margin-bottom:7px; opacity:0.75; }}
-    .fix {{ font-size:20px; font-weight:700; color:{WHITE}; line-height:1.32; }}
-    .aside {{ font-size:15px; font-weight:600; color:#9A9690; margin:0 0 12px; }}
-    .aside em {{ color:{RED}; font-style:normal; font-weight:700; }}
-    .term {{ background:#12141A; flex:1; min-height:0; padding:20px 24px 14px;
+    /* No red flood in top — only closer "prove" carries red. */
+    .mark {{ font-family:{MONO}; font-size:9px; font-weight:700; letter-spacing:0.18em;
+             color:#6A5054; margin-bottom:2px; }}
+    .claim {{ font-size:11px; color:#4E4C54; margin-bottom:2px; opacity:0.7; }}
+    .fix {{ font-size:14px; font-weight:700; color:#C8C4CC; line-height:1.25; }}
+    .aside {{ font-size:13px; font-weight:600; color:#7A7680; margin:0 0 8px; }}
+    .aside em {{ color:#A07074; font-style:normal; font-weight:700; }}
+    .term {{ background:#14161C; flex:1; min-height:0; padding:6px 4px;
              display:flex; flex-direction:column; border:1px solid #2A2D34;
-             border-top:4px solid {RED}; }}
-    .term h3 {{ font-family:{MONO}; font-size:13px; font-weight:700; color:#C8C6CE;
-                margin-bottom:10px; letter-spacing:0.1em; }}
+             border-top:2px solid #3A3E48; }}
+    .term h3 {{ font-family:{MONO}; font-size:12px; font-weight:700; color:#A8A4AE;
+                margin-bottom:8px; letter-spacing:0.1em; }}
     .rows {{ flex:1; min-height:0; display:grid; grid-template-rows:repeat(6, 1fr); }}
-    .term {{ padding:6px 4px; }}
     .row {{ display:grid; grid-template-columns: 1.3fr 1fr; align-items:center;
-            font-family:{MONO}; font-size:15px; padding:0 8px;
+            font-family:{MONO}; font-size:14px; padding:0 8px;
             border-bottom:1px solid #1E2026; }}
     .row:last-child {{ border-bottom:none; }}
-    .kk {{ color:#9A9690; }}
-    .vv {{ color:{WHITE}; font-weight:700; }}
-    .fnr {{ background:#3A1418; border:1px solid {RED}; margin:2px 0; }}
-    .fnr .kk, .fnr .vv {{ color:#FFB0B4; font-size:18px; font-weight:700; }}
-    .cap {{ font-size:13px; font-weight:600; color:#E0A030; margin-top:10px; }}
-    .closer {{ background:#12141A; height:352px; flex:0 0 352px; display:flex;
-                flex-direction:column; justify-content:center; padding:0 56px;
-                border-top:1px solid #2A2D34; position:relative; }}
-    .closer::before {{ content:""; position:absolute; left:0; top:0; bottom:0; width:14px;
-                        background:{RED}; }}
-    .closer p {{ font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:84px; white-space:nowrap; font-weight:700; color:{WHITE}; letter-spacing:-0.045em;
-                  line-height:1.02; max-width:1740px; }}
+    .kk {{ color:#8A8690; }}
+    .vv {{ color:#D8D4DC; font-weight:700; }}
+    .fnr {{ background:#18141A; border:1px solid #2E2830; margin:2px 0; }}
+    .fnr .kk, .fnr .vv {{ color:#9A888C; font-size:14px; font-weight:700; }}
+    .cap {{ font-size:11px; font-weight:600; color:#8A7840; margin-top:6px; }}
+    /* Closer owns slide but full sentence must fit — no clip off the right edge. */
+    .closer {{ background:#161A22; height:400px; flex:0 0 400px; display:flex;
+                flex-direction:column; justify-content:center; padding:0 48px 16px;
+                border-top:1px solid #2A2D34; position:relative; overflow:hidden; }}
+    .closer p {{ font-family:Charter,'Iowan Old Style',Georgia,serif; font-size:58px; white-space:nowrap; font-weight:800; color:#FFFFFF; letter-spacing:-0.03em;
+                  line-height:1.05; max-width:100%; overflow:hidden; text-overflow:clip; }}
     .closer p span {{ color:#FF4048; }}
-    .closer .who {{ margin-bottom:16px; font-size:20px; color:#C8C6CE; font-weight:500; }}
+    .closer .who {{ margin-bottom:14px; font-size:17px; color:#C0BCC8; font-weight:500; }}
     .closer .who b {{ color:{WHITE}; font-weight:700; }}
-    .closer .proof {{ margin-top:14px; font-size:19px; color:#9A9690; font-weight:500; }}
+    .closer .proof {{ margin-top:12px; font-size:15px; color:#B0ACB4; font-weight:500; }}
     .closer .proof b {{ color:{WHITE}; }}
+    /* Team strip — pure square crops only (no AI). Lands in PPTX/PDF/video via render. */
+    .team {{ margin-top:22px; display:flex; align-items:center; gap:28px; }}
+    .team .m {{ display:flex; align-items:center; gap:12px; }}
+    .team img {{ width:56px; height:56px; border-radius:4px; object-fit:cover;
+                 border:1px solid #3A3D45; flex:0 0 auto; }}
+    .team .meta {{ display:flex; flex-direction:column; gap:2px; }}
+    .team .nm {{ font-size:15px; font-weight:700; color:#F0EEF4; }}
+    .team .rl {{ font-size:12px; color:#8A8790; font-family:{MONO}; letter-spacing:0.04em; }}
+    .team .sep {{ width:1px; height:40px; background:#2A2D34; }}
     """
     body = f"""
     <div class="s">
@@ -271,6 +311,23 @@ def poster_s3():
         <p>Now nothing acts until it can <span>prove</span> it should.</p>
         <div class="proof"><b>no span → no execution</b>
           &nbsp;·&nbsp; hold / escalate &nbsp;·&nbsp; publish the miss</div>
+        <div class="team">
+          <div class="m">
+            <img src="{_PHOTO_YOU}" alt=""/>
+            <div class="meta">
+              <div class="nm">Choda Srujan Sai</div>
+              <div class="rl">Team Leader · IIT Gandhinagar</div>
+            </div>
+          </div>
+          <div class="sep"></div>
+          <div class="m">
+            <img src="{_PHOTO_HER}" alt=""/>
+            <div class="meta">
+              <div class="nm">Dhrithika</div>
+              <div class="rl">Team Member · IIT Gandhinagar</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>"""
     return _doc(body, bg=PLATE, extra=extra)
@@ -299,7 +356,7 @@ def poster_video():
     """
     body = f"""
     <div class="s">
-      <div class="k">VIDEO  ·  2:58</div>
+      <div class="k">VIDEO  ·  2:25</div>
       <div class="h">The same transaction.<br>One field changed.</div>
       <div class="body">
         <div class="band line"><span>Approved. Refund of ₹1,84,000 issued under clause 7.2 of the vendor agreement.</span></div>
@@ -503,24 +560,9 @@ def video_frames():
     frames["3f"] = plate(bound=5, highlight="cost", show_cost_count=True)
     frames["3g"] = plate(bound=5, highlight="all")
 
-    # The matrix beat shows the deck's own slide 2, not a second matrix design.
+    # Matrix beat: deck slide 2 owns the screen (not a second matrix design).
     frames["4a"] = poster_s2()
-
-    frames["4b"] = _v(_card() + """
-      <div class="panel">
-        <div class="json">
-          {<br>
-          &nbsp;&nbsp;<span class="k">"claim"</span>: <span class="r">"clause 7.2"</span>,<br>
-          &nbsp;&nbsp;<span class="k">"verdict"</span>: <span class="r">"UNSUPPORTED"</span>,<br>
-          &nbsp;&nbsp;<span class="k">"strength"</span>: <span class="s">"categorical"</span>,<br>
-          &nbsp;&nbsp;<span class="k">"blast_radius"</span>: <span class="s">"R3"</span>,<br>
-          &nbsp;&nbsp;<span class="k">"actuator"</span>: <span class="s">"ESCALATE"</span>,<br>
-          &nbsp;&nbsp;<span class="k">"action"</span>: <span class="s">"refund ₹1,84,000"</span>,<br>
-          &nbsp;&nbsp;<span class="k">"packet"</span>: <span class="s">["claim", "spans", "verdict"]</span><br>
-          }
-        </div>
-      </div>""")
-
+    frames["4b"] = poster_s2()
     frames["4c"] = _v(_card() + f"""
       <div class="panel" style="background:transparent;padding:0;top:190px">
         <div class="split">
@@ -540,28 +582,29 @@ def video_frames():
           </div>
         </div>
       </div>""")
-
     frames["4d"] = _v(_card() + """
       <div class="panel">
-        <div class="report">
-          <h3>per-route gate report — format</h3>
-          <div class="r"><div class="kk">route</div><div class="vv">finance/refund-agent</div></div>
-          <div class="r"><div class="kk">gate latency (p50 / p95)</div><div class="vv">&lt;measured&gt; / &lt;measured&gt;</div></div>
-          <div class="r"><div class="kk">ungrounded caught</div><div class="vv">&lt;measured&gt;</div></div>
-          <div class="r fnr"><div class="kk">missed (FNR)</div><div class="vv">&lt;measured&gt; ± &lt;CI&gt;</div></div>
-          <div class="r"><div class="kk">entitlement violations</div><div class="vv">100% deterministic</div></div>
+        <div class="json">
+          {<br>
+          &nbsp;&nbsp;<span class="k">"claim"</span>: <span class="r">"clause 7.2"</span>,<br>
+          &nbsp;&nbsp;<span class="k">"verdict"</span>: <span class="r">"UNSUPPORTED"</span>,<br>
+          &nbsp;&nbsp;<span class="k">"strength"</span>: <span class="s">"categorical"</span>,<br>
+          &nbsp;&nbsp;<span class="k">"blast_radius"</span>: <span class="s">"R3"</span>,<br>
+          &nbsp;&nbsp;<span class="k">"actuator"</span>: <span class="s">"ESCALATE"</span>,<br>
+          &nbsp;&nbsp;<span class="k">"action"</span>: <span class="s">"refund ₹1,84,000"</span>,<br>
+          &nbsp;&nbsp;<span class="k">"packet"</span>: <span class="s">["claim", "spans", "verdict"]</span><br>
+          }
         </div>
-        <div class="cap">illustrative format — Round 2 fills this with measured values</div>
       </div>""")
 
-    frames["5a"] = _v(f"""
+    # Close beat: deck slide 3, then held stamp.
+    frames["5a"] = poster_s3()
+    frames["5b"] = poster_s3()
+    frames["5c"] = _v(f"""
       <div class="log">
         <div class="who">agent · finance/refund-agent&nbsp;&nbsp;·&nbsp;&nbsp;Tue 14:06</div>
         <div class="main">Approved. Refund of ₹1,84,000 issued under clause 7.2 of the vendor agreement.</div>
         <div class="bad" style="color:{BLUE}">held · Tue 14:06 · escalated</div>
         <div class="meta">clause 7.2 — no span</div>
       </div>""")
-    # ...and the close shows the deck's own slide 3.
-    frames["5b"] = poster_s3()
-    frames["5c"] = _v('<div class="mark">ControlPlane.ai</div>')
     return frames

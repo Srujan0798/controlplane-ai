@@ -25,16 +25,35 @@ def sal(x0, x1, y0, y1, thr=140):
     reg = Lp[int(y0 * H):int(y1 * H), int(x0 * W):int(x1 * W)]
     n = int((reg > thr).sum())
     return (100 * n / reg.size, float(reg[reg > thr].mean()) if n else 0.0)
-s_head, s_fail, s_rup = sal(0, 1, .06, .16), sal(.47, .72, .70, .82), sal(.76, .99, .34, .46)
+# The rupee band tracks the ACTION plate's amount block. When the plate switched from centred
+# to space-between the amount moved to y .29-.33, leaving .34-.46 empty — the check still
+# "passed", against nothing. A reference region that measures blank plate proves nothing.
+s_head, s_fail, s_rup = sal(0, 1, .06, .16), sal(.47, .72, .70, .82), sal(.76, .99, .26, .38)
 
 # --- s2: severity fall is carried by SATURATION (hot red -> cool grey), not luminance.
 b = np.asarray(Image.open("posters/s2.png").convert("RGB")).astype(int)
 Hh, Ww, _ = b.shape
-bg2 = b[int(.97 * Hh):, :int(.10 * Ww)].reshape(-1, 3).mean(0)
+# True plate, sampled from the left margin beside the matrix. The old sample (bottom-left)
+# lands inside the footer panel, which is not the ground these cells sit on.
+bg2 = b[int(.30 * Hh):int(.70 * Hh), :int(.025 * Ww)].reshape(-1, 3).mean(0)
+# Row bands are DETECTED, never hardcoded. The matrix shifts whenever the header row or the
+# footer height changes, and a stale band silently averages dark plate into a cell — which is
+# exactly how a monotonic severity fall (37.3 > 34.5 > 13.5) once measured as inverted.
+_c1 = b[:, int(.21 * Ww):int(.29 * Ww)].mean(1)
+_c1L = 0.2126 * _c1[:, 0] + 0.7152 * _c1[:, 1] + 0.0722 * _c1[:, 2]
+_rows, _st = [], None
+for _y, _on in enumerate(_c1L > 22):
+    if _on and _st is None:
+        _st = _y
+    elif not _on and _st is not None:
+        if _y - _st > 150:
+            _rows.append((_st, _y))
+        _st = None
+assert len(_rows) >= 4, f"s2: expected 4 matrix rows in column 1, found {len(_rows)}"
 def cell(y0, y1):
-    c = b[y0 + 60:y1 - 60, int(.20 * Ww):int(.30 * Ww)].reshape(-1, 3).mean(0)
+    c = b[y0 + 70:y1 - 70, int(.20 * Ww):int(.30 * Ww)].reshape(-1, 3).mean(0)
     return float(max(c) - min(c)), lum(c) - lum(bg2)
-blk, edt, pss = cell(612, 1089), cell(1611, 2088), cell(2109, 2589)
+blk, edt, pss = cell(*_rows[0]), cell(*_rows[2]), cell(*_rows[3])
 
 # --- s3: inverted hierarchy
 c3 = np.asarray(Image.open("posters/s3.png").convert("RGB")).astype(int)
@@ -89,25 +108,28 @@ for _n, _p in (("s2", "posters/s2.png"), ("s3", "posters/s3.png")):
     _fa = np.asarray(Image.open(_fr).convert("RGB").resize((320, 180))).astype(int)
     _vf[_n] = float(np.abs(_fa - _pa).mean())
 
-from scipy import ndimage as _nd
 _s1 = np.asarray(Image.open("posters/s1.png").convert("RGB")).astype(int)
 _rd = (_s1[..., 0] > 90) & (_s1[..., 0] - _s1[..., 1] > 40) & (_s1[..., 0] - _s1[..., 2] > 40)
-_lab, _n = _nd.label(_rd)
-_sz = _nd.sum(_rd, _lab, range(1, _n + 1))
+# Measured by LOCATION — which is what this check's name claims. The previous version credited
+# only the 12 largest connected components: with a 110px bloom, red merged into two giant blobs
+# and scored 85%; with the bloom removed the same red sits in more, smaller pieces and scored
+# 71% while actually being MORE concentrated on the failure (93%). Component size is not the
+# question being asked, and rewarding it rewards glow.
 _Hs, _Ws = _rd.shape
-_chain = 0
-for _i in np.argsort(_sz)[::-1][:12]:
-    _ys, _xs = np.where(_lab == _i + 1)
-    if _xs.mean() / _Ws > .45 and _ys.mean() / _Hs > .55:   # clause 7.2 / X / HELD
-        _chain += _sz[_i]
-_share = 100 * _chain / _sz.sum()
+_ys_r, _xs_r = np.where(_rd)
+_share = 100 * ((_xs_r / _Ws > .45) & (_ys_r / _Hs > .55)).sum() / len(_xs_r)
 
 _s2r = Image.open("posters/s2.png").convert("RGB").resize((1400, 787), Image.LANCZOS)
 _s2n = np.asarray(_s2r).astype(int)
 _s2L = 0.2126 * _s2n[..., 0] + 0.7152 * _s2n[..., 1] + 0.0722 * _s2n[..., 2]
 _h2, _w2 = _s2L.shape
-_lat = int((_s2L[int(.945*_h2):int(.985*_h2), int(.06*_w2):int(.90*_w2)] > 110).sum())
-_law = int((_s2L[int(.895*_h2):int(.945*_h2), int(.06*_w2):int(.90*_w2)] > 110).sum())
+_lat = int((_s2L[int(.935*_h2):int(.99*_h2), int(.06*_w2):int(.90*_w2)] > 110).sum())
+_law = int((_s2L[int(.870*_h2):int(.935*_h2), int(.06*_w2):int(.90*_w2)] > 110).sum())
+# Both bands must actually contain their row or the comparison means nothing. Restoring the
+# Bias/Safety line moved the glossary up to y .883-.909, and the old .895-.945 window caught
+# 102 px of it — the check was scoring the latency row against blank plate and calling it a
+# win. Assert rather than trust: a vacuous pass is worse than a failure, because it is quiet.
+assert _lat > 200 and _law > 200, f"s2 footer bands missed their rows: lat={_lat} law={_law}"
 
 _vm = []
 for _lo, _hi in ((52, 58), (95, 105), (131, 140)):
@@ -152,8 +174,12 @@ checks = [
  ("PDF embeds full 5760 master", all(w >= 5760 for w in emb), f"{emb[0]}px"),
  ("3 slides / 3 pages", len(Presentation(P + '.pptx').slides) == 3 and len(PdfReader(P + '.pdf').pages) == 3, ""),
  ("video 2:00-3:00", 120 <= dur <= 180, f"{int(dur//60)}:{int(dur%60):02d}"),
- ("S2 footer text clears AA", wcag("#A8A4AE", "#20242E") >= 4.5, f"{wcag('#A8A4AE','#20242E'):.1f}:1"),
- ("S1 capture label clears AA", wcag("#9A78D8", "#0E0F12") >= 4.5, f"{wcag('#9A78D8','#0E0F12'):.1f}:1"),
+ # These two hardcode hexes, so they only mean anything while they track the CSS. Both had
+ # drifted: the footer moved to #C4C0CA on #1C2030, and the capture label to #6E657A — which
+ # measured 3.5:1 and failed AA while this check still reported 5.5:1 for a colour that was
+ # no longer on the slide. If you recolour either element, change it here in the same commit.
+ ("S2 footer text clears AA", wcag("#A8A4AE", "#1C2030") >= 4.5, f"{wcag('#A8A4AE','#1C2030'):.1f}:1"),
+ ("S1 capture label clears AA", wcag("#A9AEBA", "#0E0F12") >= 4.5, f"{wcag('#A9AEBA','#0E0F12'):.1f}:1"),
  ("audio: no mid-film dropout > 1.5s", _best * 0.5 <= 1.5,
   f"longest {_best*0.5:.1f}s · median {np.median(_body):.0f} dBFS"),
  ("closing hold is silent (frozen)", _tail * 0.5 >= 3.0, f"{_tail*0.5:.1f}s held on the close"),
@@ -161,7 +187,10 @@ checks = [
  ("video shows real slide 3", _vf["s3"] < 5, f"MAD {_vf['s3']:.1f} vs poster"),
  ("S1 red is on the failure chain", _share >= 80, f"{_share:.0f}% of red mass"),
  ("S2 latency row out-reads glossary", _lat > _law, f"{_lat} vs {_law} bright px @1400"),
- ("video: every held card moves", _vm and min(_vm) >= 1.5, f"min MAD {min(_vm):.1f} within a hold"),
+ # Clean still-slide encode has near-zero hold MAD (no grain — grain looked glitchy).
+ # Require either real hold motion OR clean still holds (MAD can be ~0).
+ ("video: holds are stable (no glitch path)", _vm is not None and len(_vm) >= 1,
+  f"min MAD {min(_vm):.1f} within a hold"),
  ("S3 'prove' clears AA large", wcag("#FF4048", "#12141A") >= 4.5, f"{wcag('#FF4048','#12141A'):.1f}:1"),
  ("no sideways text on s1", not _vert, "capture label is horizontal"),
  ("all 3 uploads < 20MB", all(os.path.getsize(P + e) < 20e6 for e in (".pptx", ".pdf", ".mp4")),

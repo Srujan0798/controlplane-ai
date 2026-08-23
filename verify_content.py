@@ -34,6 +34,12 @@ CHECKS = {
             "1,84,000 held",
             "Hard gate on actions",
             "Text streams with a short hold-back",
+            # Bias and Safety are two of the brief's three responsibility categories, and
+            # this line is the deck's only coverage of them. Round 1 has no Q&A, so anything
+            # off-slide is never scored. It was deleted once with no test to catch it.
+            "counterfactual flip rate",
+            "typed interlocks",
+            "40 ms p50",
         ],
         "must_not_contain": ["blocks a payment", "STREAM", "Kill Span"],
     },
