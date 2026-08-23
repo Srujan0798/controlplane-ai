@@ -2,9 +2,10 @@
 
 **Date:** 2026-08-23  
 **Challenge:** Accenture Innovation Challenge 2026 · PS #1 · Team ControlPlane  
-**Status:** Draft for review  
+**Status:** Approved  
 **Source of truth:** [`docs/ARCHITECTURE.md`](../../ARCHITECTURE.md) (frozen)  
-**Slice:** Round 2 first build — keystone only
+**Round 2 brief:** [`docs/Accenture Innovation Challenge - Round2 - Detailed Problem Statements.pdf`](../../Accenture%20Innovation%20Challenge%20-%20Round2%20-%20Detailed%20Problem%20Statements.pdf)  
+**Slice:** Round 2 first build — keystone prototype (Phases A–B of the Round 2 plan)
 
 ---
 
