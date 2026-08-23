@@ -7,7 +7,12 @@ COPY policies ./policies
 COPY examples ./examples
 COPY docs ./docs
 
-RUN pip install --no-cache-dir -e .
+RUN pip install --no-cache-dir -e . \
+ && useradd --create-home --uid 1000 --shell /usr/sbin/nologin cp \
+ && mkdir -p /app/.data \
+ && chown -R cp:cp /app
+
+USER cp
 
 EXPOSE 8080
 ENV HOST=0.0.0.0 PORT=8080
