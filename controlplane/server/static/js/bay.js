@@ -131,6 +131,45 @@
       return Number(value).toFixed(2);
     },
 
+    isTyping(el) {
+      if (!el || el === document.body || el === document.documentElement) return false;
+      const tag = (el.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return true;
+      return Boolean(el.isContentEditable);
+    },
+
+    /** Steps/spans that grounded no SUPPORTED claim. Walk claims → spans → steps. */
+    deadCompute(data) {
+      const steps = data.steps || [];
+      const spans = data.spans || [];
+      const claims = data.claims || [];
+      const supported = new Set();
+      for (const c of claims) {
+        if ((c.binding && c.binding.verdict) === "SUPPORTED") {
+          for (const id of c.binding.span_ids || []) supported.add(id);
+        }
+      }
+      const liveSteps = new Set();
+      for (const sp of spans) {
+        if (supported.has(sp.span_id)) liveSteps.add(sp.step_id);
+      }
+      const deadSteps = steps.filter((s) => !liveSteps.has(s.step_id));
+      const deadSpans = spans.filter((sp) => !supported.has(sp.span_id));
+      return { steps: deadSteps, spans: deadSpans, count: deadSteps.length };
+    },
+
+    markClause(text) {
+      const escaped = this.escape(text || "");
+      return escaped.replace(
+        /clause 7\.2(?: of the vendor agreement)?/gi,
+        '<mark class="hit">$&</mark>'
+      );
+    },
+
+    hasClause(text) {
+      return /clause\s*7\.2/i.test(text || "");
+    },
+
     boot() {
       this.markNav();
       this.health();

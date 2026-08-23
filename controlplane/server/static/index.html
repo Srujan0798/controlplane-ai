@@ -90,8 +90,13 @@
           <div class="strip empty">Awaiting clearance. Press Admit.</div>
         </div>
 
-        <div class="overlay-card" id="overlay"></div>
+        <div class="compare" id="compare" role="region" aria-label="Ungated versus gated"></div>
         <div class="err" id="err" role="alert"></div>
+
+        <details class="drawer" id="packet" hidden>
+          <summary>Evidence packet <span class="k" id="packetKicker"></span></summary>
+          <div class="packet-body" id="packetBody"></div>
+        </details>
 
         <details class="receipts" id="receipts" hidden>
           <summary>Evidence receipts</summary>
@@ -131,6 +136,19 @@
       });
     }
 
+    function revealStrip(el, i) {
+      const show = () => {
+        el.classList.add("show");
+        const word = el.querySelector(".flap-word");
+        if (!word || reduceMotion) return;
+        word.classList.remove("flip");
+        void word.offsetWidth;
+        word.classList.add("flip");
+      };
+      if (reduceMotion) show();
+      else setTimeout(show, 90 + i * 160);
+    }
+
     function renderStrips(data) {
       const decisions = Object.values(data.decisions || {});
       const host = $("strips");
@@ -138,10 +156,12 @@
 
       if (!decisions.length) {
         host.innerHTML = `<div class="strip empty">No actuators on this run</div>`;
+        renderDeadStrip(host, data, 0);
         return;
       }
 
       decisions.forEach((d, i) => {
+        const escalate = d.actuator === "Escalate";
         const el = document.createElement("article");
         el.className = `strip ${d.actuator}`;
         el.dataset.actuator = d.actuator;
@@ -151,40 +171,150 @@
             <div class="strip-id">${esc(d.action_id)}</div>
             <div class="strip-title">${esc(String(d.action_id).replaceAll("_", " "))}</div>
             <div class="strip-cell">${esc(d.matrix_row)} × <code>${esc(d.matrix_col || "—")}</code>
-              · driving ${esc((d.driving_claim_ids || []).join(", ") || "—")}</div>
+              · driving ${esc((d.driving_claim_ids || []).join(", ") || "—")}
+              ${escalate ? `· <a class="packet-open" href="#packet">Open packet</a>` : ""}</div>
           </div>
           <div class="flap" aria-label="Actuator ${esc(d.actuator)}">
             <div class="flap-word">${esc(d.actuator)}</div>
           </div>
         `;
+        el.querySelectorAll(".packet-open").forEach((a) => {
+          a.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            openPacket();
+          });
+        });
+        if (escalate) {
+          el.addEventListener("click", (ev) => {
+            if (ev.target.closest("a")) return;
+            openPacket();
+          });
+        }
         host.appendChild(el);
-        const show = () => {
-          el.classList.add("show");
-          const word = el.querySelector(".flap-word");
-          if (!reduceMotion) {
-            word.classList.remove("flip");
-            void word.offsetWidth;
-            word.classList.add("flip");
-          }
-        };
-        if (reduceMotion) show();
-        else setTimeout(show, 90 + i * 160);
+        revealStrip(el, i);
       });
+      renderDeadStrip(host, data, decisions.length);
     }
 
-    function renderOverlay(data) {
+    function renderDeadStrip(host, data, offset) {
+      const dead = Bay.deadCompute(data);
+      if (!dead.count && !dead.spans.length) return;
+      const spanByStep = {};
+      for (const sp of dead.spans) {
+        (spanByStep[sp.step_id] || (spanByStep[sp.step_id] = [])).push(sp);
+      }
+      const items = dead.steps.length
+        ? dead.steps.map((s) => {
+            const src = (spanByStep[s.step_id] || []).map((sp) => sp.source_id).join(", ") || "—";
+            return `<li><b>${esc(s.name)}</b> · ${esc(s.kind)} · ${esc(src)}</li>`;
+          })
+        : dead.spans.map((sp) => `<li><b>${esc(sp.span_id)}</b> · ${esc(sp.source_id)}</li>`);
+      const el = document.createElement("article");
+      el.className = "strip dead";
+      el.dataset.actuator = "dead";
+      el.innerHTML = `
+        <div class="strip-tab" aria-hidden="true"></div>
+        <div class="strip-body">
+          <div class="strip-id">${dead.count} step${dead.count === 1 ? "" : "s"} · ${dead.spans.length} span${dead.spans.length === 1 ? "" : "s"}</div>
+          <div class="strip-title">Dead compute</div>
+          <ul class="dead-list">${items.join("")}</ul>
+        </div>
+        <div class="flap" aria-label="Dead compute ${dead.count}">
+          <div class="flap-word">${dead.count}</div>
+        </div>
+      `;
+      host.appendChild(el);
+      revealStrip(el, offset);
+    }
+
+    function renderCompare(data) {
       const o = data.response_overlay || {};
-      const card = $("overlay");
+      const card = $("compare");
+      const ungated = o.ungated_text || "";
+      const gated = o.user_visible_text || "";
       const hold = o.action_allowed === false;
+      const wouldHold = data.would_hold && data.mode === "shadow";
+      const stripped = Bay.hasClause(ungated) && !Bay.hasClause(gated);
+      const leftBody = ungated
+        ? Bay.markClause(ungated)
+        : `No ungated emit on this fixture`;
+      const holdLine = hold
+        ? `<div class="hold">HOLD. Irreversible action not released.</div>`
+        : wouldHold
+          ? `<div class="hold">Would hold (shadow) — counterfactual only.</div>`
+          : `<div>Downstream may proceed</div>`;
       card.classList.add("show");
       card.innerHTML = `
-        <div class="k">${esc(data.mode)} · user-visible</div>
-        <div class="text">${esc(o.user_visible_text || "—")}</div>
-        <div>${hold ? `<span class="hold">HOLD. Irreversible action not released.</span>` : "Downstream may proceed"}
-          · <a href="/v1/controlplane/requests/${encodeURIComponent(data.request_id)}/audit.jsonl">Download audit.jsonl</a>
+        <div class="compare-pane">
+          <div class="k">Ungated model text</div>
+          <div class="text">${leftBody}</div>
+        </div>
+        <div class="compare-pane">
+          <div class="k">After ControlPlane${stripped ? " · clause 7.2 stripped" : ""}</div>
+          <div class="text">${gated ? Bay.markClause(gated) : "—"}</div>
+          ${stripped ? `<div class="stripped">Clause 7.2 does not exist. Phrase removed.</div>` : ""}
+          ${holdLine}
+        </div>
+        <div class="compare-links">
+          ${esc(data.mode)} ·
+          <a href="/v1/controlplane/requests/${encodeURIComponent(data.request_id)}/audit.jsonl">Download audit.jsonl</a>
           · <a href="/static/audit.html?request=${encodeURIComponent(data.request_id)}">Open in Audit</a>
         </div>
       `;
+    }
+
+    function openPacket() {
+      const drawer = $("packet");
+      if (drawer.hidden) return;
+      drawer.open = true;
+      drawer.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+    }
+
+    function renderPacket(data) {
+      const drawer = $("packet");
+      const body = $("packetBody");
+      const spanMap = Object.fromEntries((data.spans || []).map((s) => [s.span_id, s]));
+      const escalate = Object.values(data.decisions || {}).filter((d) => d.actuator === "Escalate");
+      if (!escalate.length) {
+        drawer.hidden = true;
+        drawer.open = false;
+        body.innerHTML = "";
+        return;
+      }
+      drawer.hidden = false;
+      drawer.open = true;
+      $("packetKicker").textContent = `· ${escalate.length} Escalate`;
+      body.innerHTML = escalate.map((d) => {
+        const packet = d.packet || {};
+        const claims = packet.claims || [];
+        const spanIds = packet.candidate_spans || [];
+        const claimHtml = claims.length
+          ? claims.map((c) => `
+              <dl>
+                <dt>Claim</dt><dd>${esc(c.claim_id)} — ${esc(c.text)}</dd>
+                <dt>Verdict</dt><dd><span class="tag ${esc(c.verdict || "")}">${esc(c.verdict || "—")}</span></dd>
+                <dt>Assertion</dt><dd class="mono">${esc(c.assertion || "—")} · ${esc(c.kind || "")}</dd>
+              </dl>`).join("")
+          : `<p class="packet-empty">No driving claim on this packet.</p>`;
+        const spanHtml = spanIds.length
+          ? `<ul class="dead-list">${spanIds.map((id) => {
+              const sp = spanMap[id];
+              return `<li><b>${esc(id)}</b>${sp ? ` · ${esc(sp.source_id)} — ${esc(sp.content)}` : ""}</li>`;
+            }).join("")}</ul>`
+          : `<p class="packet-empty">Spans: (none) — absence of evidence, not conflict.</p>`;
+        return `
+          <div class="packet-card">
+            <h3>${esc(String(d.action_id).replaceAll("_", " "))}</h3>
+            <dl>
+              <dt>Matrix cell</dt>
+              <dd class="mono">${esc(d.matrix_row)} × ${esc(d.matrix_col || "—")}</dd>
+              <dt>Actuator</dt>
+              <dd class="mono">${esc(d.actuator)}</dd>
+            </dl>
+            ${claimHtml}
+            ${spanHtml}
+          </div>`;
+      }).join("");
     }
 
     function renderReceipts(data) {
@@ -233,9 +363,12 @@
       history.replaceState(null, "", url);
     }
 
+    let admitting = false;
     async function admit() {
+      if (admitting) return;
       const btn = $("admit");
       const err = $("err");
+      admitting = true;
       err.classList.remove("show");
       btn.disabled = true;
       btn.textContent = "Clearing…";
@@ -254,14 +387,18 @@
         $("bayMeta").innerHTML = `<strong>${esc(data.request_id)}</strong> · ${esc(data.use_case)} · chain ${data.chain_valid ? "VALID" : "BROKEN"}`;
         $("mLat").textContent = Bay.fmtMs(data.latency_ms);
         renderStrips(data);
-        renderOverlay(data);
+        renderCompare(data);
+        renderPacket(data);
         renderReceipts(data);
         await refreshMetrics();
       } catch (e) {
         err.textContent = `Gate failed: ${e.message}. Check the server, then Admit again.`;
         err.classList.add("show");
+        $("compare").classList.remove("show");
+        $("packet").hidden = true;
         setChain("");
       } finally {
+        admitting = false;
         btn.disabled = false;
         btn.textContent = "Admit";
       }
@@ -279,17 +416,16 @@
     $("admit").addEventListener("click", admit);
     document.addEventListener("keydown", (ev) => {
       if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
-      const typing = ev.target.matches("input, textarea");
-      if (typing) return;
-      if (ev.key === "1") $("scenario").value = "refund";
-      if (ev.key === "2") $("scenario").value = "support";
-      if (ev.key === "3") $("scenario").value = "copilot";
+      if (Bay.isTyping(ev.target)) return;
+      if (ev.key === "1") { ev.preventDefault(); $("scenario").value = "refund"; }
+      if (ev.key === "2") { ev.preventDefault(); $("scenario").value = "support"; }
+      if (ev.key === "3") { ev.preventDefault(); $("scenario").value = "copilot"; }
       if (ev.key === "e" || ev.key === "E") $("mode").value = "enforce";
       if (ev.key === "s" || ev.key === "S") {
         if (ev.target.matches("select")) return;
         $("mode").value = "shadow";
       }
-      if ((ev.key === "a" || ev.key === "A") && !ev.target.matches("select, button")) {
+      if ((ev.key === "a" || ev.key === "A") && !ev.target.matches("select") && !ev.repeat) {
         ev.preventDefault();
         admit();
       }
