@@ -17,6 +17,7 @@ from controlplane.models import (
     Decision,
     EntitlementFinding,
 )
+from controlplane.holdback import admit_for_decisions
 from controlplane.policy import PolicyRegistry
 from controlplane.recorder import ProvenanceRecorder
 from controlplane.shadow import HOLDING_ACTUATORS, MetricsStore
@@ -317,7 +318,7 @@ class ControlPlaneGate:
     ) -> dict[str, Any]:
         actuators = {aid: d.actuator.value for aid, d in decisions.items()}
         if not enforced:
-            return {
+            overlay = {
                 "ungated_text": ungated_text,
                 "shadow": True,
                 "actuators_would_apply": actuators,
@@ -325,6 +326,10 @@ class ControlPlaneGate:
                 "action_allowed": True,
                 "note": "Shadow mode — counterfactual only; downstream not blocked.",
             }
+            overlay["holdback"] = admit_for_decisions(
+                overlay.get("user_visible_text") or "", decisions
+            )
+            return overlay
 
         # Enforce: Edit strips unproven / unentitled claims from user-visible text;
         # Escalate/Block hold irreversible actions.
@@ -348,7 +353,7 @@ class ControlPlaneGate:
         action_allowed = not (
             refund and refund.actuator in (Actuator.ESCALATE, Actuator.BLOCK)
         )
-        return {
+        overlay = {
             "ungated_text": ungated_text,
             "shadow": False,
             "actuators_applied": actuators,
@@ -367,6 +372,8 @@ class ControlPlaneGate:
             ),
             "note": "Enforce mode — matrix actuators applied.",
         }
+        overlay["holdback"] = admit_for_decisions(text, decisions)
+        return overlay
 
     def history(self, limit: int = 50) -> list[dict[str, Any]]:
         return [r.public_dict() for r in self._history[-limit:]]

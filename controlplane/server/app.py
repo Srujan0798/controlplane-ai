@@ -14,9 +14,11 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from controlplane import signing, upstream, webhook
+from controlplane.holdback import admit_for_decisions
 from controlplane.persist import AuditStore
 from controlplane.pipeline import ControlPlaneGate
 from controlplane.policy import PolicyRegistry
+from controlplane.session import SessionStore
 from controlplane.security import (
     MAX_BODY_SIZE,
     SECURITY_HEADERS,
@@ -56,6 +58,11 @@ class AuditVerifyRequest(BaseModel):
     signature: str
 
 
+class SessionStartRequest(BaseModel):
+    session_id: str = Field(min_length=1)
+    principal_id: str = "anonymous"
+
+
 def audit_jsonl_bytes(found: dict[str, Any]) -> bytes:
     """Rebuild JSONL audit bytes from a public gate dict."""
     lines = [
@@ -88,6 +95,7 @@ def create_app(
     gate: ControlPlaneGate | None = None,
     enable_upstream: bool = False,
     store: AuditStore | None = None,
+    sessions: SessionStore | None = None,
 ) -> FastAPI:
     policies = PolicyRegistry()
     policies.load_dir(ROOT / "policies")
@@ -98,6 +106,12 @@ def create_app(
             store = AuditStore.from_env()
         except Exception:
             store = None
+    if sessions is None:
+        try:
+            db_path = store.path if store is not None else os.environ.get("CONTROLPLANE_DB")
+            sessions = SessionStore(path=db_path) if db_path else SessionStore()
+        except Exception:
+            sessions = SessionStore()
     limiter = RateLimiter()
 
     app = FastAPI(
@@ -110,6 +124,7 @@ def create_app(
     )
     app.state.gate = gate
     app.state.store = store
+    app.state.sessions = sessions
     app.state.started_at = time.time()
 
     def _persist(public_dict: dict[str, Any]) -> None:
@@ -125,6 +140,43 @@ def create_app(
         try:
             if webhook.should_notify(public_dict):
                 webhook.notify_escalate(public_dict)
+        except Exception:
+            return
+
+    def _session_summary(public_dict: dict[str, Any]) -> dict[str, Any]:
+        overlay = public_dict.get("response_overlay") or {}
+        actuators = overlay.get("actuators_applied") or overlay.get(
+            "actuators_would_apply"
+        ) or {}
+        if not actuators:
+            decisions = public_dict.get("decisions") or {}
+            actuators = {
+                k: (v.get("actuator") if isinstance(v, dict) else v)
+                for k, v in decisions.items()
+            }
+        return {
+            "request_id": public_dict.get("request_id"),
+            "use_case": public_dict.get("use_case"),
+            "mode": public_dict.get("mode"),
+            "would_hold": public_dict.get("would_hold"),
+            "enforced": public_dict.get("enforced"),
+            "action_allowed": overlay.get("action_allowed"),
+            "actuators": actuators,
+            "holdback": overlay.get("holdback"),
+        }
+
+    def _attach_session(session_id: str | None, public_dict: dict[str, Any]) -> None:
+        if not session_id:
+            return
+        try:
+            principal = (public_dict.get("principal") or {}).get("id") or "anonymous"
+            sessions.begin_session(session_id, str(principal))
+            rid = public_dict.get("request_id")
+            if not rid:
+                return
+            sessions.attach_request(session_id, str(rid), _session_summary(public_dict))
+            public_dict["session_id"] = session_id
+            public_dict["compounding_risk"] = sessions.compounding_risk(session_id)
         except Exception:
             return
 
@@ -322,11 +374,27 @@ def create_app(
         valid = signing.verify(body.content.encode("utf-8"), body.signature)
         return {"valid": valid}
 
+    @app.post("/v1/controlplane/sessions")
+    def start_session(body: SessionStartRequest) -> dict[str, Any]:
+        return sessions.begin_session(body.session_id, body.principal_id)
+
+    @app.get("/v1/controlplane/sessions/{session_id}")
+    def get_session(session_id: str) -> dict[str, Any]:
+        found = sessions.get(session_id)
+        if not found:
+            raise HTTPException(status_code=404, detail="session not found")
+        return found
+
     @app.post("/v1/controlplane/demo/{scenario}")
-    def run_demo(scenario: str, mode: str | None = None) -> dict[str, Any]:
+    def run_demo(
+        scenario: str,
+        mode: str | None = None,
+        session_id: str | None = None,
+    ) -> dict[str, Any]:
         result = _run_scenario(gate, scenario, mode_override=mode)
         pub = result.public_dict()
         _after_gate(pub)
+        _attach_session(session_id, pub)
         return pub
 
     @app.post("/v1/chat/completions")
@@ -458,6 +526,15 @@ def _wrap_multi(gate, use_case, runner, mode_override):
     would_hold = any(d.actuator in HOLDING_ACTUATORS for d in decisions.values())
     for d in decisions.values():
         gate.metrics.record(use_case=use_case, actuator=d.actuator, mode=mode)
+    visible = f"[{use_case}] gated response"
+    overlay = {
+        "shadow": mode == "shadow",
+        "actuators_applied": {k: v.actuator.value for k, v in decisions.items()},
+        "user_visible_text": visible,
+        "action_allowed": not would_hold or mode == "shadow",
+        "note": f"Scenario={use_case} mode={mode}",
+        "holdback": admit_for_decisions(visible, decisions),
+    }
     result = GateResult(
         request_id=led.request_id,
         use_case=use_case,
@@ -469,13 +546,7 @@ def _wrap_multi(gate, use_case, runner, mode_override):
         latency_ms=(_time.perf_counter() - t0) * 1000.0,
         enforced=mode == "enforce" and would_hold,
         would_hold=would_hold,
-        response_overlay={
-            "shadow": mode == "shadow",
-            "actuators_applied": {k: v.actuator.value for k, v in decisions.items()},
-            "user_visible_text": f"[{use_case}] gated response",
-            "action_allowed": not would_hold or mode == "shadow",
-            "note": f"Scenario={use_case} mode={mode}",
-        },
+        response_overlay=overlay,
     )
     gate._history.append(result)
     return result
