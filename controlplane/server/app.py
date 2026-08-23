@@ -9,10 +9,11 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from controlplane import signing, upstream, webhook
 from controlplane.persist import AuditStore
 from controlplane.pipeline import ControlPlaneGate
 from controlplane.policy import PolicyRegistry
@@ -50,6 +51,38 @@ class ChatCompletionRequest(BaseModel):
     scenario: str | None = None  # refund | support | copilot | decision
 
 
+class AuditVerifyRequest(BaseModel):
+    content: str
+    signature: str
+
+
+def audit_jsonl_bytes(found: dict[str, Any]) -> bytes:
+    """Rebuild JSONL audit bytes from a public gate dict."""
+    lines = [
+        json.dumps(
+            {
+                "type": "request",
+                "payload": {
+                    "request_id": found["request_id"],
+                    "use_case": found["use_case"],
+                    "mode": found["mode"],
+                    "policy_version": found["policy_version"],
+                },
+            }
+        )
+    ]
+    for sp in found.get("spans") or []:
+        lines.append(json.dumps({"type": "span", "payload": sp}))
+    for c in found.get("claims") or []:
+        lines.append(json.dumps({"type": "claim", "payload": c}))
+    for d in (found.get("decisions") or {}).values():
+        lines.append(json.dumps({"type": "decision", "payload": d}))
+    lines.append(
+        json.dumps({"type": "chain", "payload": {"valid": found.get("chain_valid")}})
+    )
+    return ("\n".join(lines) + "\n").encode("utf-8")
+
+
 def create_app(
     *,
     gate: ControlPlaneGate | None = None,
@@ -84,6 +117,14 @@ def create_app(
             return
         try:
             store.save(public_dict)
+        except Exception:
+            return
+
+    def _after_gate(public_dict: dict[str, Any]) -> None:
+        _persist(public_dict)
+        try:
+            if webhook.should_notify(public_dict):
+                webhook.notify_escalate(public_dict)
         except Exception:
             return
 
@@ -245,22 +286,8 @@ def create_app(
         found = _lookup(request_id)
         if not found:
             raise HTTPException(status_code=404, detail="request not found")
-        # Rebuild a minimal JSONL audit from public dict
-        lines = []
-        lines.append(json.dumps({"type": "request", "payload": {
-            "request_id": found["request_id"],
-            "use_case": found["use_case"],
-            "mode": found["mode"],
-            "policy_version": found["policy_version"],
-        }}))
-        for sp in found["spans"]:
-            lines.append(json.dumps({"type": "span", "payload": sp}))
-        for c in found["claims"]:
-            lines.append(json.dumps({"type": "claim", "payload": c}))
-        for aid, d in found["decisions"].items():
-            lines.append(json.dumps({"type": "decision", "payload": d}))
-        lines.append(json.dumps({"type": "chain", "payload": {"valid": found["chain_valid"]}}))
-        body = ("\n".join(lines) + "\n").encode("utf-8")
+        body = audit_jsonl_bytes(found)
+        sig = signing.sign_bytes(body)
 
         def gen():
             yield body
@@ -269,15 +296,37 @@ def create_app(
             gen(),
             media_type="application/x-ndjson",
             headers={
-                "Content-Disposition": f'attachment; filename="{request_id}.audit.jsonl"'
+                "Content-Disposition": f'attachment; filename="{request_id}.audit.jsonl"',
+                "X-ControlPlane-Signature": sig,
             },
         )
+
+    @app.get("/v1/controlplane/requests/{request_id}/audit.jsonl.sig")
+    def audit_signature(request_id: str) -> PlainTextResponse:
+        found = _lookup(request_id)
+        if not found:
+            raise HTTPException(status_code=404, detail="request not found")
+        sig = signing.sign_bytes(audit_jsonl_bytes(found))
+        return PlainTextResponse(
+            sig,
+            headers={
+                "X-ControlPlane-Signature": sig,
+                "Content-Disposition": (
+                    f'attachment; filename="{request_id}.audit.jsonl.sig"'
+                ),
+            },
+        )
+
+    @app.post("/v1/controlplane/audit/verify")
+    def audit_verify(body: AuditVerifyRequest) -> dict[str, bool]:
+        valid = signing.verify(body.content.encode("utf-8"), body.signature)
+        return {"valid": valid}
 
     @app.post("/v1/controlplane/demo/{scenario}")
     def run_demo(scenario: str, mode: str | None = None) -> dict[str, Any]:
         result = _run_scenario(gate, scenario, mode_override=mode)
         pub = result.public_dict()
-        _persist(pub)
+        _after_gate(pub)
         return pub
 
     @app.post("/v1/chat/completions")
@@ -292,7 +341,9 @@ def create_app(
 
         Demo path: maps user text / scenario hint onto frozen enterprise fixtures
         and returns a gated completion plus `controlplane` extension object.
-        Upstream passthrough is optional (CONTROLPLANE_UPSTREAM_URL).
+        If no scenario is resolved and CONTROLPLANE_UPSTREAM_URL is set, the
+        request is forwarded as-is. Upstream replies are not given fake
+        Edit/Escalate actuators — Lane-1 fixtures were not used.
         """
         use_case = body.use_case or x_controlplane_use_case
         mode = body.mode or x_controlplane_mode
@@ -301,7 +352,7 @@ def create_app(
         if scenario:
             result = _run_scenario(gate, scenario, mode_override=mode)
             pub = result.public_dict()
-            _persist(pub)
+            _after_gate(pub)
             content = pub["response_overlay"].get("user_visible_text") or (
                 body.messages[-1].content if body.messages else ""
             )
@@ -329,19 +380,34 @@ def create_app(
             }
             return JSONResponse(completion)
 
-        upstream = os.environ.get("CONTROLPLANE_UPSTREAM_URL")
-        if enable_upstream and upstream:
-            raise HTTPException(
-                status_code=501,
-                detail="Upstream passthrough stub — set scenario for demo path",
-            )
+        if enable_upstream or upstream.configured():
+            try:
+                forwarded = upstream.forward_chat(
+                    [{"role": m.role, "content": m.content} for m in body.messages],
+                    body.model,
+                )
+            except upstream.UpstreamNotConfigured as exc:
+                raise HTTPException(status_code=501, detail=str(exc)) from exc
+            except upstream.UpstreamError as exc:
+                raise HTTPException(status_code=502, detail=str(exc)) from exc
+            completion = dict(forwarded)
+            completion["controlplane"] = {
+                "upstream": True,
+                "demo_fixtures_used": False,
+                "note": (
+                    "Upstream passthrough. Lane-1 demo fixtures were not used. "
+                    "Edit/Escalate/Block are not applied without provenance."
+                ),
+            }
+            return JSONResponse(completion)
 
         raise HTTPException(
             status_code=400,
             detail=(
                 "No scenario resolved. Pass scenario=refund|support|copilot|decision "
                 "or include those keywords in the user message. "
-                "This keeps the Lane-1 demo deterministic for judges."
+                "This keeps the Lane-1 demo deterministic for judges. "
+                "Set CONTROLPLANE_UPSTREAM_URL for honest OpenAI-compatible passthrough."
             ),
         )
 
@@ -358,7 +424,7 @@ def _infer_scenario(messages: list[ChatMessage]) -> str | None:
         return "support"
     if "decision" in text:
         return "decision"
-    return "refund"  # default demo for empty/judge probes
+    return None
 
 
 def _run_scenario(gate: ControlPlaneGate, scenario: str, mode_override: str | None):
