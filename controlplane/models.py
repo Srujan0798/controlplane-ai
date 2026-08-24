@@ -106,6 +106,20 @@ class EntitlementFinding:
 
 
 @dataclass(frozen=True)
+class EvidencePacket:
+    """Attached on Escalate: claim + candidate spans + verdict + diff stub."""
+
+    claim_id: str
+    claim_text: str
+    verdict: str
+    candidate_span_ids: tuple[str, ...]
+    diff: str | None = None
+    proposed_actuator: str = "Escalate"
+    action_id: str = ""
+    extra: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class Decision:
     action_id: str
     actuator: Actuator

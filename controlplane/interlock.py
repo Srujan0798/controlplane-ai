@@ -6,7 +6,7 @@ from controlplane.entitlement import audit_claim
 from controlplane.ledger import EvidenceLedger
 from controlplane.models import (
     Action, Actuator, AssertionStrength, Binding, BlastTier, Claim, Decision,
-    EntitlementFinding, Verdict,
+    EntitlementFinding, EvidencePacket, Verdict,
 )
 
 # Transcribed from ARCHITECTURE.md §4. Never redraw.
@@ -74,11 +74,31 @@ def decide(
     action: Action,
     findings: dict[str, EntitlementFinding] | None = None,
 ) -> Decision:
-    if findings is None:
-        findings = {}
-        for claim_id, binding in ledger.bindings.items():
-            if all(sid in ledger.spans for sid in binding.span_ids):
-                findings[claim_id] = audit_claim(ledger, claim_id)
+    computed: dict[str, EntitlementFinding] = {}
+    for claim_id, binding in ledger.bindings.items():
+        unresolved = tuple(sid for sid in binding.span_ids if sid not in ledger.spans)
+        if unresolved:
+            # An ACL we cannot evaluate is not an ACL we may ignore. Skipping the
+            # audit here would read as "not violated" and fail open.
+            computed[claim_id] = EntitlementFinding(
+                claim_id=claim_id,
+                violated=True,
+                offending_span_ids=unresolved,
+                detail="UNRESOLVABLE_SPAN: binding cites spans absent from the ledger",
+            )
+        else:
+            computed[claim_id] = audit_claim(ledger, claim_id)
+
+    # Callers may supply findings, but entitlement is always on: a supplied
+    # finding may raise a verdict, never clear one the plane computed itself.
+    supplied = findings or {}
+    findings = {}
+    for claim_id, computed_finding in computed.items():
+        override = supplied.get(claim_id)
+        if override is not None and (override.violated or not computed_finding.violated):
+            findings[claim_id] = override
+        else:
+            findings[claim_id] = computed_finding
 
     scored: list[tuple[Claim, str, Actuator]] = []
     for claim in ledger.claims.values():
@@ -91,10 +111,25 @@ def decide(
         scored.append((claim, column, _actuator_for(action.tier, column)))
 
     if not scored:
+        # No claim carries role_in_action for this action, so nothing was proven
+        # for it. Default is UNSUPPORTED, so route the absence through the frozen
+        # UNKNOWN column rather than passing: R0 Pass, R1 annotate, R2/R3 Escalate.
         driving_ids: tuple[str, ...] = ()
-        matrix_col = ""
-        actuator = Actuator.PASS
-        packet: dict[str, Any] = {"claims": [], "candidate_spans": [], "diff": None}
+        matrix_col = COL_UNKNOWN
+        actuator = MATRIX[(action.tier, COL_UNKNOWN)]
+        if actuator in (Actuator.ESCALATE, Actuator.BLOCK):
+            packet: EvidencePacket | dict[str, Any] = EvidencePacket(
+                claim_id="",
+                claim_text="",
+                verdict=Verdict.UNKNOWN.value,
+                candidate_span_ids=(),
+                diff=None,
+                proposed_actuator=actuator.value,
+                action_id=action.action_id,
+                extra={"reason": "no claim carries role_in_action for this action", "claims": []},
+            )
+        else:
+            packet: EvidencePacket | dict[str, Any] = {"claims": [], "candidate_spans": [], "diff": None}
     else:
         worst = max(_SEVERITY[a] for _, _, a in scored)
         driving = [(c, col, a) for c, col, a in scored if _SEVERITY[a] == worst]

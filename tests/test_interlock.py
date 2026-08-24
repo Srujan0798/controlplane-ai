@@ -3,7 +3,7 @@ from controlplane.interlock import MATRIX, decide
 from controlplane.ledger import EvidenceLedger
 from controlplane.models import (
     Action, Actuator, AssertionStrength, Binding, BlastTier, Claim, ClaimKind,
-    EntitlementFinding, Principal, Verdict,
+    EntitlementFinding, Principal, Span, Verdict,
 )
 
 
@@ -64,6 +64,8 @@ def test_supported_not_violated_is_pass():
     led.claims["c"] = Claim("c", "ok", ClaimKind.TEXTUAL,
                             AssertionStrength.CATEGORICAL, {"show": 1.0})
     led.bindings["c"] = Binding("c", ("s1",), "fixture", Verdict.SUPPORTED)
+    # record the cited span so the binding resolves (acl subset of clearance)
+    led.spans["s1"] = Span("s1", "step", "src", frozenset(), "ok content", "h")
     d = decide(led, Action("show", "show_text", BlastTier.R3))
     assert d.actuator == Actuator.PASS
 
@@ -79,6 +81,9 @@ def test_worst_claim_among_role_in_action():
     led.claims["other"] = Claim("other", "secret", ClaimKind.TEXTUAL,
                                 AssertionStrength.CATEGORICAL, {"show": 1.0})
     led.bindings["other"] = Binding("other", ("s1",), "fixture", Verdict.CONTRADICTED)
+    # record the cited spans so the bindings resolve (acl subset of clearance)
+    led.spans["s"] = Span("s", "step", "src", frozenset(), "ok", "h")
+    led.spans["s1"] = Span("s1", "step", "src", frozenset(), "secret", "h")
     d = decide(led, Action("refund", "issue_refund", BlastTier.R3, irreversibility=True))
     assert d.actuator == Actuator.ESCALATE
     assert d.driving_claim_ids == ("ghost",)
