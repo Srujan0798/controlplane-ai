@@ -1,10 +1,12 @@
 # Keep the graph focused on live code + current docs.
-# The archive is historical proposal text: it dominates BFS traversals
-# with semantically-similar nodes and drowns out the real call paths.
-archive/
+# The archives are historical proposal text: they dominate BFS traversals with
+# semantically-similar nodes and drown out the real call paths.
+_archive/
+round2/_archive/
+docs/_archive/
 graphify-out/
-posters/
-assets/
+.venv/
+.worktrees/
 *.pptx
 *.pdf
 *.bak

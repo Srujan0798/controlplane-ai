@@ -1,0 +1,1 @@
+"""Frozen demo scenario fixtures."""
