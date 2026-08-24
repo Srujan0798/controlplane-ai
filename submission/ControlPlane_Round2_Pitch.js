@@ -736,11 +736,110 @@ function notes(s, text) {
 }
 
 // =====================================================================
-// SLIDE 8 — WHY NOT
+// SLIDE 8 — DEMO: PRINCIPAL FLIP
 // =====================================================================
 {
   const s = pres.addSlide();
-  chrome(s, "07 // NOT THESE");
+  chrome(s, "07 // DEMO 04");
+  notes(s,
+    "Same span. Same claim. Same hash. Only the caller changed. analyst_01 is not entitled to the HR-comp span — the matrix says Edit. hr_partner_01 is — Pass. Zero LLM in this path. The claim did not change. The evidence did not change. The access right did. This is the incident output-only checkers cannot see, and it is the argument against RAG groundedness made concrete: groundedness sees the retrieval and says supported; it never carries who is asking, so it cannot flip on identity."
+  );
+
+  eyebrow(s, "07 · DEMO 04 / 04  ·  ENTITLEMENT FLIP  ·  python3 examples/knowledge_flip_demo.py", 1.04, 1.00, 17.9);
+  headline(s, [
+    { text: "SAME SPAN. SAME CLAIM. SAME HASH." },
+    { text: " ONLY THE CALLER CHANGED.", accent: true },
+  ], { x: 1.04, y: 1.34, w: 17.9, h: 0.62, size: 26 });
+
+  // Left pane: analyst_01 -> Edit
+  card(s, 1.04, 2.30, 8.85, 6.70, C.panel, C.rust, 1.1);
+  rustBar(s, 1.04, 2.30, 8.85);
+  s.addText("analyst_01", {
+    x: 1.36, y: 2.52, w: 8.20, h: 0.40,
+    fontFace: FONT, fontSize: 20, bold: true, color: C.cream, margin: 0,
+  });
+  s.addText("clearance {analyst}  ·  span ACL {hr-comp-l6}", {
+    x: 1.36, y: 2.96, w: 8.20, h: 0.34,
+    fontFace: FONT, fontSize: 14, color: C.muted, margin: 0,
+  });
+  s.addText("content_hash  60d00e…f8603d", {
+    x: 1.36, y: 3.46, w: 8.20, h: 0.34,
+    fontFace: FMONO, fontSize: 14, color: C.amber, margin: 0,
+  });
+  s.addText("“L6 base range is confidential HR-partner material.”", {
+    x: 1.36, y: 3.96, w: 8.20, h: 0.70,
+    fontFace: FONT, fontSize: 16, italic: true, color: C.cream, margin: 0, valign: "top",
+  });
+  s.addText("span ACL ⊄ principal clearance  →  VIOLATION", {
+    x: 1.36, y: 4.84, w: 8.20, h: 0.40,
+    fontFace: FONT, fontSize: 15, color: C.rust, bold: true, margin: 0,
+  });
+  s.addText("CELL   R1 × Contradicted / entitlement violation", {
+    x: 1.36, y: 5.34, w: 8.20, h: 0.32,
+    fontFace: FONT, fontSize: 14, color: C.warm, margin: 0,
+  });
+  s.addText("ACTUATOR", {
+    x: 1.36, y: 5.84, w: 8.20, h: 0.28,
+    fontFace: FONT, fontSize: 13, color: C.muted, charSpacing: 2, margin: 0,
+  });
+  s.addText("Edit", {
+    x: 1.36, y: 6.16, w: 8.20, h: 0.90,
+    fontFace: FONT, fontSize: 40, bold: true, color: C.cream, margin: 0,
+  });
+
+  // Right pane: hr_partner_01 -> Pass
+  card(s, 10.11, 2.30, 8.85, 6.70, C.panel, C.amber, 1.1);
+  rustBar(s, 10.11, 2.30, 8.85);
+  s.addText("hr_partner_01", {
+    x: 10.43, y: 2.52, w: 8.20, h: 0.40,
+    fontFace: FONT, fontSize: 20, bold: true, color: C.cream, margin: 0,
+  });
+  s.addText("clearance {hr-partner, hr-comp-l6}  ·  span ACL {hr-comp-l6}", {
+    x: 10.43, y: 2.96, w: 8.20, h: 0.34,
+    fontFace: FONT, fontSize: 14, color: C.muted, margin: 0,
+  });
+  s.addText("content_hash  60d00e…f8603d", {
+    x: 10.43, y: 3.46, w: 8.20, h: 0.34,
+    fontFace: FMONO, fontSize: 14, color: C.amber, margin: 0,
+  });
+  s.addText("“L6 base range is confidential HR-partner material.”", {
+    x: 10.43, y: 3.96, w: 8.20, h: 0.70,
+    fontFace: FONT, fontSize: 16, italic: true, color: C.cream, margin: 0, valign: "top",
+  });
+  s.addText("span ACL ⊆ principal clearance  →  OK", {
+    x: 10.43, y: 4.84, w: 8.20, h: 0.40,
+    fontFace: FONT, fontSize: 15, color: C.amber, bold: true, margin: 0,
+  });
+  s.addText("CELL   R1 × clean / supported", {
+    x: 10.43, y: 5.34, w: 8.20, h: 0.32,
+    fontFace: FONT, fontSize: 14, color: C.warm, margin: 0,
+  });
+  s.addText("ACTUATOR", {
+    x: 10.43, y: 5.84, w: 8.20, h: 0.28,
+    fontFace: FONT, fontSize: 13, color: C.muted, charSpacing: 2, margin: 0,
+  });
+  s.addText("Pass", {
+    x: 10.43, y: 6.16, w: 8.20, h: 0.90,
+    fontFace: FONT, fontSize: 40, bold: true, color: C.amber, margin: 0,
+  });
+
+  card(s, 1.04, 9.14, 17.92, 1.72);
+  s.addText("ZERO LLM IN THIS PATH. Set-membership on ACL ⊆ clearance.", {
+    x: 1.36, y: 9.30, w: 17.3, h: 0.40,
+    fontFace: FONT, fontSize: 18, bold: true, color: C.cream, margin: 0,
+  });
+  s.addText("The claim is the same. The evidence is the same. Only the caller changed — and the actuator flips. Groundedness sees the retrieval and says supported; it never carries who is asking, so it cannot see this.", {
+    x: 1.36, y: 9.74, w: 17.3, h: 0.90,
+    fontFace: FONT, fontSize: 15, color: C.warm, margin: 0, valign: "top",
+  });
+}
+
+// =====================================================================
+// SLIDE 9 — WHY NOT
+// =====================================================================
+{
+  const s = pres.addSlide();
+  chrome(s, "08 // NOT THESE");
   notes(s,
     "Guardrails match banned surface forms. Clause 7.2 is a well-formed sentence, so they admit it. Groundedness checkers average and cannot see who is asking, so they miss both the missing clause and the HR span. Confidence fails by definition: the failure mode is confidently wrong. The judge asks, does this look right? We ask, which span proves it? You cannot block, edit or escalate on eighty-seven."
   );
@@ -823,11 +922,11 @@ function notes(s, text) {
 }
 
 // =====================================================================
-// SLIDE 9 — MATRIX
+// SLIDE 10 — MATRIX
 // =====================================================================
 {
   const s = pres.addSlide();
-  chrome(s, "08 // MATRIX");
+  chrome(s, "09 // MATRIX");
   notes(s,
     "A hedged warranty guess on a support reply is not the same object as an ungrounded clause authorising a payment. Treat them as one score and you either over-flag the first — the plane gets switched off — or under-flag the second. Same plane. Support streams with an annotation. The copilot's partner email is edited. The refund is held and escalated. Proof still scales with consequence."
   );
@@ -1107,7 +1206,7 @@ function notes(s, text) {
 }
 
 // =====================================================================
-// SLIDE 12 — ASK / CLOSE
+// SLIDE 13 — ASK / CLOSE
 // =====================================================================
 {
   const s = pres.addSlide();

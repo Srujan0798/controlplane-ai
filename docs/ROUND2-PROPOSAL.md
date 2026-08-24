@@ -93,6 +93,7 @@ Actuators are exactly **Block · Edit · Escalate · Pass** (plus autonomy downg
 - **Edit is surgical, never generative.** Strip the unsupported or unentitled claim. Free-form rewriting produces a new unverified artifact.
 - **Escalate ships an evidence packet, not an alert:** the claim, the candidate spans, the verdict, the diff.
 - Fail stance belongs to the **tier**, not a global default: R0/R1 fail open with annotation; R2/R3 fail closed or escalate. A universal fail-open makes the plane bypassable by anyone who can induce load.
+- **Absence of a decision is not a permission.** Two silent-pass paths were closed in the prototype: a binding that cites a span the ledger never recorded cannot earn SUPPORTED (it falls to UNSUPPORTED), and an action with **no routed claims** is priced through the frozen `UNKNOWN` column instead of passing by default. Entitlement is always computed by the plane; a caller-supplied finding may raise a verdict, never clear one. No new matrix cell was added to do this (Appendix A.4).
 
 User surface: three states — **Verified / Uncertain / Blocked** — one claim-level line each. No raw scores.
 
@@ -248,7 +249,8 @@ Mapped to [ARCHITECTURE.md](ARCHITECTURE.md) §7–8. Residual risks we will say
 | **Alert fatigue / over-flag.** Over-flagging is how every guardrail gets switched off; under-flagging is liability. | §4 matrix; §8 composite score rejected | Hostile verdict, proportionate action. Identical UNSUPPORTED is Pass+annotate on R1-hedged and Escalate on R3-categorical (Appendix A). User surface is three states, never a 0–100 score. **You cannot block, edit or escalate on 87.** R0/R1 fail open with annotation so ordinary text is not held hostage. Shadow before enforce. |
 | **API-only visibility.** No weights, logits, or hidden states. Purely parametric answers have nothing to bind to. | §5 deployment; §8 model-emitted citations rejected; [QA.md](QA.md) B1 | We work at the I/O layer by design: context-assembly hook + reverse proxy. Binding is undefined without an evidence set, and we do not pretend otherwise. Ungrounded routes are *declared* ungrounded; blast radius still applies — an ungrounded answer can annotate a draft but cannot authorise a payment. Async semantic-entropy is calibration, never the token stream. *We do not claim to verify what we were never given. We claim that what we were never given cannot authorise an action.* |
 | **The plane is bypassed by load, or disabled by the team.** | §8 universal fail-open; [QA.md](QA.md) C4–C5 | Fail stance belongs to the tier. The plane is a single point of failure only for dangerous actions. Hard gate is on actions, not text; R0/R1 — the majority of volume — pass with annotation. Enforcement earned per route. |
-| **We enforce a wrong ACL perfectly.** | [QA.md](QA.md) B4 | We do not invent access rights and we do not fix IAM. We stop the model silently bypassing the rights the source already carries, and we log principal × source on every entitlement decision so the over-permissioned index becomes visible. |
+| **The gate is bypassed by malformed input rather than load.** A binding that cites a span nobody recorded, an action whose ID does not match any routed claim — the cheapest attack is not defeating the verdict, it is arranging for no verdict to exist. | §2.3; Appendix A.4 | **Closed, and stated plainly as a strengthening.** The gate now fails closed on **unresolvable spans** (a binding citing an absent span earns UNSUPPORTED, and an ACL we cannot evaluate is recorded as violated, not skipped) and on **actions with no routed claims** (priced through the frozen `UNKNOWN` column: R0 Pass, R1 annotate, R2/R3 Escalate). A typo in an action ID can no longer commit the irreversible refund. Locked by 9 regression tests in `tests/test_fail_closed.py`; matrix cell count unchanged. |
+| **We enforce a wrong ACL perfectly.** | [QA.md](QA.md) B4 | We do not invent access rights and we do not fix IAM. We stop the model silently bypassing the rights the source already carries, and we log principal × source on every entitlement decision so the over-permissioned index becomes visible. Entitlement is **always computed by the plane**: a caller may supply a finding that raises a verdict, never one that clears a violation the plane computed itself. |
 | **Prompt injection makes a false claim “bind.”** | [QA.md](QA.md) B5 | Binding is computed by us, not asserted by the model. Injection can change what the model says; it cannot change which spans were captured, nor the entailment verdict, nor the ACL. The attack that does work is poisoning a source document — a supply-chain attack on the corpus, forensically traceable via source ID and content hash. *We defend the claim-to-evidence link, not the truth of the evidence.* |
 | **Speculative release with post-hoc recall.** | §8 | Rejected. Hold-back buffer (~150–300 ms trailing delay). Failures inside the buffer never reach the user. No liability gap. |
 | **Integration cost discovered after a “drop-in” sale.** | [QA.md](QA.md) C2; [NARRATIVE.md](NARRATIVE.md) §5 | Said out loud: one SDK hook plus a proxy; days, not quarters, on a standard retrieval stack; not zero. The integration cost is the moat. |
@@ -267,6 +269,7 @@ Stated so they can be attacked directly.
 4. **Tens of thousands of interactions per week** across three concurrent use cases (support, copilot, decision-support), with 80–90% at R0/R1. Directional, from the Round 2 brief, not a measured production trace.
 5. **Caller identity is available at request time.** Entitlement is set-membership against `principal.clearance`. If the host application cannot name the principal, the entitlement axis degrades and we will say so rather than fake an ACL.
 6. **The prototype is fixtures-and-Lane-1.** Claims in the demos are authored, not extracted by a 1–3B model. Binding is exact/fixture lookup, not NLI. That is sufficient to prove the keystone and the matrix; it is not a production claim extractor.
+7. **A missing decision is treated as a refusal, not a permission.** We assume no upstream component is trustworthy enough to earn a pass by omission. If a binding cites a span the ledger never recorded, the claim is UNSUPPORTED and its ACL is recorded as violated rather than skipped; if an action carries no routed claims, it is priced through the frozen `UNKNOWN` column rather than passing. This is stated as an assumption because it has a cost we accept: a genuinely harmless action that our fixtures fail to route will be annotated or escalated rather than waved through. We would rather explain a held action than a committed one. Locked by `tests/test_fail_closed.py` (Appendix A.4).
 
 ---
 
@@ -381,6 +384,26 @@ Locked by `tests/test_multi_usecase.py`.
 | Refund dual-action + three-use-case fixtures | Multi-turn session store, geographic policy packs, PII NER model |
 
 No LLM and no network on the critical path. That is a fidelity choice, not a missing detector: Lane 1 is where 80–90% of volume and all of R3 entitlement/interlock already live.
+
+### A.4 Fail-closed regressions (three silent-pass paths closed)
+
+```bash
+pytest -q tests/test_fail_closed.py
+```
+
+Three paths could previously let an action reach **Pass** without a verdict. All three now fail closed, and the frozen matrix was not widened to do it:
+
+| Path | Old behaviour | Now |
+|---|---|---|
+| A binding cites a span the ledger never recorded | earned **SUPPORTED** on an asserted citation | **UNSUPPORTED** (`fixture-unresolved`) — a binding may only cite spans this ledger recorded |
+| The same unresolvable span in the entitlement audit | audit **skipped**, which reads as “not violated” | recorded as **violated** (`UNRESOLVABLE_SPAN`) — an ACL we cannot evaluate is not one we may ignore |
+| An action with **no routed claims** (e.g. a typo'd action ID) | empty matrix column, actuator **Pass** | routed through the frozen `UNKNOWN` column: R0 Pass, R1 annotate, **R2/R3 Escalate** with an evidence packet |
+
+Also closed: a caller-supplied `findings` map (including an empty one) can no longer disable entitlement. Supplied findings may raise a verdict; they cannot clear one the plane computed.
+
+**Observed:** 9 regression tests pass; the typo'd R3 refund is **held and escalated** rather than committed; the dual-action refund is unchanged (`show_text` → Edit, `issue_refund` → Escalate, both independent); `verify_chain() = True`; matrix cell count unchanged. Gate latency is unmoved — see `submission/latency_bench.json` (p50 **0.074 ms**, p95 **0.134 ms** gate-internal, against a **≤40 ms p50 / ≤200 ms p95** budget; never quote 40 ms as p95).
+
+This is a strengthening, not a workaround: the plane's claim is that an unproven action cannot commit, and these were the three ways an action could avoid being proven at all.
 
 ---
 

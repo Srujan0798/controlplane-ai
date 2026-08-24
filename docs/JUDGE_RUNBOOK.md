@@ -38,6 +38,12 @@ Health check: `GET /healthz` → `{"ok": true, ...}`.
    - `issue_refund` → **Escalate** (R3 — clause 7.2 is **absent**; money held with evidence packet)
 4. **Never say “blocked.”** Say *held and escalated with the evidence packet.*
 5. **Show receipts:** matrix cell + driving claims on screen, or download `GET /v1/controlplane/requests/{id}/audit.jsonl`.
+5b. **Optional principal flip (10s) — proves entitlement is identity, not text:**
+   ```bash
+   curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=analyst_01'   # → Edit
+   curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=hr_partner_01' # → Pass
+   ```
+   Same span, same claim, same `content_hash`. Only the caller changed. Zero LLM. This is the argument against RAG groundedness — point at it running.
 6. **Optional OpenAI shape (10s):**
    ```bash
    curl -s http://127.0.0.1:8787/v1/chat/completions \
@@ -57,7 +63,7 @@ Health check: `GET /healthz` → `{"ok": true, ...}`.
 | Console blank / 500 | Confirm `controlplane/server/static/index.html` exists; restart uvicorn. |
 | `ok: false` / connection refused | `curl /healthz`; rebuild compose; `pip install -e ".[dev]"`. |
 | Wrong actuators / weird metrics | `POST /v1/controlplane/metrics/reset`, re-run refund enforce. Determinism: five runs → same Edit+Escalate (`make test`). |
-| Demo path returns 400 unknown scenario | Only `refund`, `support`, `copilot`, `decision` (and aliases). Typo → 400 by design. |
+| Demo path returns 400 unknown scenario | Only `refund`, `support`, `copilot`, `decision`, `flip` (and aliases). Typo → 400 by design. |
 | Judge asks for “live LLM” | Lane 1 is **deterministic only** — canned fixtures are the proof. Upstream is stubbed. |
 | Panic | `make judge` prints this path + the uvicorn tip; re-read the Never-say list below. |
 

@@ -184,6 +184,31 @@ class ControlPlaneGate:
     def run_refund_demo(self, mode_override: str | None = None) -> GateResult:
         return self._rerun_refund(mode_override=mode_override)
 
+    def run_flip_demo(
+        self,
+        principal_id: str = "analyst_01",
+        mode_override: str | None = None,
+    ) -> GateResult:
+        """Principal-flip demo: same HR-COMP-L6 span + claim, caller decides actuator.
+
+        analyst_01 is not entitled -> R1 x entitlement violation -> Edit.
+        hr_partner_01 is entitled -> R1 clean/supported -> Pass.
+        Routes through the real bind -> entitle -> interlock path (zero LLM).
+        """
+        from controlplane.scenarios.flip import build_flip
+
+        ledger, claims, actions, fixture_map = build_flip(principal_id)
+        return self.run_prepared(
+            use_case="flip",
+            ledger=ledger,
+            claims=claims,
+            actions=actions,
+            fixture_map=fixture_map,
+            mode_override=mode_override,
+            labeled_should_hold=None,
+            ungated_text=None,
+        )
+
     def _rerun_refund(self, mode_override: str | None = None) -> GateResult:
         from controlplane.scenarios.refund import UNGATED_RESPONSE
         from controlplane.models import (

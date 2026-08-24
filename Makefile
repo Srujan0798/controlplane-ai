@@ -4,7 +4,7 @@ test:
 	pytest -q
 
 bench:
-	python3 scripts/load_bench.py -n 200
+	CONTROLPLANE_RPM=100000 python3 scripts/load_bench.py -n 200
 
 run:
 	uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787

@@ -51,6 +51,19 @@ _DEFAULT_PACKS: dict[str, dict[str, Any]] = {
             "issue_refund": {"tier": "R3", "irreversibility": True},
         },
     },
+    "flip": {
+        "policy_version": "pack-flip-v1",
+        "use_case": "flip",
+        "description": "Principal-flip demo — same HR-COMP-L6 span, same claim, caller decides actuator",
+        "default_tier": "R1",
+        "mode": "enforce",
+        "latency_budget_ms_p50": 40,
+        "latency_budget_ms_p95": 200,
+        "fail_stance": "closed_escalate",
+        "actions": {
+            "show_text": {"tier": "R1", "irreversibility": False},
+        },
+    },
 }
 
 

@@ -398,8 +398,9 @@ def create_app(
         scenario: str,
         mode: str | None = None,
         session_id: str | None = None,
+        principal: str | None = None,
     ) -> dict[str, Any]:
-        result = _run_scenario(gate, scenario, mode_override=mode)
+        result = _run_scenario(gate, scenario, mode_override=mode, principal_id=principal)
         pub = result.public_dict()
         _after_gate(pub)
         _attach_session(session_id, pub)
@@ -503,10 +504,20 @@ def _infer_scenario(messages: list[ChatMessage]) -> str | None:
     return None
 
 
-def _run_scenario(gate: ControlPlaneGate, scenario: str, mode_override: str | None):
+def _run_scenario(
+    gate: ControlPlaneGate,
+    scenario: str,
+    mode_override: str | None,
+    principal_id: str | None = None,
+):
     scenario = scenario.lower().strip()
     if scenario in {"refund", "decision-support", "decision"}:
         return gate.run_refund_demo(mode_override=mode_override or "enforce")
+    if scenario == "flip":
+        return gate.run_flip_demo(
+            principal_id=principal_id or "analyst_01",
+            mode_override=mode_override or "enforce",
+        )
     if scenario in {"support", "customer-support"}:
         return _wrap_multi(gate, "customer-support", run_customer_support, mode_override)
     if scenario in {"copilot", "internal-copilot"}:
