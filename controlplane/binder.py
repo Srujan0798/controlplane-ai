@@ -25,9 +25,20 @@ def bind_claims(
         elif claim.claim_id in fixture_map:
             span_ids = fixture_map[claim.claim_id]
             if span_ids:
-                binding = Binding(
-                    claim.claim_id, tuple(span_ids), "fixture", Verdict.SUPPORTED
+                unresolved = tuple(
+                    sid for sid in span_ids if sid not in ledger.spans
                 )
+                if unresolved:
+                    # A binding may only cite spans this ledger actually recorded.
+                    # Citing an absent span is an asserted binding, not a computed
+                    # one, so it earns nothing: fail closed to UNSUPPORTED.
+                    binding = Binding(
+                        claim.claim_id, (), "fixture-unresolved", Verdict.UNSUPPORTED
+                    )
+                else:
+                    binding = Binding(
+                        claim.claim_id, tuple(span_ids), "fixture", Verdict.SUPPORTED
+                    )
             else:
                 binding = Binding(
                     claim.claim_id, (), "fixture", Verdict.UNSUPPORTED

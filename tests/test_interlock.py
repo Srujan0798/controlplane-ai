@@ -13,12 +13,26 @@ from controlplane.models import (
     EntitlementFinding,
     EvidencePacket,
     Principal,
+    Span,
     Verdict,
 )
 
 
 def _led():
     return EvidenceLedger.begin("r", Principal(id="u", clearance=frozenset()), "x")
+
+
+def _span(led, span_id, acl=frozenset()):
+    """Record a real span. A binding may only cite spans the ledger holds."""
+    led.spans[span_id] = Span(
+        span_id=span_id,
+        step_id="step-1",
+        source_id="SRC",
+        acl=frozenset(acl),
+        content="evidence",
+        content_hash="0" * 64,
+    )
+    return span_id
 
 
 def test_r3_unsupported_categorical_escalates():
@@ -93,6 +107,7 @@ def test_supported_not_violated_is_pass():
         AssertionStrength.CATEGORICAL,
         {"show": 1.0},
     )
+    _span(led, "s1")
     led.bindings["c"] = Binding("c", ("s1",), "fixture", Verdict.SUPPORTED)
     d = decide(led, Action("show", "show_text", BlastTier.R3))
     assert d.actuator == Actuator.PASS
@@ -107,6 +122,7 @@ def test_worst_claim_among_role_in_action():
         AssertionStrength.CATEGORICAL,
         {"refund": 1.0},
     )
+    _span(led, "s")
     led.bindings["ok"] = Binding("ok", ("s",), "fixture", Verdict.SUPPORTED)
     led.claims["ghost"] = Claim(
         "ghost",
@@ -123,6 +139,7 @@ def test_worst_claim_among_role_in_action():
         AssertionStrength.CATEGORICAL,
         {"show": 1.0},
     )
+    _span(led, "s1")
     led.bindings["other"] = Binding("other", ("s1",), "fixture", Verdict.CONTRADICTED)
     d = decide(led, Action("refund", "issue_refund", BlastTier.R3, irreversibility=True))
     assert d.actuator == Actuator.ESCALATE
