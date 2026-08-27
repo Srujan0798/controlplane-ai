@@ -85,6 +85,7 @@ SEBI/
 |---|---|
 | Judges / submit | `round2/CONTROLPLANE_R2_FINAL.md` + live console + `submission/` |
 | Pitch morning-of | `round2/R2S5.md` + `docs/JUDGE_RUNBOOK.md` |
+| Hostile Q&A (room defense) | [`docs/HOSTILE_QA_DRILL.md`](docs/HOSTILE_QA_DRILL.md) · depth: `docs/QA.md` |
 | Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` |
 | Absolute truth (internal) | `docs/ARCHITECTURE.md`, `NARRATIVE.md`, `QA.md` |
 | Agent workers (next tasks) | [`docs/AGENT_PROMPTS.md`](docs/AGENT_PROMPTS.md) · gaps: `docs/PRIZE_WIN_MATRIX.md` |

@@ -4,6 +4,8 @@ ControlPlane.ai · Accenture Innovation Challenge Round 2 · Team ControlPlane
 
 Use this sheet at the stand. Do not improvise latency or hallucination claims.
 
+Hostile room defense (one-liners + live curls): [HOSTILE_QA_DRILL.md](HOSTILE_QA_DRILL.md).
+
 ---
 
 ## Ports
@@ -89,7 +91,7 @@ make bench         # optional; refreshes submission/latency_bench.json
 | One accuracy number across failure modes | Per-route measured % caught / % missed at 40 ms **p50**. |
 | monitor · detect · observe · trust score · “AI safety” as virtue | authorise · admit · prove · bind · hold · escalate · gate |
 
-Full hostile Q&A: [QA.md](QA.md). Architecture freezes: [ARCHITECTURE.md](ARCHITECTURE.md) §5, §10.
+Full hostile Q&A: [QA.md](QA.md). Drill sheet (one-liners + curls): [HOSTILE_QA_DRILL.md](HOSTILE_QA_DRILL.md). Architecture freezes: [ARCHITECTURE.md](ARCHITECTURE.md) §5, §10.
 
 ---
 
