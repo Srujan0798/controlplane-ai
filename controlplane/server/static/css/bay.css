@@ -196,6 +196,27 @@ p.lede {
 }
 p.lede { font-size: 14px; max-width: 62ch; margin-bottom: 22px; }
 
+.desk-law {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--orange);
+  background: var(--bay-raised);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--strip);
+}
+.desk-law strong { color: var(--orange); font-weight: 700; }
+.desk-law em { font-style: normal; font-weight: 600; color: var(--strip); }
+.desk-law .mono { font-size: 11px; }
+.lat-truth {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--strip-mute);
+}
+
 .field { display: grid; gap: 6px; }
 .field span,
 .kicker {
@@ -1135,6 +1156,9 @@ body.projector .proj-toggle { font-size: 12px; padding: 5px 10px; }
 body.projector .desk h1 { font-size: 28px; }
 body.projector .page h1 { font-size: 34px; }
 body.projector .desk p.lede { font-size: 16px; max-width: 40ch; }
+body.projector .desk-law { font-size: 15px; padding: 12px 14px; }
+body.projector .desk-law .mono { font-size: 13px; }
+body.projector .lat-truth { font-size: 12px; }
 body.projector p.lede { font-size: 17px; }
 body.projector .field span,
 body.projector .kicker,

@@ -41,7 +41,12 @@
     <div class="workspace">
       <aside class="desk">
         <h1>Clearance bay</h1>
-        <p class="lede">Run a gate. Pending actions arrive as strips. Claims must earn their flap.</p>
+        <p class="lede">Admission-control layer for AI that acts. Pending actions arrive as strips. Claims must earn their flap.</p>
+        <p class="desk-law" role="note">
+          <strong>Clause 7.2 does not exist.</strong>
+          Absence → <span class="mono">UNSUPPORTED</span> → Escalate.
+          Refund is <em>held and escalated with the evidence packet</em> — never “blocked.”
+        </p>
 
         <label class="field">
           <span>Traffic</span>
@@ -75,6 +80,7 @@
           <div class="meter"><b id="mFnr">—</b><small>Labeled FNR</small></div>
           <div class="meter"><b id="mLat">—</b><small>Last ms</small></div>
         </div>
+        <p class="lat-truth">Targets ≤40ms p50 / ≤200ms p95 · measured gate p50≈0.074 / p95≈0.134 · Last ms is this run</p>
       </aside>
 
       <main class="bay" id="bay" aria-live="polite">
@@ -91,7 +97,7 @@
         </div>
 
         <div class="strips" id="strips">
-          <div class="strip empty">Awaiting clearance. Press Admit.</div>
+          <div class="strip empty">Awaiting clearance. Press Admit — refund proves Edit + Escalate (held with packet, not blocked).</div>
         </div>
 
         <div class="compare" id="compare" role="region" aria-label="Ungated versus gated"></div>
@@ -243,9 +249,9 @@
         ? Bay.markClause(ungated)
         : `No ungated emit on this fixture`;
       const holdLine = hold
-        ? `<div class="hold">HOLD. Irreversible action not released.</div>`
+        ? `<div class="hold">Held and escalated with the evidence packet. Irreversible action not released.</div>`
         : wouldHold
-          ? `<div class="hold">Would hold (shadow) — counterfactual only.</div>`
+          ? `<div class="hold">Would hold (shadow) — counterfactual only. Not “blocked.”</div>`
           : `<div>Downstream may proceed</div>`;
       card.classList.add("show");
       card.innerHTML = `
@@ -256,7 +262,7 @@
         <div class="compare-pane">
           <div class="k">After ControlPlane${stripped ? " · clause 7.2 stripped" : ""}</div>
           <div class="text">${gated ? Bay.markClause(gated) : "—"}</div>
-          ${stripped ? `<div class="stripped">Clause 7.2 does not exist. Phrase removed.</div>` : ""}
+          ${stripped ? `<div class="stripped">Clause 7.2 does not exist. Phrase removed — absence, not conflict.</div>` : ""}
           ${holdLine}
         </div>
         <div class="compare-links">
@@ -375,7 +381,7 @@
     }
 
     function clearBay() {
-      $("strips").innerHTML = `<div class="strip empty">Awaiting clearance. Press Admit.</div>`;
+      $("strips").innerHTML = `<div class="strip empty">Awaiting clearance. Press Admit — refund proves Edit + Escalate (held with packet, not blocked).</div>`;
       $("compare").classList.remove("show");
       $("compare").innerHTML = "";
       const packet = $("packet");

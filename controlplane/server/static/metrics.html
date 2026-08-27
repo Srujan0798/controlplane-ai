@@ -32,11 +32,11 @@
 
     <main class="page" id="main">
       <h1>FNR cockpit</h1>
-      <p class="lede">Not a vanity dashboard. The publishable claim is the miss rate — empty until labels arrive. That emptiness is the credibility play. Never quote 40ms as p95.</p>
+      <p class="lede">Not a vanity dashboard. The publishable claim is the miss rate — empty until labels arrive. That emptiness is the credibility play. Latency targets ≤40ms p50 / ≤200ms p95; measured gate p50≈0.074 / p95≈0.134 — never quote 40ms as p95.</p>
 
       <div class="claim-shape">
-        <p id="claimShape">On this route we catch &lt;measured&gt;% of ungrounded claims at 40ms p50 — and here is the &lt;measured&gt;% we don't.</p>
-        <small>Labeled FNR is n/a until the adjudicator (Lane 3) marks ground truth. Would-hold is the shadow counterfactual, not a true-positive count.</small>
+        <p id="claimShape">On this route we catch &lt;measured&gt;% of ungrounded claims at ≤40ms p50 — and here is the &lt;measured&gt;% we don't.</p>
+        <small>Labeled FNR is n/a until the adjudicator (Lane 3) marks ground truth. Would-hold is the shadow counterfactual, not a true-positive count. Gate bench: submission/latency_bench.json.</small>
       </div>
 
       <div class="meter-row four" aria-live="polite">
