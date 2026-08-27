@@ -3,8 +3,9 @@
 **Accenture Innovation Challenge 2026 · Problem Track 1 · Team ControlPlane**  
 Choda Srujan Sai · Dhrithika — IIT Gandhinagar
 
-Speaker-ready. 12 slides. ~8–10 minutes if spoken as written. PPTX rendering is a later pass.
+Speaker-ready. 12 slides. ~8–10 minutes if spoken as written. Live stand script: [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md).
 
+> **Speak-from canon:** [round2/R2S5.md](../round2/R2S5.md). This file is the slide outline; R2S5 is the demo spine.  
 > Companion to the frozen system of record: [ARCHITECTURE.md](ARCHITECTURE.md).  
 > Spoken lines: [NARRATIVE.md](NARRATIVE.md) §7. Business case: [ROUND2-PROPOSAL.md](ROUND2-PROPOSAL.md).  
 > Hostile Q&A: [QA.md](QA.md). Prototype: `python3 examples/refund_trace_demo.py` and `python3 examples/multi_usecase_demo.py`.
@@ -12,6 +13,8 @@ Speaker-ready. 12 slides. ~8–10 minutes if spoken as written. PPTX rendering i
 This file is a rendering. It does not reopen architecture.
 
 **One trace, start to close.** The ₹1,84,000 refund is the hook, the mechanism, the matrix and the last line. Do not cycle through three shallow scenarios.
+
+**Live cold open (R2S5):** room machine boots on the held R3 panel (`HELD — ESCALATE` · `executed: false`), not a title slide. Deck slide 1 is optional chrome for remote/PDF; in the room, open on the gate.
 
 **Script discipline** ([NARRATIVE.md](NARRATIVE.md) §7): every spoken line names a claim, a graph, an action or a measurement — or it is cut.
 
@@ -460,7 +463,8 @@ Three quantities the graph makes exact (no catch-rate, no savings %):
 | **2 Enforce R2** | weeks 12–20 | Reversible writes / external sends. Autonomy downgrade. |
 | **3 FNR + loops** | from week 16 | Per-route FNR with CI; override capture; geographic packs as DAG *content* |
 
-Latency **targets**: **≤40 ms p50 / ≤200 ms p95** added on R0/R1 text. Never quote 40 as p95.
+Latency **targets**: **≤40 ms p50 / ≤200 ms p95** added on R0/R1 text. Never quote 40 as p95.  
+**Measured** gate (`submission/latency_bench.json`, n=200): p50≈**0.074 ms**, p95≈**0.134 ms** — under target; still quote targets vs measured separately.
 
 We do **not** eliminate hallucinations. We do **not** claim drop-in. We do **not** claim zero added latency: **we never make the model feel slow; we make the action wait.** The integration cost is the moat.
 
@@ -476,12 +480,12 @@ We do **not** eliminate hallucinations. We do **not** claim drop-in. We do **not
 
 - A fabricated catch rate, payback period, or "we save X% of tokens" ([ARCHITECTURE.md](ARCHITECTURE.md) §10.7; [QA.md](QA.md) D2).
 - "zero integration / drop it in" or "zero added latency" ([NARRATIVE.md](NARRATIVE.md) §5).
-- Quote 40 ms as p95 ([ARCHITECTURE.md](ARCHITECTURE.md) §5, §10.6).
+- Quote 40 ms as p95 ([ARCHITECTURE.md](ARCHITECTURE.md) §5, §10.6). Measured ≠ target; never round measured up to 40 and call it p95.
 
 ### Backing
 
 - Volume, mix, three quantities, phases: [ROUND2-PROPOSAL.md](ROUND2-PROPOSAL.md) §4–5.
-- Latency, shadow default, deployment shape: [ARCHITECTURE.md](ARCHITECTURE.md) §5.
+- Latency targets + measured bench: [ARCHITECTURE.md](ARCHITECTURE.md) §5; `submission/latency_bench.json`.
 - Refuse-to-claim list (about *us*): [NARRATIVE.md](NARRATIVE.md) §5; [ARCHITECTURE.md](ARCHITECTURE.md) §10.8.
 - Prototype dead compute on this fixture: `faq_search` and `crm_lookup` ground no accepted claim (`examples/refund_trace_demo.py`; [ROUND2-PROPOSAL.md](ROUND2-PROPOSAL.md) Appendix A.1). Do not quote ARCHITECTURE §9's "9 tool calls, 4 dead" as this slice — that is the narrative example, not the running prototype.
 
@@ -589,7 +593,7 @@ From [ARCHITECTURE.md](ARCHITECTURE.md) §10 and [NARRATIVE.md](NARRATIVE.md) §
 3. The **company** wrongly paid ₹1,84,000. The customer did not lose it.
 4. The matrix is **transcribed, never redrawn**.
 5. Actuators are exactly **Block · Edit · Escalate · Pass**.
-6. Latency is **≤40 ms p50 / ≤200 ms p95**. Never quote 40 as p95.
+6. Latency **targets** are **≤40 ms p50 / ≤200 ms p95**. Measured gate ≈0.074 / 0.134 ms (`latency_bench.json`). Never quote 40 as p95.
 7. Gate report ships **empty**. Do not invent FNR / catch-rate / savings %.
 8. Refuse-to-claim list is about **us**, not competitors.
 9. **Do not drop bias.** Measurement terms only: counterfactual flip rate, route-level, async.
@@ -631,7 +635,7 @@ Step 2 of this task. If a line cannot be pointed at, it is not on a slide.
 | 10 | ~40k/week directional; 80–90% R0/R1 | [ROUND2-PROPOSAL.md](ROUND2-PROPOSAL.md) §4; [ARCHITECTURE.md](ARCHITECTURE.md) §5.7 |
 | 10 | Three cashable quantities; no savings % | [ROUND2-PROPOSAL.md](ROUND2-PROPOSAL.md) §4.1; [QA.md](QA.md) D2 |
 | 10 | Phases 0–3 | [ROUND2-PROPOSAL.md](ROUND2-PROPOSAL.md) §5 |
-| 10 | ≤40 ms p50 / ≤200 ms p95 **targets** | [ARCHITECTURE.md](ARCHITECTURE.md) §5, §10.6 |
+| 10 | ≤40 ms p50 / ≤200 ms p95 **targets**; measured ≈0.074 / 0.134 ms | [ARCHITECTURE.md](ARCHITECTURE.md) §5, §10.6; `submission/latency_bench.json` |
 | 10 | Four refusals | [NARRATIVE.md](NARRATIVE.md) §5 |
 | 11 | Empty FNR schema | [ROUND2-PROPOSAL.md](ROUND2-PROPOSAL.md) §5; [ARCHITECTURE.md](ARCHITECTURE.md) §10.7 |
 | 11 | "We publish our own miss rate…" | [NARRATIVE.md](NARRATIVE.md) §7 |
@@ -646,12 +650,20 @@ Prototype claims on slides 5–7 and 9 were re-read from live demo output for th
 
 ## Demo cues (if a laptop is in the room)
 
+Align with R2S5 demo spine + [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md). Prefer the live console (held panel cold open); CLI is the backup.
+
 ```bash
+# Preferred: console refund · enforce → dual Edit + Escalate on one ledger
+# curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce' | python3 -m json.tool
+
 python3 examples/refund_trace_demo.py
-# Beat 1: clause_72 UNSUPPORTED, spans=(none)
+# Beat 1: clause_72 UNSUPPORTED, spans=(none) — clause 7.2 does not exist
 # Beat 2: show_text → Edit  (R1 × entitlement)
 # Beat 3: issue_refund → Escalate  (R3 × unsupported-categorical)
-# never “blocked”; verify_chain() = True
+# never “blocked”; held and escalated with the evidence packet; verify_chain() = True
+
+python3 examples/knowledge_flip_demo.py
+# analyst_01 → Edit; hr_partner_01 → Pass; same span / claim / hash
 
 python3 examples/multi_usecase_demo.py
 # show_reply           → Pass + annotate
