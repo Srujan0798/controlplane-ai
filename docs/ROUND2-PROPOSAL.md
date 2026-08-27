@@ -7,7 +7,32 @@ Choda Srujan Sai · Dhrithika — IIT Gandhinagar
 > Positioning: [NARRATIVE.md](NARRATIVE.md). Hostile Q&A: [QA.md](QA.md).  
 > Prototype: `python3 examples/refund_trace_demo.py` and `python3 examples/multi_usecase_demo.py`.
 
-This document is the Round 2 business proposal. It cites the architecture; it does not reopen it.
+This document is the Round 2 business proposal. It cites the architecture; it does not reopen it.  
+Business-proposal truth source: [`round2/CONTROLPLANE_R2_FINAL.md`](../round2/CONTROLPLANE_R2_FINAL.md). Branch of record: **`main`**.
+
+---
+
+## Stage Check (compact)
+
+| Stage | Locked into | Status |
+|---|---|---|
+| **R2S1** prototype scope | §§1–4 | **PASS** |
+| **R2S2** enterprise envelope | §5 | **PASS** |
+| **R2S3** build/demo | §6 | **PASS** |
+| **R2S4** buyers/value/rollout | §§7–11 | **PASS** |
+
+| # | Eternal invariant | Status |
+|---|---|---|
+| 1 | Default = `UNSUPPORTED` | **PASS** |
+| 2 | Entitlement = `span.acl ⊆ principal.clearance`; zero LLM | **PASS** |
+| 3 | Exact R×S matrix; never redrawn; no route parameter | **PASS** |
+| 4 | One graph: `STEP → SPAN → CLAIM → ACTION` | **PASS** |
+| 5 | Hard gate on **actions**, not tokens | **PASS** |
+| 6 | Dual-action: R1 **Edit** + R3 **Escalate** (**held**, never “blocked”) | **PASS** |
+| 7 | `UNKNOWN` never → `SUPPORTED` | **PASS** |
+| 8 | FNR as typed format; empty until earned | **PASS** |
+| 9 | Bias = async route-level only (never live matrix cell) | **PASS** |
+| 10 | Refuse-to-claim list (about *us*) | **PASS** |
 
 ---
 
@@ -86,16 +111,16 @@ Two inputs govern every decision: **blast radius R** (what this response can bre
 | **R1** | Edit | Edit | Pass + annotate | Pass + annotate |
 | **R0** | Pass + annotate | Pass + annotate | Pass | Pass |
 
-**The verdict is hostile; the action is proportionate.** A claim must earn SUPPORTED, but merely failing to earn it only blocks where the blast radius justifies blocking. That is the over/under-flag tradeoff, encoded rather than “tuned away.”
+**The verdict is hostile; the action is proportionate.** A claim must earn SUPPORTED; failing to earn it maps to the frozen cell for that pending action — Pass / Pass + annotate / Edit / Escalate / Block — never a single response-level “blocked.” That is the over/under-flag tradeoff, encoded rather than “tuned away.”
 
-Actuators are exactly **Block · Edit · Escalate · Pass** (plus autonomy downgrade and circuit breaker, spoken not drawn):
+Actuators are exactly **Block · Edit · Escalate · Pass / Pass + annotate** (plus autonomy downgrade and circuit breaker, spoken not drawn). Forbidden inventions: `STREAM`, `Kill Span`, `Hold & Re-verify`, `Redact & Flag`, `COMMIT BLOCKED` as the R3 unsupported-categorical label.
 
 - **Edit is surgical, never generative.** Strip the unsupported or unentitled claim. Free-form rewriting produces a new unverified artifact.
-- **Escalate ships an evidence packet, not an alert:** the claim, the candidate spans, the verdict, the diff.
+- **Escalate ships an evidence packet, not an alert:** the claim, the candidate spans, the verdict, the diff. Dual-action centrepiece: R1 **Edit** + R3 **Escalate** — refund is **held**, never “blocked.”
 - Fail stance belongs to the **tier**, not a global default: R0/R1 fail open with annotation; R2/R3 fail closed or escalate. A universal fail-open makes the plane bypassable by anyone who can induce load.
 - **Absence of a decision is not a permission.** Two silent-pass paths were closed in the prototype: a binding that cites a span the ledger never recorded cannot earn SUPPORTED (it falls to UNSUPPORTED), and an action with **no routed claims** is priced through the frozen `UNKNOWN` column instead of passing by default. Entitlement is always computed by the plane; a caller-supplied finding may raise a verdict, never clear one. No new matrix cell was added to do this (Appendix A.4).
 
-User surface: three states — **Verified / Uncertain / Blocked** — one claim-level line each. No raw scores.
+User surface: three states — **Verified / Uncertain / Blocked** — one claim-level line each. No raw scores. Refund action surface remains **Held / Escalate**, not “blocked.”
 
 ### 2.4 Latency and deployment shape
 
@@ -411,7 +436,7 @@ This is a strengthening, not a workaround: the plane's claim is that an unproven
 
 ## Appendix B — Live control plane (production elevation)
 
-The core mechanism is no longer CLI-only. On branch `feature/round2-controlplane`:
+The core mechanism is no longer CLI-only. On branch **`main`**:
 
 ```bash
 uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787
