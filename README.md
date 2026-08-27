@@ -88,6 +88,7 @@ SEBI/
 | Hostile Q&A (room defense) | [`docs/HOSTILE_QA_DRILL.md`](docs/HOSTILE_QA_DRILL.md) · depth: `docs/QA.md` |
 | Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` |
 | Absolute truth (internal) | `docs/ARCHITECTURE.md`, `NARRATIVE.md`, `QA.md` |
+| Event day / packaging | [`docs/EVENT_DAY_CHECKLIST.md`](docs/EVENT_DAY_CHECKLIST.md) |
 | Agent workers (next tasks) | [`docs/AGENT_PROMPTS.md`](docs/AGENT_PROMPTS.md) · gaps: `docs/PRIZE_WIN_MATRIX.md` |
 | License / attribution | [`LICENSE`](LICENSE) (MIT · Team ControlPlane · 2026) |
 | Do **not** present | `round2/_archive/`, `docs/_archive/`, agent scratch, graphify cache |

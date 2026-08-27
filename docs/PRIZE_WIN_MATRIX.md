@@ -60,7 +60,7 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 40. Printable one-pager from console — GAP
 41. Demo “reset room” button — DONE
 42. Side-by-side ungated vs gated text — DONE
-43. Soundless “flap” polish + microcopy — PARTIAL (flap UI shipped; content-law polish still open for Agent 6)
+43. Soundless “flap” polish + microcopy — DONE (flap UI + content-law polish `06d6115`)
 44. Brand consistency with pitch deck — PARTIAL (Agent 2: R2S5 ↔ deck ↔ console)
 45. Favicon / OG meta for screenshare — PARTIAL (favicon.svg + theme-color; no Open Graph tags)
 
@@ -138,8 +138,8 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 
 ## G. Product craft & differentiation signals
 
-106. Category noun consistency (admission-control layer) — PARTIAL (docs strong; console polish → Agent 6)
-107. Visible content laws in UI (7.2 does not exist) — PARTIAL (present on architecture/matrix/runbook/compare; Agent 6 polish)
+106. Category noun consistency (admission-control layer) — DONE (docs + console `06d6115`)
+107. Visible content laws in UI (7.2 does not exist) — DONE (Clearance first viewport desk-law + architecture/matrix/runbook)
 108. No fake customer logos — DONE
 109. No fake FNR % without labels — DONE
 110. Latency never claimed as p95=40ms — DONE (bench publishes measured gate/wall; targets stated separately)
@@ -171,7 +171,7 @@ Ordered by room impact (highest first). Max 15. Do not invent FNR %, logos, or `
 1. **Pitch fidelity lock** — DONE (`round2/R2S5.md` ↔ deck ↔ `docs/JUDGE_RUNBOOK.md`; held≠blocked, 7.2 absence, dual Edit+Escalate, latency honesty).
 2. **Hostile Q&A drill** — DONE (`docs/HOSTILE_QA_DRILL.md` with live click/curl proofs; linked from runbook/README).
 3. **Event-day checklist** — DONE (`docs/EVENT_DAY_CHECKLIST.md`: backup laptop, USB/airgap, ports, panic recovery).
-4. **Console content-law microcopy** — PARTIAL / in progress (Agent 6 owns `controlplane/server/static/`; admission-control noun; never “blocked”; 7.2 in first viewport — verify UI commit before calling DONE).
+4. **Console content-law microcopy** — DONE (`06d6115` — desk-law 7.2 on Clearance first viewport; admission-control noun; held≠blocked; measured latency cite).
 5. **Known-good annotated tag** — recommend `v0.2.0-round2` after human approval (do not force-push).
 6. **Proposal pack sync** — DONE (`submission/` PDF ↔ `round2/CONTROLPLANE_R2_FINAL.md` Stage Check).
 7. **LICENSE / attribution** — DONE (repo-root `LICENSE` MIT + README Document map note).
