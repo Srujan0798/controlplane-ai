@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+Follow **AGENTS.md** as project law (identical for Cursor/Codex via AGENTS.md).
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

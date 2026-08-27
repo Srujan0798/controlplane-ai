@@ -218,3 +218,10 @@ Agent 0 ──► Agent 1 ──► Agent 7
 4. Hostile Q&A + event checklist exist
 5. No fake metrics; fail-closed preserved
 ```
+
+---
+
+## Superseded by Adaptoid waves (2026-08-28)
+
+**New dispatch path:** `HOW_TO_RUN.md` + `work/wave-6|7|8/*.md`  
+Agents 0–8 above completed the post-merge polish. Elevation continues via Waves 6–8 task files (Adaptoid Lite hybrid plan).

@@ -89,6 +89,8 @@ SEBI/
 | Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` |
 | Absolute truth (internal) | `docs/ARCHITECTURE.md`, `NARRATIVE.md`, `QA.md` |
 | Event day / packaging | [`docs/EVENT_DAY_CHECKLIST.md`](docs/EVENT_DAY_CHECKLIST.md) |
+| Adaptoid agents (parallel) | [`HOW_TO_RUN.md`](HOW_TO_RUN.md) · [`work/`](work/) · [`AGENTS.md`](AGENTS.md) |
+| Kill-shot / evidence | `docs/KILL_SHOT.md` (after W6-05) · `docs/ACCEPTANCE.md` (after W8-01) |
 | Agent workers (next tasks) | [`docs/AGENT_PROMPTS.md`](docs/AGENT_PROMPTS.md) · gaps: `docs/PRIZE_WIN_MATRIX.md` |
 | License / attribution | [`LICENSE`](LICENSE) (MIT · Team ControlPlane · 2026) |
 | Do **not** present | `round2/_archive/`, `docs/_archive/`, agent scratch, graphify cache |
