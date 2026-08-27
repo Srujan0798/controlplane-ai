@@ -4,7 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#1c1f24" />
-  <title>ControlPlane · Clearance bay</title>
+  <title>ControlPlane.ai — Admission Control Layer</title>
+  <meta property="og:title" content="ControlPlane.ai" />
+  <meta property="og:description" content="Admission control layer for AI that acts" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="ControlPlane.ai" />
+  <meta name="twitter:description" content="Admission control layer for AI that acts" />
   <link rel="stylesheet" href="/static/css/bay.css" />
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
   <script src="/static/js/bay.js"></script>
@@ -38,24 +44,32 @@
       </div>
     </header>
 
-    <div class="workspace">
-      <aside class="desk">
-        <h1>Clearance bay</h1>
-        <p class="lede">Admission-control layer for AI that acts. Pending actions arrive as strips. Claims must earn their flap.</p>
-        <p class="desk-law" role="note">
-          <strong>Clause 7.2 does not exist.</strong>
-          Absence → <span class="mono">UNSUPPORTED</span> → Escalate.
-          Refund is <em>held and escalated with the evidence packet</em> — never “blocked.”
-        </p>
+<div class="workspace">
+       <aside class="desk">
+         <h1>Clearance bay</h1>
+         <p class="lede">Admission-control layer for AI that acts. Pending actions arrive as strips. Claims must earn their flap.</p>
+         <p class="desk-law" role="note">
+           <strong>Clause 7.2 does not exist.</strong>
+           Absence → <span class="mono">UNSUPPORTED</span> → Escalate.
+           Refund is <em>held and escalated with the evidence packet</em> — never “blocked.”
+         </p>
 
-        <label class="field">
-          <span>Traffic</span>
-          <select id="scenario" aria-label="Scenario">
-            <option value="refund">Refund agent · dual action</option>
-            <option value="support">Customer support · R1</option>
-            <option value="copilot">Internal copilot · R2</option>
-          </select>
-        </label>
+         <p class="principal-info">
+           <strong>Who’s calling:</strong> <span id="principalId">(idle)</span> · Clearance: <span id="principalClearance">—</span>
+         </p>
+         <p class="entitlement-hint">
+           Entitlement: span.acl ⊆ principal.clearance · zero LLM
+         </p>
+
+         <label class="field">
+           <span>Traffic</span>
+           <select id="scenario" aria-label="Scenario">
+             <option value="refund">Refund agent · dual action</option>
+             <option value="flip">Principal-flip (HR-COMP-L6)</option>
+             <option value="support">Customer support · R1</option>
+             <option value="copilot">Internal copilot · R2</option>
+           </select>
+         </label>
 
         <label class="field">
           <span>Stance</span>
@@ -72,7 +86,7 @@
 
         <button type="button" class="admit" id="admit">Admit</button>
         <button type="button" class="btn danger" id="reset">Reset room</button>
-        <p class="hint">1 refund · 2 support · 3 copilot · A admit · deep link <code>?scenario=&amp;mode=&amp;session_id=&amp;autorun=1</code></p>
+        <p class="hint">1 refund · 2 support · 3 copilot · 4 flip · A admit · deep link <code>?scenario=&amp;mode=&amp;session_id=&amp;autorun=1</code></p>
 
         <div class="meter-row" aria-live="polite">
           <div class="meter"><b id="mTotal">—</b><small>Decisions</small></div>
@@ -443,8 +457,11 @@
           }
         }
         $("bayMeta").innerHTML = `<strong>${esc(data.request_id)}</strong> · ${esc(data.use_case)} · chain ${data.chain_valid ? "VALID" : "BROKEN"}${extra}`;
-        $("mLat").textContent = Bay.fmtMs(data.latency_ms);
-        renderStrips(data);
+         $("mLat").textContent = Bay.fmtMs(data.latency_ms);
+         const p = data.principal || {};
+         $("principalId").textContent = p.id || "anonymous";
+         $("principalClearance").textContent = (p.clearance || []).join(", ") || "—";
+         renderStrips(data);
         renderCompare(data);
         renderPacket(data);
         renderReceipts(data);
@@ -478,8 +495,9 @@
       if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
       if (Bay.isTyping(ev.target)) return;
       if (ev.key === "1") { ev.preventDefault(); $("scenario").value = "refund"; }
-      if (ev.key === "2") { ev.preventDefault(); $("scenario").value = "support"; }
-      if (ev.key === "3") { ev.preventDefault(); $("scenario").value = "copilot"; }
+       if (ev.key === "2") { ev.preventDefault(); $("scenario").value = "support"; }
+       if (ev.key === "3") { ev.preventDefault(); $("scenario").value = "copilot"; }
+       if (ev.key === "4") { ev.preventDefault(); $("scenario").value = "flip"; }
       if (ev.key === "e" || ev.key === "E") $("mode").value = "enforce";
       if (ev.key === "s" || ev.key === "S") {
         if (ev.target.matches("select")) return;

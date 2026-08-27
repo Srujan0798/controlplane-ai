@@ -18,6 +18,7 @@
     "customer-support": "support",
     copilot: "copilot",
     "internal-copilot": "copilot",
+    flip: "flip",
   };
 
   const Bay = {

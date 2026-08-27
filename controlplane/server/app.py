@@ -264,6 +264,10 @@ def create_app(
     def page_runbook() -> HTMLResponse:
         return _page("runbook.html")
 
+    @app.get("/print", response_class=HTMLResponse)
+    def page_print() -> HTMLResponse:
+        return _page("print.html")
+
     if STATIC.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
 
