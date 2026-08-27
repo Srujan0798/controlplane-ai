@@ -24,8 +24,8 @@ graphify-out/
 .DS_Store
 
 # One-off agent wave / impeccable reports (local provenance only)
-.wave*.md
-.impeccable*.md
+.wave*
+.impeccable*
 
 # NOTE: round2/_archive/ and docs/_archive/ are TRACKED on purpose.
 # They are the stage-by-stage provenance of the proposal. Do not ignore them.
