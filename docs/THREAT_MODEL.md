@@ -1,8 +1,8 @@
 # ControlPlane.ai — Threat model (Round 2)
 
-STRIDE-style review of the **shipped Round 2 surface**: OpenAI-compatible proxy, Evidence Ledger, and judge console. Scoped to what is in this branch — not the full multi-lane production vision in [ARCHITECTURE.md](ARCHITECTURE.md).
+STRIDE-style review of the **shipped Round 2 surface**: OpenAI-compatible proxy, Evidence Ledger, and judge console. Scoped to what is on `main` — not the full multi-lane production vision in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-**Branch:** `feature/round2-controlplane` · **Do not claim production-hardened auth.**
+**Branch:** `main` · **Do not claim production-hardened auth.**
 
 ---
 

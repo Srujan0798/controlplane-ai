@@ -8,6 +8,17 @@ Hostile room defense (one-liners + live curls): [HOSTILE_QA_DRILL.md](HOSTILE_QA
 
 ---
 
+## Who speaks when (Team ControlPlane)
+
+Team: **ControlPlane** · **Choda Srujan Sai** · **Dhrithika**.
+
+- **Console / live demo clicks** — one person drives Operate (refund enforce, flip, audit download); the other narrates dual Edit+Escalate. Do not both click.
+- **Architecture / mechanism** — Srujan answers STEP→SPAN→CLAIM→ACTION, entitlement set-membership, frozen matrix, no-LLM critical path.
+- **Hostile Q&A** — Dhrithika leads with [HOSTILE_QA_DRILL.md](HOSTILE_QA_DRILL.md) one-liners; Srujan backs with the matching curl if the judge asks for proof.
+- **If interrupted** — whoever is mid-sentence finishes the line; the other person picks up from the runbook script, not a new story.
+
+---
+
 ## Ports
 
 | How you start | URL |

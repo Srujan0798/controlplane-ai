@@ -127,14 +127,14 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 95. PPTX deck — DONE (`submission/ControlPlane_Round2_Pitch.pptx`)
 96. Proposal PDF for upload portal — DONE (`submission/ControlPlane_Round2_Proposal.pdf`)
 97. Judge script (what to say while clicking) — DONE (`docs/JUDGE_RUNBOOK.md` + `/runbook`)
-98. Hostile Q&A drill sheet linked to live demo — PARTIAL (`docs/QA.md` exists; dedicated `HOSTILE_QA_DRILL.md` with click proofs still GAP — Agent 4)
+98. Hostile Q&A drill sheet linked to live demo — DONE (`docs/HOSTILE_QA_DRILL.md` + runbook/README links)
 99. Competitive kill-shot one-pager — PARTIAL (contrasts live in pitch/proposal; no standalone one-pager)
 100. Assumptions register (explicit Round 2 params) — PARTIAL
 101. Risk register with mitigations in proposal — DONE
 102. Roadmap with Phase 0 shadow as default — DONE
 103. “What we refuse to claim” slide fidelity — PARTIAL (Agent 2 pitch lock)
 104. Demo failure recovery script — DONE (JUDGE_RUNBOOK failure table)
-105. Team roles / who speaks when — GAP
+105. Team roles / who speaks when — DONE (`docs/JUDGE_RUNBOOK.md` § Who speaks when)
 
 ## G. Product craft & differentiation signals
 
@@ -154,11 +154,11 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 116. One-command Docker demo — DONE
 117. Offline demo mode (no network) — DONE (canned scenarios; offline-safe console fonts)
 118. Port conflict fallback documented — DONE (8080 Docker / 8787 local)
-119. USB/airgap instructions — GAP (Agent 5 checklist)
-120. Backup laptop checklist — GAP (Agent 5)
+119. USB/airgap instructions — DONE (`docs/EVENT_DAY_CHECKLIST.md`)
+120. Backup laptop checklist — DONE (`docs/EVENT_DAY_CHECKLIST.md`)
 121. Known-good commit tag — GAP (suggest `v0.2.0-round2` after human approval — do not invent)
-122. LICENSE / attribution — GAP
-123. CHANGELOG — DONE (`CHANGELOG.md`; header still mentions pre-merge branch — cosmetic drift)
+122. LICENSE / attribution — DONE (`LICENSE` MIT + README Document map)
+123. CHANGELOG — DONE (`CHANGELOG.md`; header on `main`)
 124. CONTRIBUTING for teammates — GAP
 125. Final pre-flight script `make judge` — DONE (`Makefile` judge target)
 
@@ -168,21 +168,21 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 
 Ordered by room impact (highest first). Max 15. Do not invent FNR %, logos, or `p95=40ms`.
 
-1. **Pitch fidelity lock** — align `round2/R2S5.md` ↔ deck ↔ `docs/JUDGE_RUNBOOK.md` (held≠blocked, 7.2 absence, dual Edit+Escalate, latency honesty).
-2. **Hostile Q&A drill** — `docs/HOSTILE_QA_DRILL.md` with live click/curl proofs linked from runbook/README (Agent 4).
-3. **Event-day checklist** — backup laptop, USB/airgap offline, ports, panic recovery (Agent 5).
-4. **Console content-law microcopy** — admission-control noun; never “blocked”; 7.2 visible in first viewport (Agent 6).
+1. **Pitch fidelity lock** — DONE (`round2/R2S5.md` ↔ deck ↔ `docs/JUDGE_RUNBOOK.md`; held≠blocked, 7.2 absence, dual Edit+Escalate, latency honesty).
+2. **Hostile Q&A drill** — DONE (`docs/HOSTILE_QA_DRILL.md` with live click/curl proofs; linked from runbook/README).
+3. **Event-day checklist** — DONE (`docs/EVENT_DAY_CHECKLIST.md`: backup laptop, USB/airgap, ports, panic recovery).
+4. **Console content-law microcopy** — PARTIAL / in progress (Agent 6 owns `controlplane/server/static/`; admission-control noun; never “blocked”; 7.2 in first viewport — verify UI commit before calling DONE).
 5. **Known-good annotated tag** — recommend `v0.2.0-round2` after human approval (do not force-push).
-6. **Proposal pack sync** — `submission/` PDF ↔ `round2/CONTROLPLANE_R2_FINAL.md` Stage Check (Agent 3).
-7. **LICENSE / attribution** — missing at repo root.
-8. **Team roles / who speaks when** — one line in runbook or pitch sheet.
-9. **Fail-stance enforcement** — close PARTIAL #12 if room-depth agents touch gate (keep fail-closed; no LLM).
+6. **Proposal pack sync** — DONE (`submission/` PDF ↔ `round2/CONTROLPLANE_R2_FINAL.md` Stage Check).
+7. **LICENSE / attribution** — DONE (repo-root `LICENSE` MIT + README Document map note).
+8. **Team roles / who speaks when** — DONE (`docs/JUDGE_RUNBOOK.md` § Who speaks when).
+9. **Fail-stance enforcement** — close PARTIAL #12 if room-depth agents touch gate (keep fail-closed; no LLM). Out of scope for Agent 7 docs pass.
 10. **Optional Playwright walk** — install `.[e2e]` so optional browser test is green in room rehearsal.
 11. **Coverage gate / soak** — nice-to-have proof, not stand-blocking.
 12. **CORS allowlist + Idempotency-Key** — enterprise polish; low stand impact.
 13. **Compose profiles / hot-reload / graceful shutdown** — ops depth, defer unless asked.
 14. **Proof cache / speculative tool-arg verify / Lane 2 NLI** — DEFER or GAP by design (Lane 2 off critical path).
-15. **CHANGELOG header** — drop stale “not merged to main” wording when convenient.
+15. **CHANGELOG header** — DONE (stale “not merged to main” wording dropped; `docs/THREAT_MODEL.md` branch line also on `main`).
 
 ---
 

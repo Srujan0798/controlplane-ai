@@ -2,7 +2,7 @@
 
 ## Round 2 elevation — ControlPlane.ai (0.2.x)
 
-Accenture Innovation Challenge 2026 · branch `feature/round2-controlplane` (not merged to `main`).
+Accenture Innovation Challenge 2026 · branch `main` (Round 2 elevation merged).
 
 ### Mechanism (carried from Round 1 → production surface)
 
