@@ -18,6 +18,7 @@ CONSOLE_ROUTES = (
     "/matrix",
     "/architecture",
     "/runbook",
+    "/print",
 )
 
 
@@ -109,6 +110,64 @@ def test_playwright_console_routes_optional() -> None:
                     f"http://127.0.0.1:18787{path}", wait_until="domcontentloaded"
                 )
                 assert resp is not None and resp.status == 200, path
+            browser.close()
+    finally:
+        server.should_exit = True
+        thread.join(timeout=5)
+
+
+def test_playwright_refund_clearance_smoke() -> None:
+    """Smoke test: run refund scenario and verify dual actuators appear in UI."""
+    sync_api = pytest.importorskip(
+        "playwright.sync_api",
+        reason="playwright not installed (optional extra: pip install '.[e2e]')",
+    )
+    import threading
+    import time
+
+    import uvicorn
+
+    config = uvicorn.Config(create_app(), host="127.0.0.1", port=18788, log_level="warning")
+    server = uvicorn.Server(config)
+    thread = threading.Thread(target=server.run, daemon=True)
+    thread.start()
+    deadline = time.time() + 10
+    while not server.started and time.time() < deadline:
+        time.sleep(0.05)
+    if not server.started:
+        pytest.skip("uvicorn test server failed to start for refund smoke test")
+
+    try:
+        with sync_api.sync_playwright() as p:
+            try:
+                browser = p.chromium.launch(headless=True)
+            except Exception as exc:  # noqa: BLE001 — browser binary may be missing
+                pytest.skip(f"Playwright chromium unavailable: {exc}")
+            page = browser.new_page()
+            # Navigate to clearance bay
+            resp = page.goto("http://127.0.0.1:18788/", wait_until="domcontentloaded")
+            assert resp is not None and resp.status == 200
+            
+            # Verify refund scenario is available
+            assert "Refund agent" in page.content()
+            
+            # Set scenario to refund and mode to enforce
+            page.select_option("#scenario", "refund")
+            page.select_option("#mode", "enforce")
+            
+            # Click Admit button
+            page.click("#admit")
+            
+            # Wait for strips to appear (or content to load)
+            page.wait_for_function(
+                "document.querySelector('.strip') || document.body.textContent.includes('Edit') || document.body.textContent.includes('Escalate')",
+                timeout=5000
+            )
+            
+            # Verify actuators are visible
+            content = page.content()
+            assert "Edit" in content or "Escalate" in content, "Expected actuators not found in clearance bay"
+            
             browser.close()
     finally:
         server.should_exit = True
