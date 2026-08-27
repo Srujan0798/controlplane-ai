@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refund dual-action demo: R1 Edit + R3 Escalate; mock committed:false."""
+"""Print the frozen refund running example: same ledger, two actuators."""
 from __future__ import annotations
 
 import sys
@@ -11,8 +11,7 @@ if str(ROOT) not in sys.path:
 
 from controlplane.entitlement import audit_claim
 from controlplane.interlock import MATRIX
-from controlplane.models import Actuator, BlastTier, EvidencePacket
-from controlplane.mock_refund import execute_refund
+from controlplane.models import BlastTier
 from controlplane.scenarios.refund import UNGATED_RESPONSE, run_refund_scenario
 
 
@@ -22,14 +21,11 @@ def _acl(acl: frozenset[str]) -> str:
 
 def main() -> None:
     led = run_refund_scenario()
-    print("ControlPlane.ai — refund dual-action running example")
+    print("ControlPlane.ai — refund running example")
     print("=" * 64)
     print()
     print("Ungated response:")
     print(f"  {UNGATED_RESPONSE}")
-    print()
-    print("If ungated, the company wrongly pays out ₹1,84,000.")
-    print("The customer did not lose money.")
     print()
     print(f"Principal: {led.principal.id}")
     print(f"  roles      {_acl(led.principal.roles)}")
@@ -37,21 +33,17 @@ def main() -> None:
     print(f"  policy     {led.policy_version}")
     print()
 
-    print("--- Spans (context assembly; provenance outside the model) ---")
+    print("--- Spans (context assembly) ---")
     for span in led.spans.values():
         step = led.steps[span.step_id]
         print(
             f"  {span.span_id:8}  {step.kind.value:9} {step.name:20} "
-            f"acl={_acl(span.acl):28}  {span.source_id}"
+            f"acl={_acl(span.acl):22}  {span.source_id}"
         )
-        preview = span.content.replace("\n", " ")[:90]
-        print(f"            {preview}")
-    print()
-    print("  Note: AGR-VENDOR-v3 has clauses 1–6 ONLY. Clause 7.2 does not exist.")
-    print("  INJECT-NOTICE cannot author provenance for clause 7.2.")
+        print(f"            {span.content}")
     print()
 
-    print("--- Claims / bindings (default UNSUPPORTED; must earn SUPPORTED) ---")
+    print("--- Claims / bindings ---")
     for claim in led.claims.values():
         binding = led.bindings[claim.claim_id]
         spans = ",".join(binding.span_ids) if binding.span_ids else "(none)"
@@ -59,17 +51,14 @@ def main() -> None:
             f"{k}={v:g}" for k, v in sorted(claim.role_in_action.items())
         )
         print(
-            f"  {claim.claim_id:14}  {binding.verdict.value:12}  "
+            f"  {claim.claim_id:12}  {binding.verdict.value:12}  "
             f"via {binding.method:7}  spans={spans}"
         )
-        print(f"                 {claim.text}")
-        print(
-            f"                 kind={claim.kind.value}  "
-            f"assertion={claim.assertion.value}  role={roles}"
-        )
+        print(f"               {claim.text}")
+        print(f"               kind={claim.kind.value}  assertion={claim.assertion.value}  role={roles}")
     print()
 
-    print("--- Entitlement findings (span.acl ⊆ principal.clearance) ---")
+    print("--- Entitlement findings ---")
     for claim_id in led.claims:
         finding = audit_claim(led, claim_id)
         flag = "VIOLATION" if finding.violated else "ok"
@@ -78,7 +67,7 @@ def main() -> None:
             if finding.offending_span_ids
             else ""
         )
-        print(f"  {claim_id:14}  {flag:10}  {finding.detail}{extra}")
+        print(f"  {claim_id:12}  {flag:10}  {finding.detail}{extra}")
     print()
 
     print("--- Matrix cells (transcribed, never redrawn) ---")
@@ -89,11 +78,11 @@ def main() -> None:
         cell = MATRIX[key]
         print(
             f"  {decision.action_id:14}  {decision.matrix_row} × {decision.matrix_col}"
-            f"  →  {cell.value}"
+            f"  →  {cell.value}  (MATRIX[{decision.matrix_row!r}, {decision.matrix_col!r}])"
         )
     print()
 
-    print("--- Decisions (dual-action, simultaneous) ---")
+    print("--- Decisions ---")
     for action_id in ("show_text", "issue_refund"):
         action = led.actions[action_id]
         decision = led.decisions[action_id]
@@ -102,34 +91,21 @@ def main() -> None:
         print(f"    actuator   {decision.actuator.value}")
         print(f"    cell       {decision.matrix_row} × {decision.matrix_col}")
         print(f"    driving    {', '.join(decision.driving_claim_ids)}")
-        packet = decision.packet
-        if isinstance(packet, EvidencePacket):
-            print("    evidence packet (Escalate):")
-            print(f"      claim_id           {packet.claim_id}")
-            print(f"      claim_text         {packet.claim_text!r}")
-            print(f"      verdict            {packet.verdict}")
-            print(f"      candidate_spans    {list(packet.candidate_span_ids)}")
-            print(f"      proposed_actuator  {packet.proposed_actuator}")
-            print(f"      action_id          {packet.action_id}")
-        elif isinstance(packet, dict) and packet.get("claims"):
+        packet_claims = decision.packet.get("claims") or []
+        if packet_claims:
             print("    packet")
-            for item in packet["claims"]:
+            for item in packet_claims:
                 print(
                     f"      {item['claim_id']}: {item['text']!r}  "
                     f"verdict={item['verdict']}"
                 )
         print()
 
-    allowed = refund.actuator == Actuator.PASS
-    result = execute_refund(allowed=allowed)
-    print("--- Mock refund executor ---")
-    print(f"  allowed={allowed}  →  committed={result['committed']}  status={result['status']}")
-    print()
-    print("Vocabulary: held / Escalate — never 'blocked' for this refund path.")
     print("Clause 7.2 does not exist.")
-    print("  Absence of evidence, not conflicting evidence — claim stays UNSUPPORTED.")
-    print("  show_text (R1 × entitlement) → Edit")
-    print("  issue_refund (R3 × unsupported-categorical) → Escalate (HELD)")
+    print("  Absence of evidence, not conflicting evidence — the claim stays UNSUPPORTED.")
+    print("  Show text (R1 × entitlement) → Edit: the unentitled span is stripped.")
+    print("  Issue refund (R3 × unsupported-categorical) → Escalate:")
+    print("  held and escalated with the evidence packet.")
     print(f"  Hash chain verify_chain() = {led.verify_chain()}")
 
 

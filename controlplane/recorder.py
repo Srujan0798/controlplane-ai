@@ -1,7 +1,6 @@
 from __future__ import annotations
 import hashlib
 import itertools
-
 from controlplane.ledger import EvidenceLedger
 from controlplane.models import Principal, Span, Step, StepKind
 
@@ -24,14 +23,11 @@ class ProvenanceRecorder:
         policy_version: str = "matrix-v1",
     ) -> EvidenceLedger:
         led = EvidenceLedger.begin(request_id, principal, action_intent, policy_version)
-        led.append(
-            "request_begin",
-            {
-                "request_id": request_id,
-                "principal": principal.id,
-                "action_intent": action_intent,
-            },
-        )
+        led.append("request_begin", {
+            "request_id": request_id,
+            "principal": principal.id,
+            "action_intent": action_intent,
+        })
         return led
 
     def record_step(self, led: EvidenceLedger, kind: StepKind, name: str) -> str:
@@ -68,16 +64,13 @@ class ProvenanceRecorder:
             offsets=offsets,
         )
         led.spans[span_id] = span
-        led.append(
-            "span",
-            {
-                "span_id": span_id,
-                "step_id": step_id,
-                "source_id": source_id,
-                "acl": sorted(acl),
-                "content_hash": span.content_hash,
-            },
-        )
+        led.append("span", {
+            "span_id": span_id,
+            "step_id": step_id,
+            "source_id": source_id,
+            "acl": sorted(acl),
+            "content_hash": span.content_hash,
+        })
         return span_id
 
     def finish_context_assembly(self, led: EvidenceLedger) -> None:

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
+  <title>ControlPlane · Matrix</title>
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <script src="/static/js/bay.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to matrix</a>
+  <div class="shell">
+    <header class="rail">
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
+      </div>
+    </header>
+
+    <main class="page wide" id="main">
+      <h1>Frozen matrix</h1>
+      <p class="lede">Transcribed from ARCHITECTURE.md §4. Never redrawn. Six of seven models corrupted this grid when asked to invent it. Axis labels, column vocabulary and cell values are load-bearing. Click a cell.</p>
+
+      <div class="matrix-wrap">
+        <table class="matrix" id="grid">
+          <thead>
+            <tr>
+              <th>R \ S</th>
+              <th>Contradicted / entitlement violation</th>
+              <th>Unsupported + categorical</th>
+              <th>Unsupported + hedged</th>
+              <th>Unknown</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="explain" id="explain" tabindex="-1">
+        <div class="cell-ref">Select a cell</div>
+        <h3>The verdict is hostile; the action is proportionate.</h3>
+        <p>A claim must earn SUPPORTED. Failing to earn it only blocks where blast radius justifies blocking. Default verdict is UNSUPPORTED.</p>
+      </div>
+
+      <p class="note">Actuators are exactly Block · Edit · Escalate · Pass (and Pass + annotate). STREAM, Kill Span, Terminate Step, Hold &amp; Re-verify, Redact &amp; Flag were all invented. Cut. Autonomy downgrade and circuit breaker are spoken, not drawn.</p>
+    </main>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
+  </div>
+  <script>
+    const COLS = [
+      "Contradicted / entitlement violation",
+      "Unsupported + categorical",
+      "Unsupported + hedged",
+      "Unknown",
+    ];
+    const ROWS = [
+      { id: "R3", meaning: "irreversible or regulated — payment, deletion, publication, regulated advice" },
+      { id: "R2", meaning: "reversible write / external send" },
+      { id: "R1", meaning: "user-visible, read-only" },
+      { id: "R0", meaning: "internal draft, a human reads it first" },
+    ];
+    /* Exact cells from ARCHITECTURE.md §4. Do not invent. */
+    const CELLS = {
+      "R3|Contradicted / entitlement violation": {
+        actuator: "Block",
+        why: "Irreversible action plus a contradicted claim or an ACL miss. Entitlement is set membership, not a classifier. Block is correct here — and only here on the R3 row.",
+        demo: "A PII-shaped entity bound to no span, or bound to a span whose source ACL excludes the caller.",
+      },
+      "R3|Unsupported + categorical": {
+        actuator: "Escalate",
+        why: "Clause 7.2 does not exist. The failure is absence of evidence, not conflicting evidence — which is why this is Escalate, not Block. Say held and escalated with the evidence packet.",
+        demo: "issue_refund on the refund agent. Never say “blocked” about the refund.",
+      },
+      "R3|Unsupported + hedged": {
+        actuator: "Escalate",
+        why: "Even a hedged ungrounded claim is too expensive to release at R3. Escalate with the packet. The verdict is hostile; the action is still proportionate — not Block.",
+        demo: "A payment recommendation that hedges (“may be permitted”) without a span.",
+      },
+      "R3|Unknown": {
+        actuator: "Escalate",
+        why: "UNKNOWN never collapses into SUPPORTED. Missing evidence at R3 is not a pass. Bounded proof depth times out to UNKNOWN, then the matrix routes it.",
+        demo: "Derived / multi-hop claim that cannot be recomputed from spans.",
+      },
+      "R2|Contradicted / entitlement violation": {
+        actuator: "Block",
+        why: "A reversible write still must not fire on contradiction or leak. You can undo the send; you should not send it.",
+        demo: "External partner email grounded on a span the caller is not entitled to.",
+      },
+      "R2|Unsupported + categorical": {
+        actuator: "Edit",
+        why: "Surgical, never generative: strip the unsupported claim, or re-invoke the generator once with a constrained instruction naming the failing span. A second failure falls through to Escalate.",
+        demo: "internal-copilot draft_partner_email — R2 reversible write.",
+      },
+      "R2|Unsupported + hedged": {
+        actuator: "Edit",
+        why: "Same actuator as categorical at R2. Hedging does not earn a pass on a write. Edit the ungrounded clause.",
+        demo: "A hedged SLA figure in an outbound draft.",
+      },
+      "R2|Unknown": {
+        actuator: "Escalate",
+        why: "Unknown at R2 is not an edit — there is nothing surgical to strip. Escalate. Fail stance for R2 is closed or escalate; it is not a global fail-open.",
+        demo: "A partner-email claim that timed out of Lane 2.",
+      },
+      "R1|Contradicted / entitlement violation": {
+        actuator: "Edit",
+        why: "User-visible text, not an irreversible commit. Strip the unentitled span from the overlay. The refund is priced on a different action, same ledger.",
+        demo: "show_text on the refund agent: HR span grounds a claim; caller ACL excludes it → Edit.",
+      },
+      "R1|Unsupported + categorical": {
+        actuator: "Edit",
+        why: "Do not Block a read. Strip the unsupported claim from the user-visible text.",
+        demo: "A customer-facing sentence that asserts a policy clause with no span.",
+      },
+      "R1|Unsupported + hedged": {
+        actuator: "Pass + annotate",
+        why: "Hedged and user-visible: annotate, do not hold the conversation. Proof scales with consequence.",
+        demo: "customer-support show_reply.",
+      },
+      "R1|Unknown": {
+        actuator: "Pass + annotate",
+        why: "UNKNOWN routes rather than blocks. At R1 the fail stance is open with annotation.",
+        demo: "A support reply whose Lane-2 bind did not return in budget.",
+      },
+      "R0|Contradicted / entitlement violation": {
+        actuator: "Pass + annotate",
+        why: "Internal draft. A human reads it first. Annotate the contradiction; do not hold the desk.",
+        demo: "An internal copilot draft before anyone hits send.",
+      },
+      "R0|Unsupported + categorical": {
+        actuator: "Pass + annotate",
+        why: "Cheap path. R0/R1 is 80–90% of volume and gets Lane 1 only. Annotate the categorical miss.",
+        demo: "A scratch note that names a number with no span.",
+      },
+      "R0|Unsupported + hedged": {
+        actuator: "Pass",
+        why: "Lowest blast radius, hedged, ungrounded. Pass. This is the cell people try to “fix” into Block. Do not.",
+        demo: "Internal brainstorming text.",
+      },
+      "R0|Unknown": {
+        actuator: "Pass",
+        why: "Unknown on a draft is not a hold. Fail open. A universal fail-open on every tier is the attacker's first move — this cell is the legitimate fail-open.",
+        demo: "R0 timeout → Pass.",
+      },
+    };
+
+    const tbody = document.querySelector("#grid tbody");
+    tbody.innerHTML = ROWS.map((row) => `
+      <tr>
+        <th scope="row" title="${Bay.escape(row.meaning)}">${row.id}</th>
+        ${COLS.map((col) => {
+          const cell = CELLS[`${row.id}|${col}`];
+          return `<td>
+            <button type="button" class="cell" data-r="${row.id}" data-c="${Bay.escape(col)}" data-actuator="${Bay.escape(cell.actuator)}" aria-label="${row.id} times ${Bay.escape(col)} equals ${Bay.escape(cell.actuator)}">
+              <span class="face">${Bay.escape(cell.actuator)}</span>
+            </button>
+          </td>`;
+        }).join("")}
+      </tr>
+    `).join("");
+
+    function show(r, c) {
+      const key = `${r}|${c}`;
+      const cell = CELLS[key];
+      if (!cell) return;
+      document.querySelectorAll(".cell").forEach((btn) => {
+        btn.classList.toggle("on", btn.dataset.r === r && btn.dataset.c === c);
+      });
+      const row = ROWS.find((x) => x.id === r);
+      Bay.$("explain").innerHTML = `
+        <div class="cell-ref">${Bay.escape(r)} × ${Bay.escape(c)}</div>
+        <h3>${Bay.escape(cell.actuator)}</h3>
+        <p>${Bay.escape(cell.why)}</p>
+        <p class="hint">${Bay.escape(row.meaning)}. Demo: ${Bay.escape(cell.demo)}</p>
+      `;
+      Bay.$("explain").focus();
+      const url = new URL(location.href);
+      url.searchParams.set("cell", `${r},${c}`);
+      history.replaceState(null, "", url);
+    }
+
+    tbody.addEventListener("click", (ev) => {
+      const btn = ev.target.closest(".cell");
+      if (!btn) return;
+      show(btn.dataset.r, btn.dataset.c);
+    });
+
+    const link = Bay.parseDeepLink().cell;
+    if (link) {
+      const [r, ...rest] = link.split(",");
+      const c = rest.join(",").trim();
+      if (CELLS[`${r}|${c}`]) show(r, c);
+    } else {
+      show("R3", "Unsupported + categorical");
+    }
+  </script>
+</body>
+</html>

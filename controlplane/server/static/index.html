@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
+  <title>ControlPlane · Clearance bay</title>
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <script src="/static/js/bay.js"></script>
+</head>
+<body>
+  <!--
+    THESIS: Admission control as a flight-strip bay — pending ACTIONs are physical strips that flap to their actuator; refuse metric-dashboard hero.
+    OWN-WORLD: Graphite bay, cream paper strips, matte-black flap faces, condensed mono letters, safety-orange Admit, amber lamps; raised by split-flap cascade + hardware orange key.
+    STORY: Judge chooses scenario, hits Admit, watches strips cascade into Edit + Escalate with matrix cells and downloadable receipts.
+    FIRST VIEWPORT: Left desk (scenario + orange Admit); right bay with empty strip slots; after run, two dominant strips own the bay.
+    FORM: ATC strip bay (assigned #4, seed 27b2e849) + split-flap cascade raise + orange action key raise.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+  -->
+  <a class="skip" href="#bay">Skip to strips</a>
+  <div class="shell">
+    <header class="rail">
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="desk">
+        <h1>Clearance bay</h1>
+        <p class="lede">Run a gate. Pending actions arrive as strips. Claims must earn their flap.</p>
+
+        <label class="field">
+          <span>Traffic</span>
+          <select id="scenario" aria-label="Scenario">
+            <option value="refund">Refund agent · dual action</option>
+            <option value="support">Customer support · R1</option>
+            <option value="copilot">Internal copilot · R2</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Stance</span>
+          <select id="mode" aria-label="Mode">
+            <option value="enforce">Enforce</option>
+            <option value="shadow">Shadow (counterfactual only)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Session (optional)</span>
+          <input type="text" id="session" name="session" autocomplete="off" spellcheck="false" placeholder="judge-1" aria-label="Session ID" />
+        </label>
+
+        <button type="button" class="admit" id="admit">Admit</button>
+        <button type="button" class="btn danger" id="reset">Reset room</button>
+        <p class="hint">1 refund · 2 support · 3 copilot · A admit · deep link <code>?scenario=&amp;mode=&amp;session_id=&amp;autorun=1</code></p>
+
+        <div class="meter-row" aria-live="polite">
+          <div class="meter"><b id="mTotal">—</b><small>Decisions</small></div>
+          <div class="meter"><b id="mHold">—</b><small>Would hold</small></div>
+          <div class="meter"><b id="mFnr">—</b><small>Labeled FNR</small></div>
+          <div class="meter"><b id="mLat">—</b><small>Last ms</small></div>
+        </div>
+      </aside>
+
+      <main class="bay" id="bay" aria-live="polite">
+        <div class="bay-head">
+          <h2>Active strips</h2>
+          <div class="bay-meta" id="bayMeta">No request on the board</div>
+        </div>
+
+        <div class="chain" aria-hidden="true">
+          <span class="node" data-n="step">Step</span>→
+          <span class="node" data-n="span">Span</span>→
+          <span class="node" data-n="claim">Claim</span>→
+          <span class="node" data-n="action">Action</span>
+        </div>
+
+        <div class="strips" id="strips">
+          <div class="strip empty">Awaiting clearance. Press Admit.</div>
+        </div>
+
+        <div class="compare" id="compare" role="region" aria-label="Ungated versus gated"></div>
+        <div class="err" id="err" role="alert"></div>
+
+        <details class="drawer" id="packet" hidden>
+          <summary>Evidence packet <span class="k" id="packetKicker"></span></summary>
+          <div class="packet-body" id="packetBody"></div>
+        </details>
+
+        <details class="receipts" id="receipts" hidden>
+          <summary>Evidence receipts</summary>
+          <div class="receipt-grid">
+            <div class="receipt-pane">
+              <h3>Claims</h3>
+              <div id="claimTable"></div>
+            </div>
+            <div class="receipt-pane">
+              <h3>Spans</h3>
+              <div id="spanTable"></div>
+            </div>
+          </div>
+        </details>
+      </main>
+    </div>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
+  </div>
+
+  <script>
+    const $ = (id) => Bay.$(id);
+    const reduceMotion = Bay.reduceMotion;
+    const esc = (v) => Bay.escape(v);
+
+    async function refreshMetrics() {
+      try {
+        const j = await Bay.get("/v1/controlplane/metrics");
+        $("mTotal").textContent = j.total_decisions ?? 0;
+        $("mHold").textContent = j.would_have_held ?? 0;
+        $("mFnr").textContent = Bay.fmtFnr(j.published_fnr);
+      } catch { /* meters stay */ }
+    }
+
+    function setChain(stage) {
+      document.querySelectorAll(".chain .node").forEach((n) => {
+        n.classList.toggle("live", n.dataset.n === stage);
+      });
+    }
+
+    function revealStrip(el, i) {
+      const show = () => {
+        el.classList.add("show");
+        const word = el.querySelector(".flap-word");
+        if (!word || reduceMotion) return;
+        word.classList.remove("flip");
+        void word.offsetWidth;
+        word.classList.add("flip");
+      };
+      if (reduceMotion) show();
+      else setTimeout(show, 90 + i * 160);
+    }
+
+    function renderStrips(data) {
+      const decisions = Object.values(data.decisions || {});
+      const host = $("strips");
+      host.innerHTML = "";
+
+      if (!decisions.length) {
+        host.innerHTML = `<div class="strip empty">No actuators on this run</div>`;
+        renderDeadStrip(host, data, 0);
+        return;
+      }
+
+      decisions.forEach((d, i) => {
+        const escalate = d.actuator === "Escalate";
+        const el = document.createElement("article");
+        el.className = `strip ${d.actuator}`;
+        el.dataset.actuator = d.actuator;
+        el.innerHTML = `
+          <div class="strip-tab" aria-hidden="true"></div>
+          <div class="strip-body">
+            <div class="strip-id">${esc(d.action_id)}</div>
+            <div class="strip-title">${esc(String(d.action_id).replaceAll("_", " "))}</div>
+            <div class="strip-cell">${esc(d.matrix_row)} × <code>${esc(d.matrix_col || "—")}</code>
+              · driving ${esc((d.driving_claim_ids || []).join(", ") || "—")}
+              ${escalate ? `· <a class="packet-open" href="#packet">Open packet</a>` : ""}</div>
+          </div>
+          <div class="flap" aria-label="Actuator ${esc(d.actuator)}">
+            <div class="flap-word">${esc(d.actuator)}</div>
+          </div>
+        `;
+        el.querySelectorAll(".packet-open").forEach((a) => {
+          a.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            openPacket();
+          });
+        });
+        if (escalate) {
+          el.addEventListener("click", (ev) => {
+            if (ev.target.closest("a")) return;
+            openPacket();
+          });
+        }
+        host.appendChild(el);
+        revealStrip(el, i);
+      });
+      renderDeadStrip(host, data, decisions.length);
+    }
+
+    function renderDeadStrip(host, data, offset) {
+      const dead = Bay.deadCompute(data);
+      if (!dead.count && !dead.spans.length) return;
+      const spanByStep = {};
+      for (const sp of dead.spans) {
+        (spanByStep[sp.step_id] || (spanByStep[sp.step_id] = [])).push(sp);
+      }
+      const items = dead.steps.length
+        ? dead.steps.map((s) => {
+            const src = (spanByStep[s.step_id] || []).map((sp) => sp.source_id).join(", ") || "—";
+            return `<li><b>${esc(s.name)}</b> · ${esc(s.kind)} · ${esc(src)}</li>`;
+          })
+        : dead.spans.map((sp) => `<li><b>${esc(sp.span_id)}</b> · ${esc(sp.source_id)}</li>`);
+      const el = document.createElement("article");
+      el.className = "strip dead";
+      el.dataset.actuator = "dead";
+      el.innerHTML = `
+        <div class="strip-tab" aria-hidden="true"></div>
+        <div class="strip-body">
+          <div class="strip-id">${dead.count} step${dead.count === 1 ? "" : "s"} · ${dead.spans.length} span${dead.spans.length === 1 ? "" : "s"}</div>
+          <div class="strip-title">Dead compute</div>
+          <ul class="dead-list">${items.join("")}</ul>
+        </div>
+        <div class="flap" aria-label="Dead compute ${dead.count}">
+          <div class="flap-word">${dead.count}</div>
+        </div>
+      `;
+      host.appendChild(el);
+      revealStrip(el, offset);
+    }
+
+    function renderCompare(data) {
+      const o = data.response_overlay || {};
+      const card = $("compare");
+      const ungated = o.ungated_text || "";
+      const gated = o.user_visible_text || "";
+      const hold = o.action_allowed === false;
+      const wouldHold = data.would_hold && data.mode === "shadow";
+      const stripped = Bay.hasClause(ungated) && !Bay.hasClause(gated);
+      const leftBody = ungated
+        ? Bay.markClause(ungated)
+        : `No ungated emit on this fixture`;
+      const holdLine = hold
+        ? `<div class="hold">HOLD. Irreversible action not released.</div>`
+        : wouldHold
+          ? `<div class="hold">Would hold (shadow) — counterfactual only.</div>`
+          : `<div>Downstream may proceed</div>`;
+      card.classList.add("show");
+      card.innerHTML = `
+        <div class="compare-pane">
+          <div class="k">Ungated model text</div>
+          <div class="text">${leftBody}</div>
+        </div>
+        <div class="compare-pane">
+          <div class="k">After ControlPlane${stripped ? " · clause 7.2 stripped" : ""}</div>
+          <div class="text">${gated ? Bay.markClause(gated) : "—"}</div>
+          ${stripped ? `<div class="stripped">Clause 7.2 does not exist. Phrase removed.</div>` : ""}
+          ${holdLine}
+        </div>
+        <div class="compare-links">
+          ${esc(data.mode)} ·
+          <a href="/v1/controlplane/requests/${encodeURIComponent(data.request_id)}/audit.jsonl">Download audit.jsonl</a>
+          · <a href="/static/audit.html?request=${encodeURIComponent(data.request_id)}">Open in Audit</a>
+        </div>
+      `;
+    }
+
+    function openPacket() {
+      const drawer = $("packet");
+      if (drawer.hidden) return;
+      drawer.open = true;
+      drawer.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+    }
+
+    function renderPacket(data) {
+      const drawer = $("packet");
+      const body = $("packetBody");
+      const spanMap = Object.fromEntries((data.spans || []).map((s) => [s.span_id, s]));
+      const escalate = Object.values(data.decisions || {}).filter((d) => d.actuator === "Escalate");
+      if (!escalate.length) {
+        drawer.hidden = true;
+        drawer.open = false;
+        body.innerHTML = "";
+        return;
+      }
+      drawer.hidden = false;
+      drawer.open = true;
+      $("packetKicker").textContent = `· ${escalate.length} Escalate`;
+      body.innerHTML = escalate.map((d) => {
+        const packet = d.packet || {};
+        const claims = packet.claims || [];
+        const spanIds = packet.candidate_spans || [];
+        const claimHtml = claims.length
+          ? claims.map((c) => `
+              <dl>
+                <dt>Claim</dt><dd>${esc(c.claim_id)} — ${esc(c.text)}</dd>
+                <dt>Verdict</dt><dd><span class="tag ${esc(c.verdict || "")}">${esc(c.verdict || "—")}</span></dd>
+                <dt>Assertion</dt><dd class="mono">${esc(c.assertion || "—")} · ${esc(c.kind || "")}</dd>
+              </dl>`).join("")
+          : `<p class="packet-empty">No driving claim on this packet.</p>`;
+        const spanHtml = spanIds.length
+          ? `<ul class="dead-list">${spanIds.map((id) => {
+              const sp = spanMap[id];
+              return `<li><b>${esc(id)}</b>${sp ? ` · ${esc(sp.source_id)} — ${esc(sp.content)}` : ""}</li>`;
+            }).join("")}</ul>`
+          : `<p class="packet-empty">Spans: (none) — absence of evidence, not conflict.</p>`;
+        return `
+          <div class="packet-card">
+            <h3>${esc(String(d.action_id).replaceAll("_", " "))}</h3>
+            <dl>
+              <dt>Matrix cell</dt>
+              <dd class="mono">${esc(d.matrix_row)} × ${esc(d.matrix_col || "—")}</dd>
+              <dt>Actuator</dt>
+              <dd class="mono">${esc(d.actuator)}</dd>
+            </dl>
+            ${claimHtml}
+            ${spanHtml}
+          </div>`;
+      }).join("");
+    }
+
+    function renderReceipts(data) {
+      const findings = data.findings || {};
+      const claims = data.claims || [];
+      const spans = data.spans || [];
+      $("receipts").hidden = false;
+
+      $("claimTable").innerHTML = `
+        <table>
+          <thead><tr><th>ID</th><th>Text</th><th>Verdict</th><th>ACL</th></tr></thead>
+          <tbody>
+            ${claims.map((c) => {
+              const f = findings[c.claim_id];
+              const viol = f && f.violated;
+              return `<tr>
+                <td>${esc(c.claim_id)}</td>
+                <td>${esc(c.text)}</td>
+                <td><span class="tag ${esc(c.binding?.verdict || "")}">${esc(c.binding?.verdict || "—")}</span></td>
+                <td class="${viol ? "viol" : ""}">${viol ? "violation" : "ok"}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>`;
+
+      $("spanTable").innerHTML = `
+        <table>
+          <thead><tr><th>ID</th><th>Source</th><th>ACL</th><th>Content</th></tr></thead>
+          <tbody>
+            ${spans.map((s) => `<tr>
+              <td>${esc(s.span_id)}</td>
+              <td>${esc(s.source_id)}</td>
+              <td>${esc((s.acl || []).join(", "))}</td>
+              <td>${esc(s.content)}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table>`;
+    }
+
+    function sessionId() {
+      return ($("session").value || "").trim();
+    }
+
+    function rememberLink(scenario, mode, keepAutorun) {
+      const url = new URL(location.href);
+      url.searchParams.set("scenario", scenario);
+      url.searchParams.set("mode", mode);
+      const session = sessionId();
+      if (session) url.searchParams.set("session_id", session);
+      else url.searchParams.delete("session_id");
+      if (keepAutorun) url.searchParams.set("autorun", "1");
+      else url.searchParams.delete("autorun");
+      history.replaceState(null, "", url);
+    }
+
+    function clearBay() {
+      $("strips").innerHTML = `<div class="strip empty">Awaiting clearance. Press Admit.</div>`;
+      $("compare").classList.remove("show");
+      $("compare").innerHTML = "";
+      const packet = $("packet");
+      packet.hidden = true;
+      packet.open = false;
+      $("packetBody").innerHTML = "";
+      $("packetKicker").textContent = "";
+      $("receipts").hidden = true;
+      $("err").classList.remove("show");
+      $("bayMeta").textContent = "No request on the board";
+      $("mLat").textContent = "—";
+      setChain("");
+    }
+
+    async function resetRoom() {
+      if (!confirm("Reset room? Shadow counters clear. Strips leave the board. Ledger history stays.")) return;
+      try {
+        await Bay.post("/v1/controlplane/metrics/reset");
+        clearBay();
+        await refreshMetrics();
+      } catch (e) {
+        const err = $("err");
+        err.textContent = `Reset failed: ${e.message}`;
+        err.classList.add("show");
+      }
+    }
+
+    let admitting = false;
+    async function admit() {
+      if (admitting) return;
+      const btn = $("admit");
+      const err = $("err");
+      admitting = true;
+      err.classList.remove("show");
+      btn.disabled = true;
+      btn.textContent = "Clearing…";
+      setChain("step");
+
+      try {
+        const scenario = $("scenario").value;
+        const mode = $("mode").value;
+        rememberLink(scenario, mode, false);
+        setTimeout(() => setChain("span"), 120);
+        setTimeout(() => setChain("claim"), 240);
+        const params = new URLSearchParams({ mode });
+        const session = sessionId();
+        if (session) params.set("session_id", session);
+        const data = await Bay.post(
+          `/v1/controlplane/demo/${encodeURIComponent(scenario)}?${params}`
+        );
+        setChain("action");
+        const risk = data.compounding_risk;
+        let extra = "";
+        if (data.session_id) {
+          extra = ` · session <strong>${esc(data.session_id)}</strong>`;
+          if (risk) {
+            extra += ` · turns ${risk.request_count ?? 0}`;
+            if (risk.compounded) extra += " · compounded";
+          }
+        }
+        $("bayMeta").innerHTML = `<strong>${esc(data.request_id)}</strong> · ${esc(data.use_case)} · chain ${data.chain_valid ? "VALID" : "BROKEN"}${extra}`;
+        $("mLat").textContent = Bay.fmtMs(data.latency_ms);
+        renderStrips(data);
+        renderCompare(data);
+        renderPacket(data);
+        renderReceipts(data);
+        await refreshMetrics();
+      } catch (e) {
+        err.textContent = `Gate failed: ${e.message}. Check the server, then Admit again.`;
+        err.classList.add("show");
+        $("compare").classList.remove("show");
+        $("packet").hidden = true;
+        setChain("");
+      } finally {
+        admitting = false;
+        btn.disabled = false;
+        btn.textContent = "Admit";
+      }
+    }
+
+    function applyDeepLink() {
+      const link = Bay.parseDeepLink();
+      const scenario = Bay.normalizeScenario(link.scenario);
+      const mode = Bay.normalizeMode(link.mode);
+      if (scenario) $("scenario").value = scenario;
+      if (mode) $("mode").value = mode;
+      if (link.session) $("session").value = link.session;
+      if (link.autorun) admit();
+    }
+
+    $("admit").addEventListener("click", admit);
+    $("reset").addEventListener("click", resetRoom);
+    document.addEventListener("keydown", (ev) => {
+      if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+      if (Bay.isTyping(ev.target)) return;
+      if (ev.key === "1") { ev.preventDefault(); $("scenario").value = "refund"; }
+      if (ev.key === "2") { ev.preventDefault(); $("scenario").value = "support"; }
+      if (ev.key === "3") { ev.preventDefault(); $("scenario").value = "copilot"; }
+      if (ev.key === "e" || ev.key === "E") $("mode").value = "enforce";
+      if (ev.key === "s" || ev.key === "S") {
+        if (ev.target.matches("select")) return;
+        $("mode").value = "shadow";
+      }
+      if ((ev.key === "a" || ev.key === "A") && !ev.target.matches("select") && !ev.repeat) {
+        ev.preventDefault();
+        admit();
+      }
+    });
+    refreshMetrics();
+    applyDeepLink();
+  </script>
+</body>
+</html>

@@ -1,49 +1,38 @@
 from __future__ import annotations
-
 from types import MappingProxyType
 from typing import Any
 
 from controlplane.entitlement import audit_claim
 from controlplane.ledger import EvidenceLedger
 from controlplane.models import (
-    Action,
-    Actuator,
-    AssertionStrength,
-    Binding,
-    BlastTier,
-    Claim,
-    Decision,
-    EntitlementFinding,
-    EvidencePacket,
-    Verdict,
+    Action, Actuator, AssertionStrength, Binding, BlastTier, Claim, Decision,
+    EntitlementFinding, EvidencePacket, Verdict,
 )
 
-# Exact frozen matrix from ARCHITECTURE.md §4 / R2S3. Never redraw.
+# Transcribed from ARCHITECTURE.md §4. Never redraw.
 COL_CONTRADICTED = "Contradicted / entitlement violation"
 COL_UNSUPPORTED_CATEGORICAL = "Unsupported + categorical"
 COL_UNSUPPORTED_HEDGED = "Unsupported + hedged"
 COL_UNKNOWN = "Unknown"
 
-MATRIX = MappingProxyType(
-    {
-        (BlastTier.R3, COL_CONTRADICTED): Actuator.BLOCK,
-        (BlastTier.R3, COL_UNSUPPORTED_CATEGORICAL): Actuator.ESCALATE,
-        (BlastTier.R3, COL_UNSUPPORTED_HEDGED): Actuator.ESCALATE,
-        (BlastTier.R3, COL_UNKNOWN): Actuator.ESCALATE,
-        (BlastTier.R2, COL_CONTRADICTED): Actuator.BLOCK,
-        (BlastTier.R2, COL_UNSUPPORTED_CATEGORICAL): Actuator.EDIT,
-        (BlastTier.R2, COL_UNSUPPORTED_HEDGED): Actuator.EDIT,
-        (BlastTier.R2, COL_UNKNOWN): Actuator.ESCALATE,
-        (BlastTier.R1, COL_CONTRADICTED): Actuator.EDIT,
-        (BlastTier.R1, COL_UNSUPPORTED_CATEGORICAL): Actuator.EDIT,
-        (BlastTier.R1, COL_UNSUPPORTED_HEDGED): Actuator.PASS_ANNOTATE,
-        (BlastTier.R1, COL_UNKNOWN): Actuator.PASS_ANNOTATE,
-        (BlastTier.R0, COL_CONTRADICTED): Actuator.PASS_ANNOTATE,
-        (BlastTier.R0, COL_UNSUPPORTED_CATEGORICAL): Actuator.PASS_ANNOTATE,
-        (BlastTier.R0, COL_UNSUPPORTED_HEDGED): Actuator.PASS,
-        (BlastTier.R0, COL_UNKNOWN): Actuator.PASS,
-    }
-)
+MATRIX = MappingProxyType({
+    (BlastTier.R3, COL_CONTRADICTED): Actuator.BLOCK,
+    (BlastTier.R3, COL_UNSUPPORTED_CATEGORICAL): Actuator.ESCALATE,
+    (BlastTier.R3, COL_UNSUPPORTED_HEDGED): Actuator.ESCALATE,
+    (BlastTier.R3, COL_UNKNOWN): Actuator.ESCALATE,
+    (BlastTier.R2, COL_CONTRADICTED): Actuator.BLOCK,
+    (BlastTier.R2, COL_UNSUPPORTED_CATEGORICAL): Actuator.EDIT,
+    (BlastTier.R2, COL_UNSUPPORTED_HEDGED): Actuator.EDIT,
+    (BlastTier.R2, COL_UNKNOWN): Actuator.ESCALATE,
+    (BlastTier.R1, COL_CONTRADICTED): Actuator.EDIT,
+    (BlastTier.R1, COL_UNSUPPORTED_CATEGORICAL): Actuator.EDIT,
+    (BlastTier.R1, COL_UNSUPPORTED_HEDGED): Actuator.PASS_ANNOTATE,
+    (BlastTier.R1, COL_UNKNOWN): Actuator.PASS_ANNOTATE,
+    (BlastTier.R0, COL_CONTRADICTED): Actuator.PASS_ANNOTATE,
+    (BlastTier.R0, COL_UNSUPPORTED_CATEGORICAL): Actuator.PASS_ANNOTATE,
+    (BlastTier.R0, COL_UNSUPPORTED_HEDGED): Actuator.PASS,
+    (BlastTier.R0, COL_UNKNOWN): Actuator.PASS,
+})
 
 _SEVERITY = {
     Actuator.BLOCK: 4,
@@ -65,15 +54,9 @@ _COL_RANK = {
 def _column_for_claim(claim: Claim, binding: Binding, violated: bool) -> str:
     if violated or binding.verdict == Verdict.CONTRADICTED:
         return COL_CONTRADICTED
-    if (
-        binding.verdict == Verdict.UNSUPPORTED
-        and claim.assertion == AssertionStrength.CATEGORICAL
-    ):
+    if binding.verdict == Verdict.UNSUPPORTED and claim.assertion == AssertionStrength.CATEGORICAL:
         return COL_UNSUPPORTED_CATEGORICAL
-    if (
-        binding.verdict == Verdict.UNSUPPORTED
-        and claim.assertion == AssertionStrength.HEDGED
-    ):
+    if binding.verdict == Verdict.UNSUPPORTED and claim.assertion == AssertionStrength.HEDGED:
         return COL_UNSUPPORTED_HEDGED
     if binding.verdict == Verdict.UNKNOWN:
         return COL_UNKNOWN
@@ -86,76 +69,14 @@ def _actuator_for(tier: BlastTier, column: str) -> Actuator:
     return MATRIX[(tier, column)]
 
 
-def _build_packet(
-    ledger: EvidenceLedger,
-    action: Action,
-    actuator: Actuator,
-    driving: list[tuple[Claim, str, Actuator]],
-) -> EvidencePacket | dict[str, Any]:
-    if not driving:
-        return {
-            "claims": [],
-            "candidate_spans": [],
-            "diff": None,
-        }
-    primary = driving[0][0]
-    binding = ledger.bindings[primary.claim_id]
-    if actuator == Actuator.ESCALATE:
-        return EvidencePacket(
-            claim_id=primary.claim_id,
-            claim_text=primary.text,
-            verdict=binding.verdict.value,
-            candidate_span_ids=tuple(binding.span_ids),
-            diff=None,
-            proposed_actuator=actuator.value,
-            action_id=action.action_id,
-            extra={
-                "driving_claim_ids": [c.claim_id for c, _, _ in driving],
-                "claims": [
-                    {
-                        "claim_id": c.claim_id,
-                        "text": c.text,
-                        "kind": c.kind.value,
-                        "assertion": c.assertion.value,
-                        "verdict": ledger.bindings[c.claim_id].verdict.value,
-                        "span_ids": list(ledger.bindings[c.claim_id].span_ids),
-                    }
-                    for c, _, _ in driving
-                ],
-            },
-        )
-    return {
-        "claims": [
-            {
-                "claim_id": c.claim_id,
-                "text": c.text,
-                "kind": c.kind.value,
-                "assertion": c.assertion.value,
-                "verdict": ledger.bindings[c.claim_id].verdict.value,
-                "span_ids": list(ledger.bindings[c.claim_id].span_ids),
-            }
-            for c, _, _ in driving
-        ],
-        "candidate_spans": [
-            sid
-            for c, _, _ in driving
-            for sid in ledger.bindings[c.claim_id].span_ids
-        ],
-        "diff": None,
-    }
-
-
 def decide(
     ledger: EvidenceLedger,
     action: Action,
     findings: dict[str, EntitlementFinding] | None = None,
 ) -> Decision:
-    """Sole decider: worst claim with role_in_action[action] > 0 × frozen MATRIX."""
     computed: dict[str, EntitlementFinding] = {}
     for claim_id, binding in ledger.bindings.items():
-        unresolved = tuple(
-            sid for sid in binding.span_ids if sid not in ledger.spans
-        )
+        unresolved = tuple(sid for sid in binding.span_ids if sid not in ledger.spans)
         if unresolved:
             # An ACL we cannot evaluate is not an ACL we may ignore. Skipping the
             # audit here would read as "not violated" and fail open.
@@ -174,9 +95,7 @@ def decide(
     findings = {}
     for claim_id, computed_finding in computed.items():
         override = supplied.get(claim_id)
-        if override is not None and (
-            override.violated or not computed_finding.violated
-        ):
+        if override is not None and (override.violated or not computed_finding.violated):
             findings[claim_id] = override
         else:
             findings[claim_id] = computed_finding
@@ -198,9 +117,8 @@ def decide(
         driving_ids: tuple[str, ...] = ()
         matrix_col = COL_UNKNOWN
         actuator = MATRIX[(action.tier, COL_UNKNOWN)]
-        packet: EvidencePacket | dict[str, Any]
         if actuator in (Actuator.ESCALATE, Actuator.BLOCK):
-            packet = EvidencePacket(
+            packet: EvidencePacket | dict[str, Any] = EvidencePacket(
                 claim_id="",
                 claim_text="",
                 verdict=Verdict.UNKNOWN.value,
@@ -208,13 +126,10 @@ def decide(
                 diff=None,
                 proposed_actuator=actuator.value,
                 action_id=action.action_id,
-                extra={
-                    "reason": "no claim carries role_in_action for this action",
-                    "claims": [],
-                },
+                extra={"reason": "no claim carries role_in_action for this action", "claims": []},
             )
         else:
-            packet = {"claims": [], "candidate_spans": [], "diff": None}
+            packet: EvidencePacket | dict[str, Any] = {"claims": [], "candidate_spans": [], "diff": None}
     else:
         worst = max(_SEVERITY[a] for _, _, a in scored)
         driving = [(c, col, a) for c, col, a in scored if _SEVERITY[a] == worst]
@@ -222,7 +137,25 @@ def decide(
         matrix_col = driving[0][1]
         actuator = driving[0][2]
         driving_ids = tuple(c.claim_id for c, _, _ in driving)
-        packet = _build_packet(ledger, action, actuator, driving)
+        packet = {
+            "claims": [
+                {
+                    "claim_id": c.claim_id,
+                    "text": c.text,
+                    "kind": c.kind.value,
+                    "assertion": c.assertion.value,
+                    "verdict": ledger.bindings[c.claim_id].verdict.value,
+                    "span_ids": list(ledger.bindings[c.claim_id].span_ids),
+                }
+                for c, _, _ in driving
+            ],
+            "candidate_spans": [
+                sid
+                for c, _, _ in driving
+                for sid in ledger.bindings[c.claim_id].span_ids
+            ],
+            "diff": None,
+        }
 
     decision = Decision(
         action_id=action.action_id,
@@ -234,14 +167,11 @@ def decide(
     )
     ledger.actions[action.action_id] = action
     ledger.decisions[action.action_id] = decision
-    ledger.append(
-        "decision",
-        {
-            "action_id": decision.action_id,
-            "actuator": decision.actuator.value,
-            "matrix_row": decision.matrix_row,
-            "matrix_col": decision.matrix_col,
-            "driving_claim_ids": list(decision.driving_claim_ids),
-        },
-    )
+    ledger.append("decision", {
+        "action_id": decision.action_id,
+        "actuator": decision.actuator.value,
+        "matrix_row": decision.matrix_row,
+        "matrix_col": decision.matrix_col,
+        "driving_claim_ids": list(decision.driving_claim_ids),
+    })
     return decision

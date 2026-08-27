@@ -1,7 +1,6 @@
 from controlplane.ledger import EvidenceLedger
 from controlplane.models import Principal
 
-
 def test_hash_chain_links_entries():
     led = EvidenceLedger.begin(
         request_id="req-1",
@@ -13,7 +12,6 @@ def test_hash_chain_links_entries():
     h2 = led.append("note", {"n": 2})
     assert h1 != h2
     assert led.verify_chain() is True
-
 
 def test_tamper_breaks_chain():
     led = EvidenceLedger.begin(

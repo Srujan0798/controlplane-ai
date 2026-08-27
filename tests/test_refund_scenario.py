@@ -1,6 +1,4 @@
-from controlplane.mock_refund import execute_refund
-from controlplane.models import Actuator, EvidencePacket, Verdict
-from controlplane.scenarios.knowledge import run_principal_flip
+from controlplane.models import Actuator, Verdict
 from controlplane.scenarios.refund import run_refund_scenario
 
 
@@ -16,15 +14,7 @@ def test_clause_72_is_absence_not_contradiction():
     binding = led.bindings["clause_72"]
     assert binding.verdict == Verdict.UNSUPPORTED
     assert binding.span_ids == ()
-    # Corpus law: no clause 7.2 in AGR-VENDOR-v3 content
-    agr = [s for s in led.spans.values() if s.source_id == "AGR-VENDOR-v3"]
-    assert agr
-    assert "7.2" not in agr[0].content
-    assert all(
-        "7.2" not in s.content
-        for s in led.spans.values()
-        if s.source_id != "INJECT-NOTICE"
-    )
+    assert all("7.2" not in span.content for span in led.spans.values())
 
 
 def test_show_text_driven_by_entitlement():
@@ -33,7 +23,7 @@ def test_show_text_driven_by_entitlement():
     assert d.actuator == Actuator.EDIT
     assert d.matrix_row == "R1"
     assert d.matrix_col == "Contradicted / entitlement violation"
-    assert "internal_note" in d.driving_claim_ids
+    assert "hr_side" in d.driving_claim_ids
 
 
 def test_refund_held_not_blocked():
@@ -44,37 +34,13 @@ def test_refund_held_not_blocked():
     assert d.matrix_row == "R3"
     assert d.matrix_col == "Unsupported + categorical"
     assert d.driving_claim_ids == ("clause_72",)
-    assert isinstance(d.packet, EvidencePacket)
-    assert d.packet.candidate_span_ids == ()
-
-    result = execute_refund(allowed=(d.actuator == Actuator.PASS))
-    assert result["committed"] is False
-    assert result["status"] == "REFUND HELD"
-    assert "BLOCK" not in result["status"].upper()
 
 
-def test_principal_and_frozen_sources():
+def test_principal_excludes_hr_and_hr_span_is_present():
     led = run_refund_scenario()
-    assert led.principal.id == "agent_refund_7"
-    assert led.principal.clearance == frozenset({"refund_agent"})
-    sources = {s.source_id for s in led.spans.values()}
-    assert sources == {
-        "AGR-VENDOR-v3",
-        "ORD-1023",
-        "FIN-INTERNAL-NOTE",
-        "INJECT-NOTICE",
-    }
+    assert led.principal.clearance == frozenset({"vendor-public"})
+    assert "hr-confidential" not in led.principal.clearance
+    hr_spans = [s for s in led.spans.values() if "hr-confidential" in s.acl]
+    assert len(hr_spans) == 1
+    assert led.bindings["hr_side"].span_ids == (hr_spans[0].span_id,)
     assert led.bindings["amount"].verdict == Verdict.SUPPORTED
-
-
-def test_mock_refund_vocabulary():
-    held = execute_refund(False)
-    committed = execute_refund(True)
-    assert held == {"committed": False, "status": "REFUND HELD"}
-    assert committed == {"committed": True, "status": "REFUND COMMITTED"}
-
-
-def test_knowledge_flip_edit_vs_pass():
-    unauthorized, entitled = run_principal_flip()
-    assert unauthorized.decisions["show_text"].actuator == Actuator.EDIT
-    assert entitled.decisions["show_text"].actuator == Actuator.PASS

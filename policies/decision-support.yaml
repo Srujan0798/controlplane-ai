@@ -1,0 +1,15 @@
+policy_version: pack-decision-v1
+use_case: decision-support
+description: Regulated / irreversible actions — payments, deletions
+default_tier: R3
+mode: enforce
+latency_budget_ms_p50: 40
+latency_budget_ms_p95: 200
+fail_stance: closed_escalate
+actions:
+  show_text:
+    tier: R1
+    irreversibility: false
+  issue_refund:
+    tier: R3
+    irreversibility: true

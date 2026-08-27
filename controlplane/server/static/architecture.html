@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1c1f24" />
+  <title>ControlPlane · Architecture</title>
+  <link rel="stylesheet" href="/static/css/bay.css" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <script src="/static/js/bay.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to story</a>
+  <div class="shell">
+    <header class="rail">
+      <a class="mark" href="/">Control<em>Plane</em></a>
+      <span class="mode-stamp">Operate</span>
+      <nav class="nav" aria-label="Operate">
+        <a href="/" data-nav="clearance">Clearance</a>
+        <a href="/static/policies.html" data-nav="policies">Policies</a>
+        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
+        <a href="/static/audit.html" data-nav="audit">Audit</a>
+        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
+        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
+        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+      </nav>
+      <div class="rail-status">
+        <span class="lamp" id="lamp" aria-hidden="true"></span>
+        <span id="healthText">checking bay...</span>
+      </div>
+    </header>
+
+    <main class="page wide" id="main">
+      <h1>One graph</h1>
+      <p class="lede">An AI response is not text to be scored — it is a set of claims requesting permission to act. Performance, cost and responsibility are three reads of this structure. Click a station.</p>
+
+      <div class="story-chain" id="chain">
+        <button type="button" class="station" data-k="step">Step</button>
+        <span class="arrow">produces</span>
+        <button type="button" class="station keystone" data-k="span">Span</button>
+        <span class="arrow">binds</span>
+        <button type="button" class="station" data-k="claim">Claim</button>
+        <span class="arrow">authorizes</span>
+        <button type="button" class="station" data-k="action">Action</button>
+      </div>
+      <div class="story-panel" id="panel"></div>
+
+      <h2>Three reads</h2>
+      <div class="read-grid">
+        <article class="paper">
+          <div class="meta">Performance · forward</div>
+          <h3>Does each claim bind to a span?</h3>
+          <p>Not confidence. Assertion strength × groundedness deficit. Default verdict is UNSUPPORTED. A claim must earn SUPPORTED. Not low confidence — unproven.</p>
+        </article>
+        <article class="paper">
+          <div class="meta">Cost · backward</div>
+          <h3>Did each step ground an accepted claim?</h3>
+          <p>Any step that grounds zero accepted claims is dead compute — exact, no model. Cost never blocks a user's answer; it kills a runaway loop.</p>
+        </article>
+        <article class="paper">
+          <div class="meta">Responsibility · labels</div>
+          <h3>Is the caller entitled, and is the action inside its interlock?</h3>
+          <p>Leakage is set membership + ACL, not a classifier. Bias is counterfactual flip rate, route-level, async. Safety is typed interlocks on the action, not the prose.</p>
+        </article>
+      </div>
+
+      <h2>Running example — one ledger, two actuators</h2>
+      <p class="lede" style="margin-bottom:12px">Approved. Refund of ₹1,84,000 issued under clause 7.2 of the vendor agreement. Confidence 0.94. Money moved Tuesday, found Friday. The company wrongly paid. Clause 7.2 does not exist.</p>
+      <div class="strips">
+        <article class="strip static" data-actuator="Edit">
+          <div class="strip-tab"></div>
+          <div class="strip-body">
+            <div class="strip-id">show_text</div>
+            <div class="strip-title">Show text to the customer</div>
+            <div class="strip-cell">R1 × <code>Contradicted / entitlement violation</code> · HR span, caller excluded</div>
+          </div>
+          <div class="flap"><div class="flap-word">Edit</div></div>
+        </article>
+        <article class="strip static" data-actuator="Escalate">
+          <div class="strip-tab"></div>
+          <div class="strip-body">
+            <div class="strip-id">issue_refund</div>
+            <div class="strip-title">Issue the refund</div>
+            <div class="strip-cell">R3 × <code>Unsupported + categorical</code> · clause 7.2 has no span</div>
+          </div>
+          <div class="flap"><div class="flap-word">Escalate</div></div>
+        </article>
+      </div>
+      <p class="note">Both are correct simultaneously. Proof scales with consequence. Never say “blocked” about the refund — it is held and escalated with the evidence packet.</p>
+
+      <h2>Named on the graph</h2>
+      <div class="duo-grid">
+        <article class="paper">
+          <div class="meta">Cost · backward</div>
+          <h3>Dead compute</h3>
+          <p>Walk SUPPORTED claims to spans to steps. Any step that grounded nothing is dead compute — counted and named, never estimated. On the refund fixture: <span class="mono">faq_search</span> and <span class="mono">crm_lookup</span>. Cost never blocks a user's answer; it kills a runaway loop.</p>
+        </article>
+        <article class="paper">
+          <div class="meta">Latency · stream</div>
+          <h3>Hold-back</h3>
+          <p>Text streams on a ~150–300&nbsp;ms trailing delay. Failures inside the buffer never reach the user. The hard gate sits on the action, not the token. Chosen over emit-then-recall: post-hoc retraction has a liability gap by construction.</p>
+        </article>
+      </div>
+
+      <h2>Content law</h2>
+      <p class="lede">Nine facts seven models corrupted. Each was broken by at least one. They are the room's landmines.</p>
+      <div class="law-grid">
+        <article class="law"><b>01</b><span>Clause 7.2 does not exist. Never “caps,” never “denies.” Absence, not conflict — that is why Escalate, not Block.</span></article>
+        <article class="law"><b>02</b><span>Never say “blocked” about the refund. R3 × unsupported-categorical = Escalate. Held with the packet.</span></article>
+        <article class="law"><b>03</b><span>The company wrongly pays ₹1,84,000. The customer did not lose money. The refund was not denied.</span></article>
+        <article class="law"><b>04</b><span>The matrix is transcribed, never redrawn. Axis labels, column vocabulary, cell values are load-bearing.</span></article>
+        <article class="law"><b>05</b><span>Actuators are exactly Block · Edit · Escalate · Pass. No STREAM, Kill Span, Terminate Step, Hold &amp; Re-verify.</span></article>
+        <article class="law"><b>06</b><span>Latency is ≤40 ms p50 / ≤200 ms p95. Never quote 40ms as p95 — a five-fold overclaim, dead on contact.</span></article>
+        <article class="law"><b>07</b><span>The FNR report ships as an empty schema with typed placeholders. The emptiness is the credibility play.</span></article>
+        <article class="law"><b>08</b><span>The refuse-to-claim list is about us — not the rejected-approaches list. Do not confuse the two.</span></article>
+        <article class="law"><b>09</b><span>Do not drop bias. Counterfactual flip rate with a confidence interval, route-level, async. Measurement, not morals.</span></article>
+      </div>
+    </main>
+    <footer class="colophon">ControlPlane · Choda Srujan Sai · Dhrithika · IIT Gandhinagar · PS #1</footer>
+  </div>
+  <script>
+    const STORY = {
+      step: {
+        title: "STEP — tool call, retrieval, model turn",
+        body: "A step is work the system did while assembling context or generating. Tool calls, retrievals, DB reads, model turns. Cost reads the graph backward from accepted claims onto these steps: any step that grounded nothing is dead compute, counted exactly.",
+        mute: "Most workers on this pipeline are not LLMs. Specialization and isolation, not conversation.",
+      },
+      span: {
+        title: "SPAN — the keystone. Provenance Recorder.",
+        body: "If exactly one thing gets built, build the Provenance Recorder. It hooks context assembly and captures every span with source_id, ACL, hash, offsets — the ground truth of what the model was allowed to know. Provenance is captured outside the model, where it is tamper-proof. Without this hook every other mechanism degrades to a generic guardrail. Everyone watches the exit. Nobody records the entrance.",
+        mute: "Binding is then a lookup against a small in-memory set, not a search over a corpus. That single choice removes most of the apparent cost of verification.",
+      },
+      claim: {
+        title: "CLAIM — typed atomic proposition from the output stream",
+        body: "Check-worthy typed propositions: numbers, entities, dates, quantities, causal and policy assertions. Each tagged categorical or hedged. Default verdict is UNSUPPORTED. A claim must earn SUPPORTED. Derived and multi-hop claims are never entailed — recompute from spans, or return UNKNOWN. UNKNOWN never collapses into SUPPORTED. That rule is the boundary against false assurance.",
+        mute: "Response verdict = worst claim, weighted by that claim's role in the pending action. Never an average.",
+      },
+      action: {
+        title: "ACTION — pending side effect, priced by blast radius",
+        body: "Tool + args + irreversibility. The hard gate is on actions, not tokens. Users perceive speed from text; harm lives in the commit path. The Interlock computes R, applies the frozen matrix, emits the actuator. Everything else advises; only this decides. Deadline-driven, not consensus-driven. A slow check never overturns a fast decision.",
+        mute: "R = irreversibility × audience × data class × autonomy. R0 draft · R1 user-visible · R2 reversible write · R3 irreversible or regulated.",
+      },
+    };
+
+    function show(key) {
+      document.querySelectorAll(".station").forEach((b) => b.classList.toggle("live", b.dataset.k === key));
+      const s = STORY[key];
+      Bay.$("panel").innerHTML = `
+        <div class="kicker">${key === "span" ? "Keystone" : "Primitive"}</div>
+        <h3>${s.title}</h3>
+        <p>${s.body}</p>
+        <p class="mute">${s.mute}</p>
+      `;
+    }
+
+    document.getElementById("chain").addEventListener("click", (ev) => {
+      const b = ev.target.closest(".station");
+      if (b) show(b.dataset.k);
+    });
+    show("span");
+  </script>
+</body>
+</html>

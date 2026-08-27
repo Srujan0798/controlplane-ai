@@ -5,13 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from controlplane.models import (
-    Action,
-    Binding,
-    Claim,
-    Decision,
-    Principal,
-    Span,
-    Step,
+    Action, Binding, Claim, Decision, Principal, Span, Step,
 )
 
 
@@ -81,10 +75,7 @@ class EvidenceLedger:
         for entry in self._entries:
             if entry.prev_hash != prev:
                 return False
-            expected = _sha256(
-                prev
-                + _canonical({"type": entry.entry_type, "payload": entry.payload})
-            )
+            expected = _sha256(prev + _canonical({"type": entry.entry_type, "payload": entry.payload}))
             if expected != entry.hash:
                 return False
             prev = entry.hash

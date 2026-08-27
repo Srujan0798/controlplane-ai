@@ -126,4 +126,4 @@ class Decision:
     matrix_row: str
     matrix_col: str
     driving_claim_ids: tuple[str, ...]
-    packet: EvidencePacket | dict[str, Any]
+    packet: dict[str, Any]
