@@ -87,6 +87,7 @@ SEBI/
 | Pitch morning-of | `round2/R2S5.md` + `docs/JUDGE_RUNBOOK.md` |
 | Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` |
 | Absolute truth (internal) | `docs/ARCHITECTURE.md`, `NARRATIVE.md`, `QA.md` |
+| Agent workers (next tasks) | [`docs/AGENT_PROMPTS.md`](docs/AGENT_PROMPTS.md) · gaps: `docs/PRIZE_WIN_MATRIX.md` |
 | Do **not** present | `round2/_archive/`, `docs/_archive/`, agent scratch, graphify cache |
 
 ## What shipped on this tree

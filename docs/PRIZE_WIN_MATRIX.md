@@ -1,11 +1,16 @@
 # Prize-win matrix — ControlPlane Round 2
 
 Honest inventory. What we have vs what first-prize teams actually need.
-Branch: `feature/round2-controlplane` only. **Do not merge until human says so.**
+
+**Branch:** `main` (single source of truth). `feature/round2-controlplane` is **merged**.  
+**Verified baseline:** 106 passed / 1 skipped (post-merge).  
+**Agent prompts:** [`docs/AGENT_PROMPTS.md`](AGENT_PROMPTS.md) — refresh statuses below before implementing more GAPs.
 
 Scoring lens: Accenture Round 2 asks for (1) detailed business proposal (2) working prototype of core mechanism (3) pitch. Judges also score novelty, technical depth, enterprise realism, demo clarity, risk awareness.
 
 Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
+
+> **Stale-risk note:** Waves 4–5 shipped many items still listed as GAP in sections A–H below. Treat Wave progress at the bottom as authoritative until Agent 1 refreshes line items.
 
 ---
 
@@ -176,7 +181,17 @@ Wave 2 backend security+sqlite: **SHIPPED** (`3f2ebe8`).
 Wave 3 bench+threat+runbook: **SHIPPED** (`8fb7e24`, `7387a88`) — gate p50≈0.05ms p95≈0.17ms on N=200.  
 Pretty routes + nav: **this commit**.
 
-Still open from the 125: upstream passthrough, multi-turn ledger, hold-back buffer, Playwright E2E, proposal PDF, SBOM, webhook escalations, Lane 2 NLI.
+### Post-merge remaining (room-first — refresh line items in Agent 1)
+
+Likely still open or PARTIAL for prize day (confirm against code before coding):
+
+1. Pitch fidelity: `round2/R2S5.md` ↔ deck ↔ `JUDGE_RUNBOOK` language lock
+2. Hostile Q&A drill sheet linked to live demo clicks
+3. Event-day checklist (backup laptop, airgap, known-good tag)
+4. Optional full Playwright e2e (currently smoke / skip without browser)
+5. Lane 2 NLI — **DEFER** (off critical path by design)
+6. Coverage / mutation gates — nice-to-have, not room-blocking
+7. Any leftover microcopy saying “blocked” instead of held/escalated
 
 ## Wave 4 (SHIPPED — parallel agents)
 
@@ -184,11 +199,22 @@ Still open from the 125: upstream passthrough, multi-turn ledger, hold-back buff
 - 4B multi-turn session + hold-back
 - 4C side-by-side ungated/gated + dead-compute + evidence packet UI
 - 4D e2e smoke + proposal PDF + non-root docker + SBOM
-- Monitor: healthz + pytest every 3 min
 
 ### Wave 4 outcomes
 - Upstream hook + escalate webhook + signed audits (`844832d`)
 - Multi-turn sessions + hold-back (`09fc25e`)
 - Side-by-side ungated/gated + dead-compute + evidence packet UI (`a7d1dee`)
 - E2E smoke + proposal PDF + non-root Docker + SBOM (`8e18885`…`b1bfe12`)
-- Tests: **89 passed**, 1 skipped (Playwright optional)
+
+## Wave 5 (SHIPPED)
+
+- 5A bias probe + Prometheus + Makefile polish
+- 5B console reset / session / favicon / projector
+- Offline-safe console (no Google Fonts CDN)
+
+## Merge to main (SHIPPED)
+
+- `feature/round2-controlplane` → `main` (`7c4a7bc`)
+- Kept `round2/` FINAL + R2S5 canon, knowledge-flip demo, fail-closed tests
+- Dropped ephemeral `.wave*` / `.impeccable*` reports from the tree
+- Tests on merged main: **106 passed**, 1 skipped
