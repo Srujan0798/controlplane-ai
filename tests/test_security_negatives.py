@@ -57,3 +57,17 @@ def test_oversized_json_does_not_500():
     r = client.post("/v1/chat/completions", json=huge)
     assert r.status_code in {200, 400, 413, 422}
     assert r.status_code != 500
+
+
+def test_payload_too_large_returns_413():
+    """MAX_BODY_SIZE guard (enterprise_guards middleware) must reject oversized bodies."""
+    client = _client()
+    huge = {
+        "model": "controlplane-demo",
+        "messages": [{"role": "user", "content": "x" * 1_500_000}],
+        "scenario": "refund",
+        "mode": "enforce",
+    }
+    r = client.post("/v1/chat/completions", json=huge)
+    assert r.status_code == 413
+    assert "payload too large" in r.json()["detail"].lower()

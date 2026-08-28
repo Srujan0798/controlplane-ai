@@ -214,6 +214,41 @@ one accuracy number across three failure modes.
 
 ---
 
+---
+
+## Abuse-case → test map (W8-07)
+
+Maps each hostile/abuse case to the concrete regression test that pins it. GAP = no
+covering test (and, where noted, no shipped feature). MATRIX is cited, never redrawn.
+
+| # | Abuse case | Test (`file::name`) | Coverage |
+|---|------------|--------------------|----------|
+| a | API key absent on `/v1/` | `tests/test_security.py::test_api_key_rejects_401`, `tests/test_security.py::test_api_key_helper_rejects_missing_and_wrong` | COVERED |
+| b | API key wrong on `/v1/` | `tests/test_security.py::test_api_key_rejects_401`, `tests/test_security.py::test_api_key_helper_rejects_missing_and_wrong` | COVERED |
+| c | Payload too large | `tests/test_security_negatives.py::test_payload_too_large_returns_413`, `tests/test_security_negatives.py::test_oversized_json_does_not_500` (`controlplane/server/app.py:232` middleware) | COVERED |
+| d | Rate limit exceeded | `tests/test_security.py::test_rate_limit_eventually_429`, `tests/test_security.py::test_rate_limiter_unit` | COVERED |
+| e | Forbidden CORS origin | `tests/test_cors.py::test_disallowed_origin_gets_no_allow_header`, `tests/test_cors.py::test_empty_env_denies_every_origin` | COVERED |
+| f | Idempotency-Key replay same body | — | GAP (W7-02 idempotency not shipped) |
+| g | Idempotency-Key replay different body | — | GAP (W7-02 idempotency not shipped) |
+| h | Clause 7.2 absence → UNSUPPORTED → Escalate | `tests/test_refund_scenario.py::test_clause_72_is_absence_not_contradiction`, `tests/test_refund_scenario.py::test_refund_held_not_blocked` | COVERED |
+| i | Refund agent reads internal-only span → entitlement violation → Edit | `tests/test_refund_scenario.py::test_show_text_driven_by_entitlement`, `tests/test_fail_closed.py::test_supplied_findings_cannot_clear_a_computed_violation` | COVERED |
+| j | Refund enforce → held with packet (never blocked) | `tests/test_refund_scenario.py::test_refund_held_not_blocked`, `tests/test_fail_closed.py::test_typo_in_action_id_cannot_commit_the_refund` (`status == "REFUND HELD"`) | COVERED |
+| k | Flip `analyst_01` → R1×entitlement → Edit | `tests/test_flip_endpoint.py::test_flip_endpoints_run_real_interlock` | COVERED |
+| l | Flip `hr_partner_01` → R1 clean → Pass | `tests/test_flip_endpoint.py::test_flip_endpoints_run_real_interlock` | COVERED |
+| m | Healthz 200 | `tests/test_security_negatives.py::test_healthz_ok`, `tests/test_security.py::test_api_key_rejects_401` | COVERED |
+| n | R3 irreversible + UNSUPPORTED driving claim → Escalate (fail closed) | `tests/test_fail_closed.py::test_typo_in_action_id_cannot_commit_the_refund`, `tests/test_interlock.py::test_r3_unsupported_categorical_escalates` | COVERED |
+| o | Compact/minimal payload sets allowed claim → still through interlock | `tests/test_interlock.py::test_supported_not_violated_is_pass`, `tests/test_interlock.py::test_worst_claim_among_role_in_action` | COVERED |
+
+**Gaps (no shipped feature to test, docs-only):** f, g — idempotency keying
+(`controlplane/idempotency.py` / `tests/test_idempotency.py`) was scoped in W7-02 but
+never implemented, so replay semantics cannot be asserted. No new tests added for these;
+the surface fails closed (no keying → every request treated as distinct, never re-applied).
+
+**New tests added this wave:** `tests/test_security_negatives.py::test_payload_too_large_returns_413`
+(pins the `MAX_BODY_SIZE` 413 guard that was enforced but unasserted).
+
+---
+
 ## Readiness bar
 
 Both presenters should be able to:
