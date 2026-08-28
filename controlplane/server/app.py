@@ -15,7 +15,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Str
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from controlplane import logging_setup, signing, upstream, webhook
+from controlplane import idempotency, logging_setup, signing, upstream, webhook
 from controlplane.holdback import admit_for_decisions
 from controlplane.persist import AuditStore
 from controlplane.pipeline import ControlPlaneGate
@@ -42,18 +42,31 @@ STATIC = Path(__file__).resolve().parent / "static"
 
 
 class ChatMessage(BaseModel):
-    role: str
-    content: str
+    role: str = Field(
+        examples=["user"],
+        description="Chat role, e.g. 'user' or 'assistant'.",
+    )
+    content: str = Field(
+        examples=["Refund order ORD-1023 under clause 7.2"],
+        description="Message text.",
+    )
 
 
 class ChatCompletionRequest(BaseModel):
-    model: str = "controlplane-demo"
-    messages: list[ChatMessage] = Field(default_factory=list)
+    model: str = Field(default="controlplane-demo", examples=["controlplane-demo"])
+    messages: list[ChatMessage] = Field(
+        default_factory=list,
+        examples=[
+            [{"role": "user", "content": "Refund order ORD-1023 under clause 7.2"}]
+        ],
+    )
     stream: bool = False
     # ControlPlane extensions (also accepted via headers)
-    use_case: str | None = None
-    mode: str | None = None  # shadow | enforce
-    scenario: str | None = None  # refund | support | copilot | decision
+    use_case: str | None = Field(default=None, examples=["refund"])
+    mode: str | None = Field(default=None, examples=["enforce"], description="shadow | enforce")
+    scenario: str | None = Field(
+        default=None, examples=["refund"], description="refund | support | copilot | decision"
+    )
 
 
 class AuditVerifyRequest(BaseModel):
@@ -118,6 +131,7 @@ def create_app(
     limiter = RateLimiter()
 
     access_log = logging_setup.configure_logging()
+    idem_cache = idempotency.IdempotencyCache()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -356,6 +370,61 @@ def create_app(
     def list_requests(limit: int = 50, offset: int = 0) -> dict[str, Any]:
         return {"requests": _list_requests(limit=limit, offset=offset)}
 
+    @app.get("/v1/controlplane/metrics.csv")
+    def metrics_csv(limit: int = 200, offset: int = 0) -> PlainTextResponse:
+        """Shadow 'would-have-held' decision rows as a CSV for skeptical reviewers.
+
+        Real only: every row is a persisted request. No synthesized FNR column
+        — the metric is left empty until earned (see docs/KILL_SHOT.md).
+        """
+        import csv as _csv
+        import io as _io
+
+        rows = _list_requests(limit=limit, offset=offset)
+        buf = _io.StringIO()
+        writer = _csv.writer(buf)
+        writer.writerow(
+            [
+                "request_id",
+                "use_case",
+                "mode",
+                "mode_label",
+                "ts_unix",
+                "would_hold",
+                "enforced",
+                "text_actuator",
+                "refund_actuator",
+            ]
+        )
+        for row in rows:
+            decisions = row.get("decisions") or {}
+            writer.writerow(
+                [
+                    row.get("request_id", ""),
+                    row.get("use_case", ""),
+                    row.get("mode", ""),
+                    "shadow" if row.get("mode") == "shadow" else "enforce",
+                    "",  # per-request wall-clock not persisted; left empty, not invented
+                    int(bool(row.get("would_hold"))),
+                    int(bool(row.get("enforced"))),
+                    (decisions.get("show_text") or {}).get("actuator", "")
+                    if isinstance(decisions.get("show_text"), dict)
+                    else "",
+                    (decisions.get("issue_refund") or {}).get("actuator", "")
+                    if isinstance(decisions.get("issue_refund"), dict)
+                    else "",
+                ]
+            )
+        return PlainTextResponse(
+            buf.getvalue(),
+            media_type="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition": (
+                    'attachment; filename="controlplane-metrics.csv"'
+                )
+            },
+        )
+
     @app.get("/v1/controlplane/requests/{request_id}")
     def get_request(request_id: str) -> dict[str, Any]:
         found = _lookup(request_id)
@@ -425,21 +494,114 @@ def create_app(
             raise HTTPException(status_code=404, detail="session not found")
         return found
 
-    @app.post("/v1/controlplane/demo/{scenario}")
+    @app.post(
+        "/v1/controlplane/demo/{scenario}",
+        responses={
+            200: {
+                "description": "Gated decision for the scenario.",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "request_id": "refund-9f23a1c4",
+                            "use_case": "decision-support",
+                            "mode": "enforce",
+                            "would_hold": True,
+                            "enforced": True,
+                            "latency_ms": 0.12,
+                            "decisions": {
+                                "show_text": {
+                                    "actuator": "Edit",
+                                    "matrix_row": "R1",
+                                    "matrix_col": "Contradicted / entitlement violation",
+                                },
+                                "issue_refund": {
+                                    "actuator": "Escalate",
+                                    "matrix_row": "R3",
+                                    "matrix_col": "Unsupported + categorical",
+                                },
+                            },
+                            "principal": {
+                                "id": "cs-agent-17",
+                                "roles": ["customer-support"],
+                                "clearance": ["vendor-public"],
+                            },
+                        }
+                    }
+                },
+            },
+            400: {"description": "Unknown scenario."},
+        },
+    )
     def run_demo(
         scenario: str,
+        request: Request,
         mode: str | None = None,
         session_id: str | None = None,
         principal: str | None = None,
     ) -> dict[str, Any]:
+        key = request.headers.get("idempotency-key")
+        fp = idempotency.fingerprint(
+            {
+                "scenario": scenario,
+                "mode": mode,
+                "principal": principal,
+                "session_id": session_id,
+            }
+        )
+        if key:
+            cached = idem_cache.lookup(key, fp)
+            if cached is not None:
+                cached.setdefault("idempotent_replay", True)
+                return cached
+            if idem_cache.conflict(key, fp):
+                from fastapi import status as _status
+
+                return JSONResponse(
+                    {"detail": "idempotency key reused with different body"},
+                    status_code=_status.HTTP_409_CONFLICT,
+                    headers=dict(SECURITY_HEADERS),
+                )
         result = _run_scenario(gate, scenario, mode_override=mode, principal_id=principal)
         pub = result.public_dict()
         _after_gate(pub)
         _attach_session(session_id, pub)
         logging_setup.log_decision(access_log, pub, scenario=scenario)
+        if key:
+            idem_cache.store(key, fp, pub)
         return pub
 
-    @app.post("/v1/chat/completions")
+    @app.post(
+        "/v1/chat/completions",
+        responses={
+            200: {
+                "description": "OpenAI-compatible gated completion.",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "id": "chatcmpl-refund-9f23a1c4",
+                            "object": "chat.completion",
+                            "model": "controlplane-demo",
+                            "choices": [
+                                {
+                                    "index": 0,
+                                    "message": {
+                                        "role": "assistant",
+                                        "content": "Refund is held and escalated with the evidence packet. Irreversible action not released.",
+                                    },
+                                    "finish_reason": "stop",
+                                }
+                            ],
+                            "controlplane": {
+                                "use_case": "decision-support",
+                                "would_hold": True,
+                                "enforced": True,
+                            },
+                        }
+                    }
+                },
+            }
+        },
+    )
     async def chat_completions(
         body: ChatCompletionRequest,
         request: Request,
@@ -460,6 +622,21 @@ def create_app(
         scenario = body.scenario or x_controlplane_scenario or _infer_scenario(body.messages)
 
         if scenario:
+            key = request.headers.get("idempotency-key")
+            fp = idempotency.fingerprint(body.model_dump())
+            if key:
+                cached = idem_cache.lookup(key, fp)
+                if cached is not None:
+                    cached.setdefault("idempotent_replay", True)
+                    return JSONResponse(cached)
+                if idem_cache.conflict(key, fp):
+                    from fastapi import status as _status
+
+                    return JSONResponse(
+                        {"detail": "idempotency key reused with different body"},
+                        status_code=_status.HTTP_409_CONFLICT,
+                        headers=dict(SECURITY_HEADERS),
+                    )
             result = _run_scenario(gate, scenario, mode_override=mode)
             pub = result.public_dict()
             _after_gate(pub)
@@ -489,6 +666,8 @@ def create_app(
                 "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
                 "controlplane": pub,
             }
+            if key:
+                idem_cache.store(key, fp, completion)
             return JSONResponse(completion)
 
         if enable_upstream or upstream.configured():
