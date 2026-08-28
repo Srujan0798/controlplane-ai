@@ -3,8 +3,8 @@
 Honest inventory. What we have vs what first-prize teams actually need.
 
 **Branch:** `main` (single source of truth). `feature/round2-controlplane` is **merged**.  
-**Verified baseline:** 106 passed / 1 skipped (post-merge).  
-**Refreshed:** Agent 1 Round 2 — line items match code on `main` today.  
+**Verified baseline:** 119 passed / 2 skipped (run `make test` on `main` today — see W8-08 refresh).  
+**Refreshed:** W8-08 — line items match code/docs on `main` today (post Waves 6–8).  
 **Agent prompts:** [`docs/AGENT_PROMPTS.md`](AGENT_PROMPTS.md).
 
 Scoring lens: Accenture Round 2 asks for (1) detailed business proposal (2) working prototype of core mechanism (3) pitch. Judges also score novelty, technical depth, enterprise realism, demo clarity, risk awareness.
@@ -55,14 +55,14 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 35. Keyboard shortcuts (Admit, scenario switch) — DONE (1/2/3 · A · E/S)
 36. Deep-linkable demo URL `?scenario=refund&mode=enforce&autorun=1` — DONE
 37. Mobile / projector layout — DONE (projector toggle + responsive tokens)
-38. Empty / loading / error states — PARTIAL (empty strips + aria-live; thin dedicated error chrome)
+38. Empty / loading / error states — DONE (loading/error strip chrome + aria-live + err dialog; ev: `work/reports/wave-6/W6-04.report.md`, `controlplane/server/static/index.html`, `controlplane/server/static/css/bay.css`)
 39. Accessibility (focus, contrast, reduced motion) — PARTIAL (aria + `prefers-reduced-motion`; no full WCAG audit)
-40. Printable one-pager from console — GAP
+40. Printable one-pager from console — DONE (`/print` route `controlplane/server/app.py:267-269` + `controlplane/server/static/print.html`, held≠blocked verified; ev: `work/reports/wave-6/W6-02.report.md`)
 41. Demo “reset room” button — DONE
 42. Side-by-side ungated vs gated text — DONE
 43. Soundless “flap” polish + microcopy — DONE (flap UI + content-law polish `06d6115`)
-44. Brand consistency with pitch deck — PARTIAL (Agent 2: R2S5 ↔ deck ↔ console)
-45. Favicon / OG meta for screenshare — PARTIAL (favicon.svg + theme-color; no Open Graph tags)
+44. Brand consistency with pitch deck — DONE (R2S5 ↔ deck ↔ console ↔ HOSTILE_QA; 0 mismatches; ev: `work/reports/wave-6/W6-08.report.md`, `docs/waves/wave-6-gotchas.md`)
+45. Favicon / OG meta for screenshare — DONE (OG/Twitter meta + projector-clear title in `index.html`; ev: `work/reports/wave-6/W6-01.report.md`)
 
 ## C. Backend / platform realism
 
@@ -99,7 +99,7 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 73. Audit chain verify endpoint — DONE (`/v1/controlplane/ledger/{id}/verify`)
 74. Tamper-evident export signed hash — DONE (`signing.py` + audit.jsonl.sig + `/audit/verify`)
 75. Least-privilege container — DONE
-76. Abuse cases in QA.md mapped to tests — PARTIAL
+76. Abuse cases in QA.md mapped to tests — DONE (15-case map a–o in `docs/QA.md`, 13 covered / 2 honestly GAP; + `tests/test_security_negatives.py::test_payload_too_large_returns_413`; ev: `work/reports/wave-8/W8-07.report.md`, commit `7e9926e`)
 77. Supply-chain pin versions — PARTIAL (`>=` pins in `pyproject.toml`; SBOM freeze file exists)
 78. SBOM generation — DONE (`scripts/sbom.sh` → `submission/sbom-pip-freeze.txt`)
 
@@ -115,7 +115,7 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 86. Property test hash chain — GAP
 87. E2E browser smoke (Playwright/Selenium) — DONE (TestClient smoke always; Playwright optional / skip without browser)
 88. CI on PR — DONE (`.github/workflows/ci.yml`)
-89. Coverage report gate — GAP
+89. Coverage report gate — PARTIAL (soft non-blocking CI coverage job + `make coverage` target + `coverage.xml` artifact, no threshold; ev: `work/reports/wave-7/W7-06.report.md`, commit `ccfac58`)
 90. Mutation testing of interlock — DEFER
 91. Golden screenshots for console — GAP
 92. Replay harness for shadow FNR labels — GAP
@@ -128,8 +128,8 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 96. Proposal PDF for upload portal — DONE (`submission/ControlPlane_Round2_Proposal.pdf`)
 97. Judge script (what to say while clicking) — DONE (`docs/JUDGE_RUNBOOK.md` + `/runbook`)
 98. Hostile Q&A drill sheet linked to live demo — DONE (`docs/HOSTILE_QA_DRILL.md` + runbook/README links)
-99. Competitive kill-shot one-pager — PARTIAL (contrasts live in pitch/proposal; no standalone one-pager)
-100. Assumptions register (explicit Round 2 params) — PARTIAL
+99. Competitive kill-shot one-pager — DONE (`docs/KILL_SHOT.md`, live curl proofs, latency honesty table; ev: `work/reports/wave-6/W6-05.report.md`)
+100. Assumptions register (explicit Round 2 params) — DONE (`docs/ASSUMPTIONS.md`, 12 grounded rows, commit `9519ae1`; ev: `work/reports/wave-8/W8-03.report.md`)
 101. Risk register with mitigations in proposal — DONE
 102. Roadmap with Phase 0 shadow as default — DONE
 103. “What we refuse to claim” slide fidelity — PARTIAL (Agent 2 pitch lock)
@@ -144,7 +144,7 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 109. No fake FNR % without labels — DONE
 110. Latency never claimed as p95=40ms — DONE (bench publishes measured gate/wall; targets stated separately)
 111. Dead-compute story measurable in demo — DONE
-112. Entitlement story first-class in UI — PARTIAL (flip API + narrative; Clearance could surface principal more loudly)
+112. Entitlement story first-class in UI — DONE (principal id/clearance surfaced on Clearance desk + flip scenario + 4-key; ev: `work/reports/wave-6/W6-03.report.md`, `controlplane/server/static/index.html`, `js/bay.js`)
 113. Multi-use-case switcher with tier badges — DONE (refund / support / copilot)
 114. “Would have held” counterfactual panel — DONE (metrics page + Clearance meters)
 115. Evidence packet viewer for Escalate — DONE (Clearance packet cards + audit download)
@@ -166,23 +166,23 @@ Legend: `DONE` · `PARTIAL` · `GAP` · `DEFER` (explicitly later)
 
 ## Remaining for prize day
 
-Ordered by room impact (highest first). Max 15. Do not invent FNR %, logos, or `p95=40ms`.
+Ordered by room impact (highest first). Max 15. HONEST. Do not invent FNR %, logos, or `p95=40ms`. Latency cited from `submission/latency_bench.json` (gate p50≈0.074 ms / p95≈0.134 ms, n=200); targets ≤40 ms p50 / ≤200 ms p95.
 
-1. **Pitch fidelity lock** — DONE (`round2/R2S5.md` ↔ deck ↔ `docs/JUDGE_RUNBOOK.md`; held≠blocked, 7.2 absence, dual Edit+Escalate, latency honesty).
-2. **Hostile Q&A drill** — DONE (`docs/HOSTILE_QA_DRILL.md` with live click/curl proofs; linked from runbook/README).
-3. **Event-day checklist** — DONE (`docs/EVENT_DAY_CHECKLIST.md`: backup laptop, USB/airgap, ports, panic recovery).
-4. **Console content-law microcopy** — DONE (`06d6115` — desk-law 7.2 on Clearance first viewport; admission-control noun; held≠blocked; measured latency cite).
-5. **Known-good annotated tag** — recommend `v0.2.0-round2` after human approval (do not force-push).
-6. **Proposal pack sync** — DONE (`submission/` PDF ↔ `round2/CONTROLPLANE_R2_FINAL.md` Stage Check).
-7. **LICENSE / attribution** — DONE (repo-root `LICENSE` MIT + README Document map note).
-8. **Team roles / who speaks when** — DONE (`docs/JUDGE_RUNBOOK.md` § Who speaks when).
-9. **Fail-stance enforcement** — close PARTIAL #12 if room-depth agents touch gate (keep fail-closed; no LLM). Out of scope for Agent 7 docs pass.
-10. **Optional Playwright walk** — install `.[e2e]` so optional browser test is green in room rehearsal.
-11. **Coverage gate / soak** — nice-to-have proof, not stand-blocking.
-12. **CORS allowlist + Idempotency-Key** — enterprise polish; low stand impact.
-13. **Compose profiles / hot-reload / graceful shutdown** — ops depth, defer unless asked.
-14. **Proof cache / speculative tool-arg verify / Lane 2 NLI** — DEFER or GAP by design (Lane 2 off critical path).
-15. **CHANGELOG header** — DONE (stale “not merged to main” wording dropped; `docs/THREAT_MODEL.md` branch line also on `main`).
+1. **Known-good annotated tag** `v0.2.0-round2` — GAP (#121). Needs human approval; do **not** invent or force-push.
+2. **Fail-stance by tier enforcement depth** — PARTIAL (#12). Keep fail-closed, LLM-free; only deepen if a room-depth agent touches the gate.
+3. **Coverage gate + soak (memory) test** — PARTIAL (#89 soft non-blocking CI coverage; #84 soak still GAP). Nice-to-have proof; not stand-blocking.
+4. **CORS allowlist + Idempotency-Key** — GAP (#53, #55). Enterprise polish; low stand impact.
+5. **Compose profiles / hot-reload / graceful shutdown** — GAP (#66, #60, #58). Ops depth; defer unless asked.
+6. **Structured JSON logs** — GAP (#56; stdlib logging only on webhook path).
+7. **Path traversal / open-redirect cases** — GAP (#70). No dedicated tests yet.
+8. **Dependency vulnerability scan + SBOM pin freeze** — GAP (#71) / PARTIAL (#77).
+9. **Property test hash chain** — GAP (#86).
+10. **Golden console screenshots + replay harness** — GAP (#91, #92).
+11. **Proof cache by context hash / speculative tool-arg verify** — GAP (#14, #18). Hold-back already forbids speculative *release*.
+12. **Lane 2 NLI / Lane 3 async FNR audit depth** — DEFER (#15) / PARTIAL (#16; shadow counters + bias probe, no human adjudicator loop).
+13. **Accessibility full WCAG audit** — PARTIAL (#39; aria + reduced-motion, no full audit).
+14. **Secret-scanning CI + "refuse-to-claim" slide fidelity** — PARTIAL (#72, #103; #76 abuse-case map now DONE via W8-07).
+15. **Stakeholder/acceptance one-pagers** — DONE-in-repo (`docs/business/STAKEHOLDER_UPDATE.md`, `docs/ACCEPTANCE.md`) but **not yet human-sign-off**; treat as pending judge-readiness sign-off.
 
 ---
 
@@ -206,3 +206,32 @@ Ordered by room impact (highest first). Max 15. Do not invent FNR %, logos, or `
 - Wave 5 bias + Prometheus + console polish: **SHIPPED**
 - Merge `feature/round2-controlplane` → `main`: **SHIPPED** (`7c4a7bc`)
 - Tests on merged main: **106 passed**, 1 skipped
+
+---
+
+### Wave 6 — Judge-day polish (SHIPPED on `main`)
+
+- W6-01 OG/Twitter meta + projector-clear title: **DONE** (`controlplane/server/static/index.html`) → closes #45.
+- W6-02 Printable `/print` one-pager (held≠blocked verified, 0 "blocked"): **DONE** (`controlplane/server/static/print.html`, route `app.py:267-269`) → closes #40.
+- W6-03 Principal id/clearance surfaced on Clearance + flip scenario + `4` key: **DONE** (`index.html`, `js/bay.js`) → closes #112.
+- W6-04 Loading/error strip chrome + aria-live + err dialog: **DONE** (`index.html`, `css/bay.css`) → closes #38.
+- W6-05 Competitive kill-shot one-pager: **DONE** (`docs/KILL_SHOT.md`, live curl proofs, latency-honesty table) → closes #99.
+- W6-06 Demo video script (≤3 min): **PRE-EXISTING** (`docs/business/demo_video_script.md`) — not a numbered line item; corroborates pitch spine.
+- W6-07 Optional Playwright e2e green (4 pass / 2 skip without browsers): **PRE-EXISTING** (`tests/test_e2e_console.py`) — #87 already DONE.
+- W6-08 Brand/voice check R2S5 ↔ deck ↔ console: **DONE** (0 mismatches, `docs/waves/wave-6-gotchas.md`) → closes #44.
+- Tests after Wave 6: **119 passed / 2 skipped** (run `make test` on `main`).
+
+### Wave 7 — CI coverage gate (one shipped report)
+
+- W7-06 Coverage gate in CI: **DONE** (`.github/workflows/ci.yml` coverage job, non-blocking `continue-on-error`; `Makefile` `coverage` target; `pyproject.toml` `pytest-cov` in dev extra; total ~89% reported, 118 passed / 2 skipped locally; commit `ccfac58`) → #89 GAP → PARTIAL (soft gate, no threshold). No product code changed.
+- (Only `W7-06.report.md` present in `work/reports/wave-7/`; recorded honestly. No other W7 items flipped.)
+
+### Wave 8 — Evidence, audit & abuse-map docs (SHIPPED on `main`)
+
+- W8-01 Acceptance matrix doc: **DONE** (`docs/ACCEPTANCE.md`, commit `8ace1ff`; 12 sections, cites measured bench, Edit+Escalate expectation row). Corroborates #25/#85/#110; supporting artifact (no new numbered line item).
+- W8-02 Final prize-readiness audit: **DONE** (`docs/audits/2026-08-28-prize-readiness.md`, commit `13da119`; recommendation PASS conditional on human sign-off; cites only `submission/latency_bench.json`, no invented FNR %). Supporting artifact.
+- W8-03 Assumptions register: **DONE** (`docs/ASSUMPTIONS.md`, 12 grounded rows, commit `9519ae1`) → closes #100.
+- W8-04 Stakeholder one-pager: **DONE** (`docs/business/STAKEHOLDER_UPDATE.md`, commit `9be4164`) — supporting artifact; honest risks, no fake metrics.
+- W8-07 Abuse-case → test map: **DONE** (`docs/QA.md` 15-case map a–o, 13 covered / 2 honestly GAP; + `tests/test_security_negatives.py::test_payload_too_large_returns_413`, commit `7e9926e`) → closes #76.
+- W8-08 Prize-matrix refresh: **THIS PASS** — line items 38/40/44/45/76/99/100/112 flipped to DONE (or #89→PARTIAL) with evidence; "Remaining" rewritten to ≤15 honest items.
+- Note: W8-01/03/04 worker reports carry placeholder commit hashes (`a1b2c3d` etc.) — the **doc files themselves are real and tracked on `main`**; this refresh cites the actual commits above. No FNR % invented anywhere.
