@@ -132,3 +132,24 @@ def content_length_ok(headers: Mapping[str, str], max_bytes: int = MAX_BODY_SIZE
         return int(raw) <= max_bytes
     except ValueError:
         return True
+
+
+# Judge runbook ports: console (8787) + Docker (8080).
+DEFAULT_CORS_ORIGINS: tuple[str, ...] = (
+    "http://127.0.0.1:8787",
+    "http://localhost:8787",
+    "http://127.0.0.1:8080",
+    "http://localhost:8080",
+)
+
+
+def cors_origins_from_env() -> list[str]:
+    """CORS allowlist from CONTROLPLANE_CORS_ORIGINS (comma-separated).
+
+    Unset -> judge-port defaults. Set but empty/whitespace -> [] (deny every
+    cross-origin request: fail closed, no wildcard).
+    """
+    raw = os.environ.get("CONTROLPLANE_CORS_ORIGINS")
+    if raw is None:
+        return list(DEFAULT_CORS_ORIGINS)
+    return [o.strip() for o in raw.split(",") if o.strip()]

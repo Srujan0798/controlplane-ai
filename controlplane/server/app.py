@@ -5,15 +5,17 @@ import json
 import os
 import time
 import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from controlplane import signing, upstream, webhook
+from controlplane import logging_setup, signing, upstream, webhook
 from controlplane.holdback import admit_for_decisions
 from controlplane.persist import AuditStore
 from controlplane.pipeline import ControlPlaneGate
@@ -26,6 +28,7 @@ from controlplane.security import (
     api_key_authorized,
     client_ip,
     content_length_ok,
+    cors_origins_from_env,
 )
 from controlplane.shadow import MetricsStore
 from controlplane.scenarios.multi_usecase import (
@@ -114,6 +117,23 @@ def create_app(
             sessions = SessionStore()
     limiter = RateLimiter()
 
+    access_log = logging_setup.configure_logging()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        yield
+        # Graceful shutdown: close SQLite handles so WAL flushes and no
+        # connection survives SIGTERM (AuditStore / SessionStore close()
+        # are lock-guarded no-ops when unopened).
+        for resource in (store, sessions):
+            close = getattr(resource, "close", None)
+            if close is None:
+                continue
+            try:
+                close()
+            except Exception:
+                pass
+
     app = FastAPI(
         title="ControlPlane.ai",
         description=(
@@ -121,6 +141,14 @@ def create_app(
             "OpenAI-compatible reverse proxy + evidence ledger APIs."
         ),
         version="0.2.0",
+        lifespan=lifespan,
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins_from_env(),
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type", "X-API-Key", "Authorization"],
+        max_age=600,
     )
     app.state.gate = gate
     app.state.store = store
@@ -408,6 +436,7 @@ def create_app(
         pub = result.public_dict()
         _after_gate(pub)
         _attach_session(session_id, pub)
+        logging_setup.log_decision(access_log, pub)
         return pub
 
     @app.post("/v1/chat/completions")
@@ -434,6 +463,7 @@ def create_app(
             result = _run_scenario(gate, scenario, mode_override=mode)
             pub = result.public_dict()
             _after_gate(pub)
+            logging_setup.log_decision(access_log, pub)
             content = pub["response_overlay"].get("user_visible_text") or (
                 body.messages[-1].content if body.messages else ""
             )

@@ -1,11 +1,9 @@
 # HANDOFF.md — cold resume (rewrite, never append)
 
-- **Active wave:** wave-6 (room impact) → then wave-7 → wave-8
+- **Active wave:** wave-7 (enterprise) + finish wave-8 evidence; wave-6 reports mostly in
 - **Branch:** main
-- **Known-good baseline SHA (pre-elevation):** `dee3513`
-- **Tests baseline:** 106 passed / 1 skipped
-- **Goal:** Adaptoid thin OS installed; agents execute `work/wave-*/\*.md` in parallel; evidence pack for 100% confidence
-- **Do not rebuild:** MATRIX, clause 7.2 absence, fail-closed, Lane-1 no LLM
-- **Next human action:** open agent windows; paste `work/WORKER_PROMPT.md` + one task file each (see `HOW_TO_RUN.md`)
-- **Tag (human only when green):** `git tag -a v0.2.0-round2 -m "Round 2 prize-day known-good"`
-- **Stand kit:** R2S5 + JUDGE_RUNBOOK + HOSTILE_QA_DRILL + EVENT_DAY_CHECKLIST + console :8787/:8080
+- **Adaptoid spine:** Core-shaped folders added (`orchestrator/`, `.specify/`, `protocols/`, `MASTER-FLOW.md`) — product code untouched
+- **Ultra proposals:** `/Users/srujansai/Desktop/Adaptoid-OS/improvements/` (Core not patched)
+- **Harvest agents:** paste `Adaptoid-OS/improvements/from-projects/controlplane/HARVEST-PROMPT.md`
+- **Next:** finish Wave 7/8 product tasks; run `orchestrator/scripts/preflight-lite.sh`; merge reports; human tag when green
+- **Never:** redraw MATRIX · LLM on Lane 1 · say refund “blocked”

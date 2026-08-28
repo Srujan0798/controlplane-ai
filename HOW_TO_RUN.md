@@ -1,3 +1,5 @@
+# See also: [MASTER-FLOW.md](MASTER-FLOW.md) (Core-shaped spine)
+
 # HOW_TO_RUN.md — dual-tier parallel agents
 
 ## Product (judge)

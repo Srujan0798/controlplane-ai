@@ -13,3 +13,10 @@
 | `plan/` | orchestrator | PRD / ARCHITECTURE pointer / EXECUTION |
 | `.worktrees/` | ignored | Do not use for new prize work |
 | `graphify-out/` | regenerable | `graphify update .` |
+
+| `orchestrator/` | orchestrator | Tier-1 law, scripts, memory |
+| `.specify/` | orchestrator | constitution + wave specs |
+| `protocols/` | orchestrator | ship spine (+ Ultra proposals) |
+| `prompts/` | orchestrator | worker prompt mirrors |
+| `evals/` | orchestrator | eval stubs |
+| `MASTER-FLOW.md` | orchestrator | Core-shaped flow map |
