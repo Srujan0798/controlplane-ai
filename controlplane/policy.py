@@ -109,7 +109,7 @@ def _parse_pack(raw: dict[str, Any]) -> PolicyPack:
         mode=raw.get("mode", "shadow"),
         latency_budget_ms_p50=int(raw.get("latency_budget_ms_p50", 40)),
         latency_budget_ms_p95=int(raw.get("latency_budget_ms_p95", 200)),
-        fail_stance=raw.get("fail_stance", "open_annotate"),
+        fail_stance=raw.get("fail_stance", "closed"),
         actions=actions,
     )
 

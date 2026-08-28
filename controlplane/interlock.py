@@ -69,11 +69,28 @@ def _actuator_for(tier: BlastTier, column: str) -> Actuator:
     return MATRIX[(tier, column)]
 
 
+def _is_fail_closed(stance: str) -> bool:
+    """A closed fail-stance may not soft-Pass at irreversible blast tiers.
+
+    Matches `closed` and the pack vocabulary `closed_escalate`. Open stances
+    (e.g. `open_annotate`) never flip a matrix verdict.
+    """
+    return bool(stance) and stance.split("_", 1)[0] == "closed"
+
+
 def decide(
     ledger: EvidenceLedger,
     action: Action,
     findings: dict[str, EntitlementFinding] | None = None,
+    fail_stance: str = "closed",
 ) -> Decision:
+    """Run the Action Interlock for one action.
+
+    `fail_stance` is the policy pack's declared stance (default "closed" so a
+    caller that omits it fails closed). A closed stance flips any pass-level
+    matrix verdict (Pass / Pass+annotate) to Escalate at irreversible blast
+    tiers R2/R3 — never the reverse. The MATRIX itself is never redrawn.
+    """
     computed: dict[str, EntitlementFinding] = {}
     for claim_id, binding in ledger.bindings.items():
         unresolved = tuple(sid for sid in binding.span_ids if sid not in ledger.spans)
@@ -156,6 +173,27 @@ def decide(
             ],
             "diff": None,
         }
+
+    # --- Fail-stance enforcement (frozen invariant #8: fail closed) ---
+    # A closed fail-stance may not soft-Pass at irreversible blast tiers. The
+    # MATRIX is never redrawn; this only downgrades a pass-level verdict toward
+    # Escalate (monotonic — it never relaxes a stricter matrix verdict).
+    if _is_fail_closed(fail_stance) and actuator in (
+        Actuator.PASS,
+        Actuator.PASS_ANNOTATE,
+    ):
+        if action.tier in (BlastTier.R2, BlastTier.R3):
+            actuator = Actuator.ESCALATE
+            if isinstance(packet, dict):
+                packet = {
+                    **packet,
+                    "fail_stance_enforced": True,
+                    "fail_stance": fail_stance,
+                    "reason": (
+                        "closed fail-stance: irreversible blast tier "
+                        "cannot soft-Pass without proof"
+                    ),
+                }
 
     decision = Decision(
         action_id=action.action_id,

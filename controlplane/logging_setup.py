@@ -54,12 +54,20 @@ def configure_logging(level: str | None = None) -> logging.Logger:
     return logger
 
 
-def log_decision(logger: logging.Logger, public_dict: dict[str, Any]) -> None:
+def log_decision(
+    logger: logging.Logger,
+    public_dict: dict[str, Any],
+    *,
+    scenario: str | None = None,
+) -> None:
     """Emit one ``decision`` line per admitted request.
 
     Shape: request_id, scenario, mode, latency_ms, actuators, would_hold,
     enforced. Deliberately excludes claim text, span content, and prompt
     bodies.
+
+    ``scenario`` is the operator-facing identifier (URL parameter or
+    header) when known; otherwise the policy ``use_case`` is logged.
     """
     decisions = public_dict.get("decisions") or {}
     actuators = {
@@ -72,7 +80,7 @@ def log_decision(logger: logging.Logger, public_dict: dict[str, Any]) -> None:
         extra={
             "fields": {
                 "request_id": public_dict.get("request_id"),
-                "scenario": public_dict.get("use_case"),
+                "scenario": scenario or public_dict.get("use_case"),
                 "mode": public_dict.get("mode"),
                 "latency_ms": public_dict.get("latency_ms"),
                 "actuators": actuators,

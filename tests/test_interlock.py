@@ -59,15 +59,28 @@ def test_matrix_transcribed_never_redrawn(tier, col, expected):
     assert MATRIX[(tier, col)] == expected
 
 
-def test_supported_not_violated_is_pass():
+def test_supported_not_violated_is_pass_open_stance():
     led = _led()
     led.claims["c"] = Claim("c", "ok", ClaimKind.TEXTUAL,
                             AssertionStrength.CATEGORICAL, {"show": 1.0})
     led.bindings["c"] = Binding("c", ("s1",), "fixture", Verdict.SUPPORTED)
     # record the cited span so the binding resolves (acl subset of clearance)
     led.spans["s1"] = Span("s1", "step", "src", frozenset(), "ok content", "h")
-    d = decide(led, Action("show", "show_text", BlastTier.R3))
+    d = decide(led, Action("show", "show_text", BlastTier.R3), fail_stance="open_annotate")
     assert d.actuator == Actuator.PASS
+
+
+def test_supported_but_closed_stance_escalates_at_r3():
+    """Frozen invariant #8: a closed fail-stance never soft-Passes R3."""
+    led = _led()
+    led.claims["c"] = Claim("c", "ok", ClaimKind.TEXTUAL,
+                            AssertionStrength.CATEGORICAL, {"show": 1.0})
+    led.bindings["c"] = Binding("c", ("s1",), "fixture", Verdict.SUPPORTED)
+    led.spans["s1"] = Span("s1", "step", "src", frozenset(), "ok content", "h")
+    d = decide(led, Action("show", "issue_refund", BlastTier.R3, irreversibility=True),
+               fail_stance="closed")
+    assert d.actuator == Actuator.ESCALATE
+    assert d.packet.get("fail_stance_enforced") is True
 
 
 def test_worst_claim_among_role_in_action():

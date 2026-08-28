@@ -91,6 +91,7 @@ def test_demo_endpoint_emits_decision_log_line(capture_controlplane_log):
     decisions = [line for line in lines if line.get("msg") == "decision"]
     assert decisions, "expected a decision log line for the demo admit"
     fields = decisions[-1]["fields"]
+    # scenario is the operator-facing URL parameter, not the policy use_case
     assert fields["scenario"] == "refund"
     assert fields["request_id"]
     assert isinstance(fields["latency_ms"], (int, float))

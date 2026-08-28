@@ -436,7 +436,7 @@ def create_app(
         pub = result.public_dict()
         _after_gate(pub)
         _attach_session(session_id, pub)
-        logging_setup.log_decision(access_log, pub)
+        logging_setup.log_decision(access_log, pub, scenario=scenario)
         return pub
 
     @app.post("/v1/chat/completions")
@@ -463,7 +463,7 @@ def create_app(
             result = _run_scenario(gate, scenario, mode_override=mode)
             pub = result.public_dict()
             _after_gate(pub)
-            logging_setup.log_decision(access_log, pub)
+            logging_setup.log_decision(access_log, pub, scenario=scenario)
             content = pub["response_overlay"].get("user_visible_text") or (
                 body.messages[-1].content if body.messages else ""
             )

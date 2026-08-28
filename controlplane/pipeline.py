@@ -147,7 +147,9 @@ class ControlPlaneGate:
         findings = {cid: audit_claim(ledger, cid) for cid in ledger.claims}
         decisions: dict[str, Decision] = {}
         for action in actions:
-            decisions[action.action_id] = decide(ledger, action, findings=findings)
+            decisions[action.action_id] = decide(
+                ledger, action, findings=findings, fail_stance=pack.fail_stance
+            )
 
         would_hold = any(d.actuator in HOLDING_ACTUATORS for d in decisions.values())
         enforced = mode == "enforce" and would_hold
