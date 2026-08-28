@@ -1,7 +1,11 @@
-.PHONY: test bench run judge e2e pdf sbom
+.PHONY: test coverage bench run judge e2e pdf sbom
 
 test:
 	pytest -q
+
+# Coverage report (non-blocking soft gate). Does not run by default.
+coverage:
+	pytest --cov=controlplane --cov-report=term-missing
 
 bench:
 	CONTROLPLANE_RPM=100000 python3 scripts/load_bench.py -n 200
