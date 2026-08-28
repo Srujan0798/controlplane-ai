@@ -3,6 +3,16 @@
 Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1  
 Branch of record: **`main`**. Do not use `.worktrees/` for new work.
 
+
+## Adaptoid OS on this repo (Track 1)
+- Flow map: `MASTER-FLOW.md` (must match Core spine names)
+- Orchestrator: `orchestrator/ROLE.md`
+- Specs: `.specify/`
+- Protocols: `protocols/`
+- Tasks/reports: `work/` → `work/reports/`
+- Lite reference only: `ADAPTOID-LITE.md` (3.1). Ultra Lite proposal lives outside until promoted.
+- Preflight: `orchestrator/scripts/preflight-lite.sh`
+
 ## Stack
 - Python ≥ 3.11 · FastAPI · uvicorn · pytest · YAML policies · static HTML/CSS/JS console
 - Package: `controlplane/` · run: `pip install -e ".[dev]"` · `pytest -q`
