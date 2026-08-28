@@ -1,13 +1,13 @@
 # EXECUTION.md
 
-**Active wave:** wave-6
+**Active wave:** wave-8 (closing)
 
 | Wave | Name | Status | Tasks | Commit | Notes |
 |---|---|---|---|---|---|
 | 1–5 | Historical product waves | **SHIPPED** ✅ | — | `7c4a7bc`…`dee3513` | merged on main |
-| 0 | Adaptoid thin OS | **READY** | scaffold | — | this commit |
-| 6 | Room impact | **READY TO DISPATCH** | 8 | — | `work/wave-6/` |
-| 7 | Enterprise edges | **READY TO DISPATCH** | 8 | — | after/with 6 if ownership held |
-| 8 | Evidence / confidence | **READY TO DISPATCH** | 8 | — | docs-heavy |
+| 0 | Adaptoid thin OS | **READY** | scaffold | — | — |
+| 6 | Room impact | **SHIPPED** ✅ | 8 | see `work/reports/wave-6/` | OG meta, entitlement UI, error chrome, demo, brand |
+| 7 | Enterprise edges | **SHIPPED** ✅ | 8 | see `work/reports/wave-7/` | CORS, JSON logs, shutdown, idempotency, coverage CI, fail-stance, shadow CSV, OpenAPI |
+| 8 | Evidence / confidence | **SHIPPED** ✅ | 8 | see `work/reports/wave-8/` | audit, abuse map, prize matrix, handoff, tag, CONTRIBUTING |
 
 Update Status → SHIPPED and fill Commit when wave reports merge green.
