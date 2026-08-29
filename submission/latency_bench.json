@@ -1,111 +1,261 @@
 {
-  "n": 200,
+  "n": 10000,
   "concurrencies": [
-    1
+    1,
+    4,
+    16,
+    64
   ],
   "concurrency_sweep": [
     {
       "concurrency": 1,
-      "n": 200,
-      "wall_seconds": 0.089,
-      "throughput_rps": 2237.1,
+      "n": 10000,
+      "wall_seconds": 4.662,
+      "throughput_rps": 2145.1,
       "per_stage_ms": {
         "extract": {
-          "n": 200,
-          "mean": 0.0234,
-          "p50": 0.0229,
-          "p95": 0.0292,
-          "p99": 0.0381,
-          "max": 0.0619
+          "n": 10000,
+          "mean": 0.0243,
+          "p50": 0.0232,
+          "p95": 0.0295,
+          "p99": 0.04,
+          "max": 0.1569
         },
         "bind": {
-          "n": 200,
-          "mean": 0.214,
-          "p50": 0.2093,
-          "p95": 0.2544,
-          "p99": 0.3386,
-          "max": 0.398
+          "n": 10000,
+          "mean": 0.227,
+          "p50": 0.2187,
+          "p95": 0.2658,
+          "p99": 0.3258,
+          "max": 6.5889
         },
         "entitle": {
-          "n": 200,
-          "mean": 0.1622,
-          "p50": 0.1593,
-          "p95": 0.1919,
-          "p99": 0.2519,
-          "max": 0.3515
+          "n": 10000,
+          "mean": 0.1749,
+          "p50": 0.1673,
+          "p95": 0.2117,
+          "p99": 0.2721,
+          "max": 8.3795
         },
         "interlock": {
-          "n": 200,
-          "mean": 0.0303,
-          "p50": 0.0301,
-          "p95": 0.036,
-          "p99": 0.047,
-          "max": 0.0771
+          "n": 10000,
+          "mean": 0.0329,
+          "p50": 0.0314,
+          "p95": 0.0391,
+          "p99": 0.0615,
+          "max": 0.198
         }
       },
       "gate_latency_ms": {
-        "n": 200,
-        "mean": 0.4299,
-        "p50": 0.4214,
-        "p95": 0.5105,
-        "p99": 0.6204,
-        "max": 0.7012
+        "n": 10000,
+        "mean": 0.4592,
+        "p50": 0.4444,
+        "p95": 0.5333,
+        "p99": 0.619,
+        "max": 8.668
+      }
+    },
+    {
+      "concurrency": 4,
+      "n": 10000,
+      "wall_seconds": 4.618,
+      "throughput_rps": 2165.2,
+      "per_stage_ms": {
+        "extract": {
+          "n": 10000,
+          "mean": 0.0971,
+          "p50": 0.0236,
+          "p95": 0.0291,
+          "p99": 0.0405,
+          "max": 49.7478
+        },
+        "bind": {
+          "n": 10000,
+          "mean": 0.8961,
+          "p50": 0.2181,
+          "p95": 0.2761,
+          "p99": 24.0088,
+          "max": 61.6106
+        },
+        "entitle": {
+          "n": 10000,
+          "mean": 0.6913,
+          "p50": 0.1676,
+          "p95": 0.2093,
+          "p99": 19.024,
+          "max": 66.9407
+        },
+        "interlock": {
+          "n": 10000,
+          "mean": 0.1356,
+          "p50": 0.0311,
+          "p95": 0.0374,
+          "p99": 0.0609,
+          "max": 37.1865
+        }
+      },
+      "gate_latency_ms": {
+        "n": 10000,
+        "mean": 1.82,
+        "p50": 0.4427,
+        "p95": 13.0176,
+        "p99": 30.0865,
+        "max": 67.2177
+      }
+    },
+    {
+      "concurrency": 16,
+      "n": 10000,
+      "wall_seconds": 4.614,
+      "throughput_rps": 2167.1,
+      "per_stage_ms": {
+        "extract": {
+          "n": 10000,
+          "mean": 0.1123,
+          "p50": 0.0245,
+          "p95": 0.0302,
+          "p99": 0.0443,
+          "max": 236.4672
+        },
+        "bind": {
+          "n": 10000,
+          "mean": 1.559,
+          "p50": 0.2162,
+          "p95": 0.2498,
+          "p99": 31.0883,
+          "max": 540.7207
+        },
+        "entitle": {
+          "n": 10000,
+          "mean": 1.3889,
+          "p50": 0.1661,
+          "p95": 0.1959,
+          "p99": 23.8092,
+          "max": 998.656
+        },
+        "interlock": {
+          "n": 10000,
+          "mean": 0.345,
+          "p50": 0.0309,
+          "p95": 0.0365,
+          "p99": 0.052,
+          "max": 737.678
+        }
+      },
+      "gate_latency_ms": {
+        "n": 10000,
+        "mean": 3.4052,
+        "p50": 0.4403,
+        "p95": 0.5424,
+        "p99": 93.0206,
+        "max": 998.9256
+      }
+    },
+    {
+      "concurrency": 64,
+      "n": 10000,
+      "wall_seconds": 4.709,
+      "throughput_rps": 2123.7,
+      "per_stage_ms": {
+        "extract": {
+          "n": 10000,
+          "mean": 0.9259,
+          "p50": 0.0242,
+          "p95": 0.0321,
+          "p99": 0.0553,
+          "max": 954.9111
+        },
+        "bind": {
+          "n": 10000,
+          "mean": 7.9262,
+          "p50": 0.2195,
+          "p95": 0.274,
+          "p99": 280.0962,
+          "max": 1678.1496
+        },
+        "entitle": {
+          "n": 10000,
+          "mean": 6.9821,
+          "p50": 0.1685,
+          "p95": 0.2143,
+          "p99": 245.6099,
+          "max": 2325.3655
+        },
+        "interlock": {
+          "n": 10000,
+          "mean": 1.3318,
+          "p50": 0.0312,
+          "p95": 0.0394,
+          "p99": 0.0541,
+          "max": 1924.271
+        }
+      },
+      "gate_latency_ms": {
+        "n": 10000,
+        "mean": 17.1661,
+        "p50": 0.4477,
+        "p95": 7.1533,
+        "p99": 565.5476,
+        "max": 2325.6489
       }
     }
   ],
-  "best_throughput_rps": 2237.1,
+  "best_throughput_rps": 2167.1,
   "per_stage_ms": {
     "extract": {
-      "n": 200,
-      "mean": 0.0234,
-      "p50": 0.0229,
-      "p95": 0.0292,
-      "p99": 0.0381,
-      "max": 0.0619
+      "n": 10000,
+      "mean": 0.1123,
+      "p50": 0.0245,
+      "p95": 0.0302,
+      "p99": 0.0443,
+      "max": 236.4672
     },
     "bind": {
-      "n": 200,
-      "mean": 0.214,
-      "p50": 0.2093,
-      "p95": 0.2544,
-      "p99": 0.3386,
-      "max": 0.398
+      "n": 10000,
+      "mean": 1.559,
+      "p50": 0.2162,
+      "p95": 0.2498,
+      "p99": 31.0883,
+      "max": 540.7207
     },
     "entitle": {
-      "n": 200,
-      "mean": 0.1622,
-      "p50": 0.1593,
-      "p95": 0.1919,
-      "p99": 0.2519,
-      "max": 0.3515
+      "n": 10000,
+      "mean": 1.3889,
+      "p50": 0.1661,
+      "p95": 0.1959,
+      "p99": 23.8092,
+      "max": 998.656
     },
     "interlock": {
-      "n": 200,
-      "mean": 0.0303,
-      "p50": 0.0301,
-      "p95": 0.036,
-      "p99": 0.047,
-      "max": 0.0771
+      "n": 10000,
+      "mean": 0.345,
+      "p50": 0.0309,
+      "p95": 0.0365,
+      "p99": 0.052,
+      "max": 737.678
     }
   },
   "gate_latency_ms": {
-    "n": 200,
-    "mean": 0.4299,
-    "p50": 0.4214,
-    "p95": 0.5105,
-    "p99": 0.6204,
-    "max": 0.7012
+    "n": 10000,
+    "mean": 3.4052,
+    "p50": 0.4403,
+    "p95": 0.5424,
+    "p99": 93.0206,
+    "max": 998.9256
   },
   "units": "milliseconds (per-stage compute, in-process)",
   "methodology": {
-    "n_requests": 200,
+    "n_requests": 10000,
     "machine": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
     "cpu": "arm",
     "hostname": "macs-MacBook-Pro.local",
     "python": "3.14.3",
     "workload": "frozen refund demo (extract\u2192bind\u2192entitle\u2192interlock, R1+R3, 2 actions)",
     "concurrency_levels": [
-      1
+      1,
+      4,
+      16,
+      64
     ],
     "measurement": "Wall-clock around each pipeline stage using time.perf_counter(); percentiles are computed over all per-request stage durations. Stages run in-process (no HTTP/server overhead) so the number is the model's pure compute cost, NOT end-to-end API latency. Do not quote these as API p95.",
     "lane1_target": "\u226460ms p95 deterministic ceiling (ARCHITECTURE \u00a75)",
