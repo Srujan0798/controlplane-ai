@@ -1,26 +1,21 @@
-# MASTER-FLOW — ControlPlane × Adaptoid Core spine
+# MASTER-FLOW — ControlPlane product
 
 ```
-USE / HOW_TO_RUN / AGENTS.md
-        │
-        ├── LITE reference: ADAPTOID-LITE.md
-        │
-        └── CORE-shaped project (this repo)
-               │
-               ├── orchestrator/   Tier-1 law + scripts
-               ├── .specify/       constitution + wave specs
-               ├── plan/           PRD · ARCHITECTURE · EXECUTION
-               ├── work/           task briefs → reports
-               ├── protocols/      ship spine (+ Ultra proposals)
-               ├── prompts/        worker prompts
-               ├── evals/          eval stubs
-               │
-               ▼
-        Workers execute work/wave-N/*.md
-               │
-               ▼
-        Evidence: pytest · ACCEPTANCE · audits · HANDOFF rewrite
+README / AGENTS.md
+       │
+       ├── controlplane/     gate + FastAPI + static console
+       ├── policies/         YAML packs
+       ├── examples/         CLI demos
+       ├── tests/            pytest
+       ├── docs/             architecture, runbook, acceptance, QA
+       ├── round2/           FINAL proposal + R2S5 pitch canon
+       ├── submission/       PDF / PPTX / bench / SBOM
+       ├── work/             wave tasks + reports (agent evidence)
+       ├── plan/EXECUTION.md wave status
+       └── orchestrator/     ROLE + preflight-lite.sh
+                │
+                ▼
+         make judge / pytest / console :8787 or :8080
 ```
 
-Product code stays in `controlplane/`. Adaptoid does not replace the gate.
-Ultra proposals live in Desktop `Adaptoid-OS/improvements/` until Core adopts them.
+Adaptoid Ultra proposals live outside this repo (`~/Desktop/Adaptoid-OS/improvements/`, closed). Do not re-import Lite copies here.

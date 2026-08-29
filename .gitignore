@@ -32,3 +32,8 @@ graphify-out/
 
 # Large Round 1 parked assets (if present on disk)
 archive/
+
+# Coverage / local build noise
+.coverage
+htmlcov/
+.coverage.*

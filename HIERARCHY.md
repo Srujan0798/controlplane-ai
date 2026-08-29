@@ -1,22 +1,16 @@
-# HIERARCHY.md — repo map + ownership
+# HIERARCHY.md — ownership
 
 | Path | Owner | Notes |
 |---|---|---|
-| `controlplane/` | product agents | Core gate + FastAPI + static |
-| `controlplane/server/static/` | Wave 6 UI tasks | File-own per task |
-| `policies/` | policy agents | YAML packs; no matrix redraw |
+| `controlplane/` | product | Gate + server + static |
+| `policies/` | product | YAML packs |
 | `tests/` | whoever changes code | Must stay green |
-| `docs/` | docs/evidence agents | Canon under `round2/` for FINAL/R2S5 |
-| `round2/` | pitch canon | Prefer not to rewrite R2S5 unless factual error |
-| `submission/` | packaging agents | PDF/PPTX/bench/SBOM |
-| `work/` | orchestrator writes tasks; workers write reports only under `work/reports/` |
-| `plan/` | orchestrator | PRD / ARCHITECTURE pointer / EXECUTION |
-| `.worktrees/` | ignored | Do not use for new prize work |
+| `docs/` | docs | Runbook, acceptance, architecture |
+| `round2/` | pitch canon | FINAL + R2S5 — prefer not to rewrite |
+| `submission/` | packaging | PDF / PPTX / bench / SBOM |
+| `work/` | evidence archive | Wave tasks + reports (shipped) |
+| `plan/` | status | EXECUTION.md |
+| `orchestrator/` | verify | ROLE + preflight-lite |
+| `protocols/` | reference | Ship spine copies (small) |
+| `.worktrees/` | ignored | Do not use for new work |
 | `graphify-out/` | regenerable | `graphify update .` |
-
-| `orchestrator/` | orchestrator | Tier-1 law, scripts, memory |
-| `.specify/` | orchestrator | constitution + wave specs |
-| `protocols/` | orchestrator | ship spine (+ Ultra proposals) |
-| `prompts/` | orchestrator | worker prompt mirrors |
-| `evals/` | orchestrator | eval stubs |
-| `MASTER-FLOW.md` | orchestrator | Core-shaped flow map |

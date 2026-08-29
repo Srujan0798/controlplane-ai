@@ -1,5 +1,4 @@
 # Orchestrator memory
 
-- Adaptoid improvements: `/Users/srujansai/Desktop/Adaptoid-OS/improvements/`
-- Harvest prompt: `improvements/from-projects/controlplane/HARVEST-PROMPT.md`
-- Active product waves: 6–8 under `work/`
+- Product focus only. Adaptoid closed outside this repo.
+- Waves 6–8 shipped: see plan/EXECUTION.md and work/reports/.

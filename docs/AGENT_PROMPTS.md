@@ -1,3 +1,5 @@
+> **Superseded for day-to-day work.** Waves 6–8 are shipped (`plan/EXECUTION.md`). Use `HANDOFF.md` + prize-day verify. Keep this file only as historical dispatch text.
+
 # Agent prompts — ControlPlane Round 2 (post-merge)
 
 **Repo root:** `/Users/srujansai/Desktop/SEBI`  

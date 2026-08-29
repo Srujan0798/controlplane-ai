@@ -1,22 +1,12 @@
 # AGENTS.md — ControlPlane.ai project law
 
 Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1  
-Branch of record: **`main`**. Do not use `.worktrees/` for new work.
-
-
-## Adaptoid OS on this repo (Track 1)
-- Flow map: `MASTER-FLOW.md` (must match Core spine names)
-- Orchestrator: `orchestrator/ROLE.md`
-- Specs: `.specify/`
-- Protocols: `protocols/`
-- Tasks/reports: `work/` → `work/reports/`
-- Lite reference only: `ADAPTOID-LITE.md` (3.1). Ultra Lite proposal lives outside until promoted.
-- Preflight: `orchestrator/scripts/preflight-lite.sh`
+Branch: **`main`**. Do not use `.worktrees/` for new work.
 
 ## Stack
 - Python ≥ 3.11 · FastAPI · uvicorn · pytest · YAML policies · static HTML/CSS/JS console
-- Package: `controlplane/` · run: `pip install -e ".[dev]"` · `pytest -q`
-- Judge: `docker compose up --build` (:8080) or `uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787`
+- `pip install -e ".[dev]"` · `pytest -q`
+- Judge: `docker compose up --build` (:8080) or uvicorn on **8787**
 
 ## Frozen invariants (never “improve”)
 1. Provenance **outside** the model — model output never creates spans.
@@ -28,24 +18,18 @@ Branch of record: **`main`**. Do not use `.worktrees/` for new work.
 7. Lane 1 = **deterministic only** (no LLM / NLI on critical path).
 8. Fail **closed** toward Escalate/Block — never Pass without proof.
 
-## Evidence or it didn’t happen
-- Paste command + exit code / key output in `work/reports/...`.
+## Evidence
+- Prefer `orchestrator/scripts/preflight-lite.sh` before claiming green.
 - After code changes: `graphify update .`
-- Never invent FNR %, customer logos, or quote **40ms as p95** (targets: ≤40ms p50 / ≤200ms p95; cite `submission/latency_bench.json`).
+- Never invent FNR %, customer logos, or quote **40ms as p95** (targets ≤40ms p50 / ≤200ms p95; cite `submission/latency_bench.json`).
 
-## Adaptoid dual-tier
-- Orchestrator writes `work/<wave>/<task>.md` and reviews reports.
-- Workers execute **one** task file; stay inside `writes:`; never touch `forbid:`.
-- See `HOW_TO_RUN.md`.
-
-## Canon docs
+## Canon
 - Architecture: `docs/ARCHITECTURE.md`
 - Proposal: `round2/CONTROLPLANE_R2_FINAL.md`
-- Pitch speak-from: `round2/R2S5.md`
-- Gaps: `docs/PRIZE_WIN_MATRIX.md`
+- Pitch: `round2/R2S5.md`
 - Stand: `docs/JUDGE_RUNBOOK.md`
+- Acceptance: `docs/ACCEPTANCE.md`
 
 ## graphify
-This project has a knowledge graph at graphify-out/.
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists.
-- After modifying code, run `graphify update .` (AST-only, no API cost).
+- `graphify query "<question>"` when `graphify-out/graph.json` exists.
+- After code changes: `graphify update .`

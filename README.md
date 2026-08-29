@@ -66,34 +66,32 @@ python3 examples/knowledge_flip_demo.py     # entitlement principal-flip
 
 ```text
 SEBI/
-├── README.md
+├── README.md · AGENTS.md · HANDOFF.md
 ├── pyproject.toml · Makefile · Dockerfile · docker-compose.yml
-├── controlplane/                 ← core gate + FastAPI server + static console
-├── policies/                     ← versioned YAML policy packs
-├── examples/                     ← judge CLI demos
-├── tests/                        ← criteria-locked + server/e2e tests
-├── scripts/                      ← PDF build, load bench, SBOM
-├── submission/                   ← proposal PDF, pitch PPTX, benches
-├── docs/                         ← ARCHITECTURE, ROUND2-*, NARRATIVE, QA, runbook
-├── round2/                       ← FINAL proposal + R2S5 pitch (canon)
-└── .github/workflows/            ← CI
+├── controlplane/          ← gate + FastAPI + static console
+├── policies/              ← YAML policy packs
+├── examples/ · tests/ · scripts/
+├── submission/            ← PDF / PPTX / bench / SBOM
+├── docs/                  ← ARCHITECTURE, runbook, acceptance, QA
+├── round2/                ← FINAL + R2S5 (pitch/proposal canon)
+├── work/reports/          ← wave evidence (already shipped)
+├── plan/EXECUTION.md      ← wave status
+└── orchestrator/          ← preflight-lite.sh
 ```
 
 ## Document map
 
 | Audience | Open |
 |---|---|
-| Judges / submit | `round2/CONTROLPLANE_R2_FINAL.md` + live console + `submission/` |
+| Judges / submit | `round2/CONTROLPLANE_R2_FINAL.md` + console + `submission/` |
 | Pitch morning-of | `round2/R2S5.md` + `docs/JUDGE_RUNBOOK.md` |
-| Hostile Q&A (room defense) | [`docs/HOSTILE_QA_DRILL.md`](docs/HOSTILE_QA_DRILL.md) · depth: `docs/QA.md` |
-| Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` |
-| Absolute truth (internal) | `docs/ARCHITECTURE.md`, `NARRATIVE.md`, `QA.md` |
-| Event day / packaging | [`docs/EVENT_DAY_CHECKLIST.md`](docs/EVENT_DAY_CHECKLIST.md) |
-| Adaptoid agents (parallel) | [`HOW_TO_RUN.md`](HOW_TO_RUN.md) · [`work/`](work/) · [`AGENTS.md`](AGENTS.md) |
-| Kill-shot / evidence | [`docs/KILL_SHOT.md`](docs/KILL_SHOT.md) · [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) |
-| Agent workers (next tasks) | [`docs/AGENT_PROMPTS.md`](docs/AGENT_PROMPTS.md) · gaps: `docs/PRIZE_WIN_MATRIX.md` |
-| License / attribution | [`LICENSE`](LICENSE) (MIT · Team ControlPlane · 2026) |
-| Do **not** present | `round2/_archive/`, `docs/_archive/`, agent scratch, graphify cache |
+| Hostile Q&A | `docs/HOSTILE_QA_DRILL.md` · depth: `docs/QA.md` |
+| Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` + `AGENTS.md` |
+| Event day | `docs/EVENT_DAY_CHECKLIST.md` · `docs/ACCEPTANCE.md` |
+| Kill-shot | `docs/KILL_SHOT.md` |
+| Gaps inventory | `docs/PRIZE_WIN_MATRIX.md` |
+| License | `LICENSE` (MIT) |
+| Do **not** present | `round2/_archive/`, `docs/_archive/`, `graphify-out/`, `.worktrees/` |
 
 ## What shipped on this tree
 
