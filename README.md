@@ -88,10 +88,12 @@ SEBI/
 | Hostile Q&A | `docs/HOSTILE_QA_DRILL.md` · depth: `docs/QA.md` |
 | Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` + `AGENTS.md` |
 | Event day | `docs/EVENT_DAY_CHECKLIST.md` · `docs/ACCEPTANCE.md` |
+| Final checklist | `docs/FINAL-STEPS.md` |
+| Phase-2 only | `docs/PHASE2-FROM-RESEARCH.md` (not for stand) |
 | Kill-shot | `docs/KILL_SHOT.md` |
 | Gaps inventory | `docs/PRIZE_WIN_MATRIX.md` |
 | License | `LICENSE` (MIT) |
-| Do **not** present | `round2/_archive/`, `docs/_archive/`, `graphify-out/`, `.worktrees/` |
+| Do **not** present | `graphify-out/`, `.worktrees/`, `work/reports/` (internal only) |
 
 ## What shipped on this tree
 

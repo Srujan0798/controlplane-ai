@@ -1,8 +1,6 @@
-# HANDOFF.md — PROJECT COMPLETE (pending human tag)
+# HANDOFF — clean tree, prize close
 
-- **Status:** Prize-day **PASS** on `55ec77f` (2026-08-29)
-- **Branch:** `main`
-- **Verify evidence:** `docs/audits/2026-08-29-final-close.md`
-- **Stand:** R2S5 + JUDGE_RUNBOOK + HOSTILE_QA + console :8787 / Docker :8080
-- **Human only:** `git tag -a v0.2.0-round2 -m "Round 2 prize-day known-good"`
-- **Invariants:** AGENTS.md unchanged
+- **Repo cleaned:** agent research archives deleted; OS scaffolding removed.
+- **Canon:** FINAL + R2S5 + ARCHITECTURE + JUDGE_RUNBOOK + controlplane/
+- **Next:** `docs/FINAL-STEPS.md` (tag + dry-run only)
+- **Do not** resurrect `round2/_archive` or Adaptoid copies into this repo.
