@@ -19,7 +19,7 @@ UNGATED_RESPONSE = (
 )
 
 # Not in the ungated response; extracted (never Claim literals) so the
-# entitlement beat and clause-4.1 support beat stay live while fixtures remain.
+# entitlement beat and clause-4.1 support beat stay live without fixtures.
 DEMO_SUPPLEMENTAL = (
     "Clause 4.1 covers shipping delays. "
     "customer account flagged for goodwill override."
@@ -74,7 +74,7 @@ def run_refund_scenario() -> EvidenceLedger:
     )
 
     order_step = rec.record_step(led, StepKind.TOOL, "order_lookup")
-    amount_span = rec.record_span(
+    rec.record_span(
         led,
         order_step,
         source_id="db:orders",
@@ -113,14 +113,7 @@ def run_refund_scenario() -> EvidenceLedger:
 
     actions = refund_demo_actions()
     claims = extract_demo_claims(actions)
-    bind_claims(
-        led,
-        claims,
-        fixture_map={
-            "amount": (amount_span,),
-            "clause_72": None,  # Clause 7.2 does not exist.
-        },
-    )
+    bind_claims(led, claims)
 
     for action in actions:
         decide(led, action)

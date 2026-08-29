@@ -80,6 +80,7 @@ class GateResult:
                         "span_ids": list(self.ledger.bindings[c.claim_id].span_ids),
                         "method": self.ledger.bindings[c.claim_id].method,
                         "verdict": self.ledger.bindings[c.claim_id].verdict.value,
+                        "rationale": self.ledger.bindings[c.claim_id].rationale,
                     }
                     if c.claim_id in self.ledger.bindings
                     else None,
@@ -138,10 +139,15 @@ class ControlPlaneGate:
         mode_override: str | None = None,
         labeled_should_hold: bool | None = None,
         ungated_text: str | None = None,
+        allow_fixtures: bool = False,
     ) -> GateResult:
         t0 = time.perf_counter()
         pack = self.policies.get(use_case)
         mode = mode_override or pack.mode
+        if mode == "enforce" and fixture_map and not allow_fixtures:
+            raise ValueError(
+                "fixture_map is rejected in enforce mode unless allow_fixtures=True"
+            )
 
         bind_claims(ledger, claims, fixture_map=fixture_map)
         findings = {cid: audit_claim(ledger, cid) for cid in ledger.claims}
@@ -209,6 +215,7 @@ class ControlPlaneGate:
             mode_override=mode_override,
             labeled_should_hold=None,
             ungated_text=None,
+            allow_fixtures=True,
         )
 
     def _rerun_refund(self, mode_override: str | None = None) -> GateResult:
@@ -243,7 +250,7 @@ class ControlPlaneGate:
             ),
         )
         order_step = rec.record_step(led, StepKind.TOOL, "order_lookup")
-        amount_span = rec.record_span(
+        rec.record_span(
             led,
             order_step,
             source_id="db:orders",
@@ -287,16 +294,11 @@ class ControlPlaneGate:
             ),
         ]
         claims = extract_demo_claims(actions)
-        fixture_map: dict[str, tuple[str, ...] | None] = {
-            "amount": (amount_span,),
-            "clause_72": None,
-        }
         return self.run_prepared(
             use_case="decision-support",
             ledger=led,
             claims=claims,
             actions=actions,
-            fixture_map=fixture_map,
             mode_override=mode_override,
             labeled_should_hold=True,
             ungated_text=UNGATED_RESPONSE,

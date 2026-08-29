@@ -86,6 +86,7 @@ class Binding:
     span_ids: tuple[str, ...]
     method: str
     verdict: Verdict
+    rationale: str = ""
 
 
 @dataclass(frozen=True)

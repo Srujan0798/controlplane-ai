@@ -100,5 +100,6 @@ def run_flip_scenario(principal_id: str = "analyst_01") -> EvidenceLedger:
         claims=claims,
         actions=actions,
         fixture_map=fixture_map,
+        allow_fixtures=True,
     )
     return led
