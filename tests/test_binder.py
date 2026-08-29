@@ -33,7 +33,13 @@ def test_fixture_binding_supports():
 
 
 def test_derived_never_supported_by_shallow_match():
-    led = _ledger_with_span("A is 2. B is 3.")
-    claim = Claim("c3", "A+B is 5", ClaimKind.DERIVED, AssertionStrength.CATEGORICAL)
+    # The claimed total appears as text, but there are not two operands to recompute.
+    led = _ledger_with_span("The sum of line items is 5 INR as written, without operands.")
+    claim = Claim(
+        "c3",
+        "The sum of line items is 5 INR",
+        ClaimKind.DERIVED,
+        AssertionStrength.CATEGORICAL,
+    )
     bindings = bind_claims(led, [claim])
     assert bindings[0].verdict == Verdict.UNKNOWN
