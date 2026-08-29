@@ -88,6 +88,15 @@ class OverrideRequest(BaseModel):
     prior_actuator: str = "Escalate"
 
 
+class AnalyzeRequest(BaseModel):
+    response_text: str = Field(min_length=1)
+    principal_id: str | None = "analyst"
+    roles: list[str] | None = None
+    clearance: list[str] | None = None
+    spans: list[dict[str, Any]] | None = None
+    actions: list[dict[str, Any]] | None = None
+
+
 def audit_jsonl_bytes(found: dict[str, Any]) -> bytes:
     """Rebuild JSONL audit bytes from a public gate dict."""
     lines = [
@@ -321,6 +330,10 @@ def create_app(
     def page_print() -> HTMLResponse:
         return _page("print.html")
 
+    @app.get("/gate", response_class=HTMLResponse)
+    def page_gate() -> HTMLResponse:
+        return _page("gate.html")
+
     if STATIC.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
 
@@ -494,11 +507,174 @@ def create_app(
         valid = signing.verify(body.content.encode("utf-8"), body.signature)
         return {"valid": valid}
 
-    @app.post("/v1/controlplane/decisions/{decision_id}/override")
-    def override_decision(decision_id: str, body: OverrideRequest) -> dict[str, Any]:
-        """Reviewer override — written into the chained ledger when available."""
-        from controlplane.models import Principal
+    @app.post("/v1/controlplane/analyze")
+    def analyze_arbitrary(body: AnalyzeRequest) -> dict[str, Any]:
+        """Run the REAL gate on a judge-chosen paragraph (paste or uploaded).
+
+        No fixtures, no canned scenario. Extract -> bind -> entitle -> interlock ->
+        shadow. Returns claims with types/hedging, binding method + rationale,
+        symbol table, matrix cell, actuator, evidence packet, dead compute, and
+        per-stage latency. Refund language is held / escalated — never "blocked".
+        """
+        import time as _time
+
+        from controlplane.binder import bind_claims
+        from controlplane.entitlement import audit_claim
+        from controlplane.extract import extract_claims
+        from controlplane.interlock import decide
+        from controlplane.models import (
+            Action,
+            BlastTier,
+            Principal,
+            StepKind,
+        )
+        from controlplane.pii import apply_pii_rule_a
         from controlplane.recorder import ProvenanceRecorder
+        from controlplane.symbols import build_symbol_table
+
+        t0 = _time.perf_counter()
+        principal = Principal(
+            id=body.principal_id or "analyst",
+            roles=frozenset(body.roles or []),
+            clearance=frozenset(body.clearance or ["vendor-public"]),
+        )
+        rec = ProvenanceRecorder()
+        led = rec.begin_request(
+            f"analyze-{uuid.uuid4().hex[:8]}",
+            principal,
+            "ad-hoc-analysis",
+            "matrix-v1",
+        )
+        # Optional spans the analyst supplies (provenance set). Default: one
+        # retrieval span holding the response itself so the symbol table exists.
+        if body.spans:
+            for i, sp in enumerate(body.spans):
+                step = rec.record_step(led, StepKind.RETRIEVAL, f"src-{i}")
+                rec.record_span(
+                    led,
+                    step,
+                    source_id=sp.get("source_id", f"src-{i}"),
+                    acl=frozenset(sp.get("acl") or ["vendor-public"]),
+                    content=sp["content"],
+                )
+        else:
+            step = rec.record_step(led, StepKind.RETRIEVAL, "response-src")
+            rec.record_span(
+                led,
+                step,
+                source_id="analyst-supplied",
+                acl=frozenset(["vendor-public"]),
+                content=body.response_text,
+            )
+        rec.finish_context_assembly(led)
+
+        # Default action set: show text (R1) + issue/act (R3). The analyst can
+        # override via body.actions.
+        if body.actions:
+            actions = [
+                Action(
+                    a["action_id"],
+                    a.get("name", a["action_id"]),
+                    BlastTier[a["tier"]],
+                    args=dict(a.get("args") or {}),
+                    irreversibility=bool(a.get("irreversibility")),
+                )
+                for a in body.actions
+            ]
+        else:
+            actions = [
+                Action("show_text", "Show text to the customer", BlastTier.R1),
+                Action(
+                    "issue_action",
+                    "Issue the action",
+                    BlastTier.R3,
+                    irreversibility=True,
+                ),
+            ]
+
+        te = _time.perf_counter()
+        claims = extract_claims(body.response_text, actions=actions)
+        tb = _time.perf_counter()
+        bind_claims(led, claims)
+        tent = _time.perf_counter()
+        findings = {cid: audit_claim(led, cid) for cid in led.claims}
+        apply_pii_rule_a(led, body.response_text, action_ids=[a.action_id for a in actions])
+        tint = _time.perf_counter()
+        decisions = {a.action_id: decide(led, a, findings=findings) for a in actions}
+        tf = _time.perf_counter()
+
+        symbol_table = build_symbol_table(
+            {sid: sp.content for sid, sp in led.spans.items()}
+        )
+        would_hold = any(
+            d.actuator.value in ("Escalate", "Block", "Edit") for d in decisions.values()
+        )
+        total_span_chars = sum(len(sp.content) for sp in led.spans.values())
+        grounding_span_ids = {
+            sid for b in led.bindings.values() for sid in b.span_ids if sid in led.spans
+        }
+        grounding_chars = sum(
+            len(led.spans[sid].content) for sid in grounding_span_ids
+        )
+        dead_compute_pct = round(
+            1.0 - (grounding_chars / total_span_chars if total_span_chars else 0.0), 4
+        )
+
+        return {
+            "request_id": led.request_id,
+            "would_hold": would_hold,
+            "claims": [
+                {
+                    "claim_id": c.claim_id,
+                    "text": c.text,
+                    "kind": c.kind.value,
+                    "assertion": c.assertion.value,
+                    "role_in_action": c.role_in_action,
+                    "binding": {
+                        "span_ids": list(led.bindings[c.claim_id].span_ids),
+                        "method": led.bindings[c.claim_id].method,
+                        "verdict": led.bindings[c.claim_id].verdict.value,
+                        "rationale": led.bindings[c.claim_id].rationale,
+                    }
+                    if c.claim_id in led.bindings
+                    else None,
+                }
+                for c in led.claims.values()
+            ],
+            "symbol_table": {k: list(v) for k, v in symbol_table.items()},
+            "decisions": {
+                aid: {
+                    "actuator": d.actuator.value,
+                    "matrix_row": d.matrix_row,
+                    "matrix_col": d.matrix_col,
+                    "driving_claim_ids": list(d.driving_claim_ids),
+                    "packet": d.packet,
+                }
+                for aid, d in decisions.items()
+            },
+            "dead_compute": {
+                "total_span_chars": total_span_chars,
+                "grounding_chars": grounding_chars,
+                "ungrounded_fraction": dead_compute_pct,
+            },
+            "per_stage_latency_ms": {
+                "extract": round((tb - te) * 1000, 4),
+                "bind": round((tent - tb) * 1000, 4),
+                "entitle": round((tint - tent) * 1000, 4),
+                "interlock": round((tf - tint) * 1000, 4),
+                "total": round((tf - t0) * 1000, 4),
+            },
+            "chain_valid": led.verify_chain(),
+            "note": (
+                "Held / escalated with evidence packet — irreversible action not "
+                "released without provenance."
+            ),
+        }
+        @app.post("/v1/controlplane/decisions/{decision_id}/override")
+        def override_decision(decision_id: str, body: OverrideRequest) -> dict[str, Any]:
+            """Reviewer override — written into the chained ledger when available."""
+            from controlplane.models import Principal
+            from controlplane.recorder import ProvenanceRecorder
 
         live_ledger = None
         for result in reversed(getattr(gate, "_history", []) or []):

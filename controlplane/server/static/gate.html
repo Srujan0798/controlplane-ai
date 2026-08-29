@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ControlPlane — Gate Console</title>
+<style>
+  :root { --bg:#0b1020; --panel:#121a30; --ink:#e8edf7; --muted:#9aa7c2;
+          --accent:#4ea1ff; --good:#39d98a; --warn:#ffb454; --bad:#ff6b6b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:18px; }
+  header { padding:18px 26px; border-bottom:1px solid #20304f; }
+  header h1 { margin:0; font-size:26px; letter-spacing:.5px; }
+  header p { margin:4px 0 0; color:var(--muted); font-size:15px; }
+  .wrap { display:grid; grid-template-columns:minmax(380px,1fr) minmax(420px,1.3fr); gap:20px;
+          padding:22px 26px; align-items:start; }
+  .card { background:var(--panel); border:1px solid #20304f; border-radius:12px; padding:18px; }
+  label { display:block; color:var(--muted); font-size:14px; margin:14px 0 6px; text-transform:uppercase; letter-spacing:1px; }
+  textarea, select, input[type=text] { width:100%; background:#0e1626; color:var(--ink);
+          border:1px solid #2a3a5c; border-radius:8px; padding:12px; font-size:18px;
+          font-family:inherit; resize:vertical; }
+  textarea { min-height:200px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:160px; }
+  button { margin-top:18px; background:var(--accent); color:#04101f; border:0; border-radius:8px;
+           padding:14px 20px; font-size:18px; font-weight:700; cursor:pointer; width:100%; }
+  button:hover { filter:brightness(1.08); }
+  #status { margin-top:12px; font-size:14px; color:var(--muted); min-height:18px; }
+  .claims { margin-top:8px; }
+  .claim { border-left:4px solid #2a3a5c; padding:10px 12px; margin:10px 0; background:#0e1626; border-radius:6px; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:13px; font-weight:700; }
+  .SUPPORTED { background:rgba(57,217,138,.18); color:var(--good); }
+  .CONTRADICTED { background:rgba(255,107,107,.2); color:var(--bad); }
+  .UNSUPPORTED { background:rgba(255,180,84,.18); color:var(--warn); }
+  .UNKNOWN { background:rgba(154,167,194,.18); color:var(--muted); }
+  .meta { color:var(--muted); font-size:14px; margin-top:4px; }
+  .actuator { font-size:22px; font-weight:800; margin:6px 0; }
+  .Escalate { color:var(--bad); } .Edit { color:var(--warn); }
+  .Pass, .Pass__annotate { color:var(--good); } .Block { color:var(--bad); }
+  pre { white-space:pre-wrap; word-break:break-word; background:#0e1626; border-radius:8px; padding:12px; font-size:14px; color:var(--muted); }
+  .pill { display:inline-block; background:#0e1626; border:1px solid #2a3a5c; border-radius:999px; padding:4px 12px; margin:4px 4px 0 0; font-size:13px; }
+  h2 { font-size:18px; margin:0 0 10px; color:var(--accent); text-transform:uppercase; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ControlPlane.ai — Admission-Control Gate</h1>
+  <p>Paste or upload a model response. The gate runs the real pipeline: extract → bind → entitle → interlock → shadow. No fixtures.</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <label for="text">Response text (paste or upload)</label>
+    <textarea id="text" placeholder="e.g. Approved. Refund of ₹1,84,000 issued under clause 7.2 of the vendor agreement."></textarea>
+    <input id="file" type="file" accept=".txt,.md,.json,text/*" style="margin-top:10px;color:var(--muted);" />
+
+    <div class="row">
+      <div>
+        <label for="principal">Principal</label>
+        <input id="principal" type="text" value="judge-demo" />
+      </div>
+      <div>
+        <label for="clearance">Clearance</label>
+        <select id="clearance">
+          <option value="vendor-public">vendor-public</option>
+          <option value="hr-confidential">hr-confidential</option>
+          <option value="public">public</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="actionTier">Action blast tier</label>
+        <select id="actionTier">
+          <option value="R1">R1 (show text)</option>
+          <option value="R3" selected>R3 (issue action, irreversible)</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="run">Run gate ▶</button>
+    <div id="status">idle</div>
+  </div>
+
+  <div class="card">
+    <h2>Decision</h2>
+    <div id="decision">—</div>
+    <h2 style="margin-top:18px;">Extracted claims</h2>
+    <div id="claims" class="claims">—</div>
+    <h2 style="margin-top:18px;">Symbol table</h2>
+    <div id="symbols">—</div>
+    <h2 style="margin-top:18px;">Dead compute</h2>
+    <div id="dead">—</div>
+    <h2 style="margin-top:18px;">Per-stage latency</h2>
+    <pre id="latency">—</pre>
+    <h2 style="margin-top:18px;">Full payload</h2>
+    <pre id="raw">—</pre>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+$('file').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const txt = await f.text();
+  $('text').value = txt;
+  $('status').textContent = 'loaded ' + f.name;
+});
+
+$('run').addEventListener('click', async () => {
+  const text = $('text').value.trim();
+  if (!text) { $('status').textContent = 'paste or upload text first'; return; }
+  $('status').textContent = 'running gate…';
+  const tier = $('actionTier').value;
+  const body = {
+    response_text: text,
+    principal_id: $('principal').value || 'judge-demo',
+    clearance: [$('clearance').value],
+    actions: [
+      { action_id: 'show_text', name: 'Show text to the customer', tier: 'R1' },
+      { action_id: 'issue_action', name: 'Issue the action', tier: tier, irreversibility: (tier === 'R3') }
+    ]
+  };
+  try {
+    const res = await fetch('/v1/controlplane/analyze', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) { $('status').textContent = 'error: ' + (data.detail || res.status); return; }
+    render(data);
+    $('status').textContent = 'done — ' + (data.would_hold ? 'HELD / ESCALATED' : 'PASS') + ' · chain ' + (data.chain_valid ? 'valid' : 'INVALID');
+  } catch (err) {
+    $('status').textContent = 'request failed: ' + err.message;
+  }
+});
+
+function render(d) {
+  const acts = Object.values(d.decisions || {});
+  $('decision').innerHTML = (acts.map(a =>
+    `<div class="actuator ${esc(a.actuator.replace(/[^A-Za-z]/g,''))}">${esc(a.actuator)}</div>` +
+    `<div class="meta">matrix ${esc(a.matrix_row)} × ${esc(a.matrix_col)}</div>`
+  )).join('') || '—';
+
+  $('claims').innerHTML = (d.claims || []).map(c => {
+    const b = c.binding || {};
+    return `<div class="claim">
+      <span class="badge ${esc(b.verdict || 'UNKNOWN')}">${esc(b.verdict || '—')}</span>
+      <strong> ${esc(c.kind)}</strong> · ${esc(c.assertion)}
+      <div class="meta">${esc(c.text)}</div>
+      <div class="meta">method: ${esc(b.method || '—')} · spans: ${(b.span_ids||[]).join(', ') || 'none'}</div>
+      <div class="meta">why: ${esc(b.rationale || '—')}</div>
+    </div>`;
+  }).join('') || '—';
+
+  const sym = d.symbol_table || {};
+  $('symbols').innerHTML = Object.keys(sym).length
+    ? Object.entries(sym).map(([k,v]) => `<span class="pill">${esc(k)} → ${esc(v.join(','))}</span>`).join('')
+    : '—';
+
+  const dc = d.dead_compute || {};
+  $('dead').innerHTML = `ungrounded fraction: <strong>${esc((dc.ungrounded_fraction*100).toFixed(1))}%</strong> ` +
+    `(grounding ${dc.grounding_chars||0} / total ${dc.total_span_chars||0} chars)`;
+
+  $('latency').textContent = JSON.stringify(d.per_stage_latency_ms || {}, null, 2);
+  $('raw').textContent = JSON.stringify(d, null, 2);
+}
+</script>
+</body>
+</html>
