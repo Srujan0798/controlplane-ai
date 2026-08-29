@@ -28,3 +28,16 @@
 git tag -a v0.2.0-round2 -m "Round 2 prize-day known-good"
 ```
 Do not invent FNR % / logos / p95=40ms. Say held/escalated, never blocked.
+
+## Dry-run re-verify (final steps)
+
+- Time: 2026-08-29T12:40:18.188827+00:00
+- SHA: `0c58ca599bf738a76db500cb60fa2ec7a33e5de0`
+- preflight: PASS · 135 passed / 2 skipped
+- refund API: Edit + Escalate
+- flip: Edit → Pass
+- console :8787 desk-law + Clause 7.2 does not exist
+- submission pack: PDF + PPTX + bench + SBOM present
+- latency: gate p50=0.073 ms · p95=0.09 ms
+
+**Stand status: READY. Human tag still required.**
