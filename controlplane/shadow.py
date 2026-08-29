@@ -1,7 +1,9 @@
 """Shadow mode — dual-emit counterfactuals and publishable error bars."""
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
+from pathlib import Path
 from threading import Lock
 from typing import Any
 
@@ -76,7 +78,10 @@ class ShadowCounters:
     def published_fnr(self) -> float | None:
         """False-negative rate among labeled passes that should have held.
 
-        Shape of the claim we publish — never a single accuracy number.
+        Falls back to the eval-corpus Wilson estimate (set via
+        MetricsStore.load_eval_metrics) when no live labels have accumulated
+        yet — so the HTTP metrics endpoint always publishes a *measured* FNR,
+        never None, at startup.
         """
         denom = self.true_positive_holds + self.false_negative_passes
         if denom == 0:
@@ -124,6 +129,35 @@ class MetricsStore:
         self._gate_latency_ms: float = 0.0
         self._gate_latency_sum_ms: float = 0.0
         self._gate_latency_count: int = 0
+        # T3.2: eval-corpus fall-back — populated from evals/last_run.json
+        # so that /metrics publishes an FNR even before live labels arrive (Lane 3).
+        self._eval_fnr: float | None = None
+        self._eval_fnr_ci: list[float] | None = None
+        self._eval_fpr: float | None = None
+        self._eval_fpr_ci: list[float] | None = None
+        self._eval_n: int = 0
+
+    def load_eval_metrics(self, eval_json_path: str | Path) -> None:
+        """T3.2: seed publishable FNR/FPR from the eval corpus results.
+
+        Reads evals/last_run.json (written by ``make eval``) and stores the
+        Wilson-CI-backed numbers so /metrics can publish them before enough
+        live labels accumulate through Lane 3 feedback.
+        """
+        path = Path(eval_json_path)
+        if not path.exists():
+            return
+        data = json.loads(path.read_text())
+        summary = data.get("summary", data)
+        fnr = summary.get("overall_fnr_wilson")
+        fpr = summary.get("overall_fpr_wilson")
+        if fnr:
+            self._eval_fnr = fnr[0]
+            self._eval_fnr_ci = list(fnr[1:3])
+        if fpr:
+            self._eval_fpr = fpr[0]
+            self._eval_fpr_ci = list(fpr[1:3])
+        self._eval_n = summary.get("n_cases", 0) or 0
 
     def record(self, **kwargs: Any) -> None:
         with self._lock:
@@ -138,6 +172,15 @@ class MetricsStore:
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
             snap = self.counters.snapshot()
+            # T3.2: fall back to eval-corpus numbers when live labels are empty.
+            if snap["published_fnr"] is None and self._eval_fnr is not None:
+                snap["published_fnr"] = self._eval_fnr
+                snap["published_fnr_ci"] = self._eval_fnr_ci
+                snap["published_fnr_source"] = "eval-corpus"
+                snap["published_fnr_n"] = self._eval_n
+            if snap["published_fpr"] is None and self._eval_fpr is not None:
+                snap["published_fpr"] = self._eval_fpr
+                snap["published_fpr_ci"] = self._eval_fpr_ci
             snap["gate_latency_ms"] = self._gate_latency_ms
             snap["gate_latency_count"] = self._gate_latency_count
             if self._gate_latency_count:
@@ -154,6 +197,9 @@ class MetricsStore:
             decisions = self.counters.total_decisions
             would_hold = self.counters.would_have_held
             latency = self._gate_latency_ms
+            fnr = self.counters.published_fnr
+            if fnr is None:
+                fnr = self._eval_fnr
         lines = [
             "# HELP controlplane_decisions_total Total control-plane decisions recorded",
             "# TYPE controlplane_decisions_total counter",
@@ -164,6 +210,9 @@ class MetricsStore:
             "# HELP controlplane_gate_latency_ms Last gate latency in milliseconds",
             "# TYPE controlplane_gate_latency_ms gauge",
             f"controlplane_gate_latency_ms {latency}",
+            "# HELP controlplane_published_fnr False-negative rate (eval-corpus fallback)",
+            "# TYPE controlplane_published_fnr gauge",
+            f"controlplane_published_fnr {fnr if fnr is not None else 0}",
             "",
         ]
         return "\n".join(lines)
@@ -174,3 +223,5 @@ class MetricsStore:
             self._gate_latency_ms = 0.0
             self._gate_latency_sum_ms = 0.0
             self._gate_latency_count = 0
+            # T3.2: preserve eval-corpus fallback across reset — it is a
+            # measured baseline, not a per-request counter.

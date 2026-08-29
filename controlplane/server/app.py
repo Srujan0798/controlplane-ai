@@ -134,6 +134,9 @@ def create_app(
     policies = PolicyRegistry()
     policies.load_dir(ROOT / "policies")
     metrics = MetricsStore()
+    eval_json = ROOT / "evals" / "last_run.json"
+    if eval_json.exists():
+        metrics.load_eval_metrics(eval_json)
     gate = gate or ControlPlaneGate(policies=policies, metrics=metrics)
     if store is None:
         try:
@@ -670,11 +673,12 @@ def create_app(
                 "released without provenance."
             ),
         }
-        @app.post("/v1/controlplane/decisions/{decision_id}/override")
-        def override_decision(decision_id: str, body: OverrideRequest) -> dict[str, Any]:
-            """Reviewer override — written into the chained ledger when available."""
-            from controlplane.models import Principal
-            from controlplane.recorder import ProvenanceRecorder
+
+    @app.post("/v1/controlplane/decisions/{decision_id}/override")
+    def override_decision(decision_id: str, body: OverrideRequest) -> dict[str, Any]:
+        """Reviewer override — written into the chained ledger when available."""
+        from controlplane.models import Principal
+        from controlplane.recorder import ProvenanceRecorder
 
         live_ledger = None
         for result in reversed(getattr(gate, "_history", []) or []):

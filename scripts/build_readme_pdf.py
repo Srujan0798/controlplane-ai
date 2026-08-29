@@ -62,7 +62,9 @@ def _load_numbers() -> dict:
     out: dict = {"eval": {}, "bench": {}}
     if EVAL_JSON.exists():
         try:
-            out["eval"] = json.loads(EVAL_JSON.read_text())
+            raw = json.loads(EVAL_JSON.read_text())
+            # evals.run.py nests metrics under "summary"; tolerate either shape.
+            out["eval"] = raw.get("summary", raw)
         except Exception:
             pass
     if BENCH_JSON.exists():
@@ -239,7 +241,8 @@ def build(out_path: Path = OUT) -> Path:
         g = bench.get("gate_latency_ms", {})
         story.append(P(
             f"Load bench: n={bench.get('n')} at concurrency sweep {bench.get('concurrencies')}. "
-            f"Per-request compute p50={g.get('p50')} ms, p95={g.get('p95')} ms, p99={g.get('p99')} ms. "
+            f"Per-request compute p50={g.get('p50')} ms, p95={g.get('p95')} ms, p99={g.get('p99')} ms, "
+            f"mean={g.get('mean')} ms, max={g.get('max')} ms. "
             f"Best throughput {bench.get('best_throughput_rps')} rps. "
             f"(In-process compute, not API latency; 40ms is a Lane-1 target, never a measured p95.)", body))
     else:
