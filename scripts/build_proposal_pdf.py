@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render docs/ROUND2-PROPOSAL.md → submission/ControlPlane_Round2_Proposal.pdf.
+"""Render round2/CONTROLPLANE_R2_FINAL.md → submission/ControlPlane_Round2_Proposal.pdf.
 
 Requires reportlab (`pip install reportlab` or `pip install '.[pdf]'`).
 """
@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "docs" / "ROUND2-PROPOSAL.md"
+SRC = ROOT / "round2" / "CONTROLPLANE_R2_FINAL.md"
 OUT = ROOT / "submission" / "ControlPlane_Round2_Proposal.pdf"
 
 
@@ -85,6 +85,8 @@ def _split_table_row(line: str) -> list[str]:
 def build(md_path: Path = SRC, out_path: Path = OUT) -> Path:
     rl = _require_reportlab()
     text = md_path.read_text(encoding="utf-8")
+    # Helvetica lacks ₹; use INR so glyphs render
+    text = text.replace("₹", "INR ").replace("■", "INR ")
     lines = text.splitlines()
 
     styles = rl["getSampleStyleSheet"]()

@@ -6,7 +6,7 @@
 
 | # | Organizer ask | Our artifact |
 |---|---|---|
-| 1 | Detailed business proposal | `submission/ControlPlane_Round2_Proposal.pdf` |
+| 1 | Detailed business proposal | `submission/ControlPlane_Round2_Proposal.pdf` (built from `round2/CONTROLPLANE_R2_FINAL.md`) |
 | 2 | Working prototype | Live demo of this repository |
 | 3 | Pitch presentation | `submission/ControlPlane_Round2_Pitch.pptx` |
 
