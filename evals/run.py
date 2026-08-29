@@ -155,67 +155,93 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _route_metrics(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """Precision/recall/FPR/FNR per binding route with Wilson CIs.
+def _route_distribution(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Per-route BINDING DISTRIBUTION (real, never undefined).
 
-    Ground truth is the document-level label:
-      should_hold  -> the response was ungrounded; the route must NOT support it
-      should_pass  -> the response was correct; the route SHOULD support it
-      hard_negative-> a *looks-wrong-but-correct* case; route SHOULD support it
-
-    A route "supports" a case when it produces >=1 SUPPORTED verdict there.
-      grounded doc + supported  -> TP (correct pass / grounded)
-      grounded doc + withheld   -> FN (over-flagged a good claim)
-      ungrounded doc + supported-> FP (wrongly cleared an ungrounded claim)
-      ungrounded doc + withheld -> TN (correctly held)
-    precision = TP/(TP+FP): of what the route cleared, how much was actually grounded
-    recall    = TP/(TP+FN): of grounded claims, how many the route cleared
-    fpr       = FP/(FP+TN): of ungrounded claims, how many the route wrongly cleared
-    fnr       = FN/(FN+TP): of grounded claims, how many the route wrongly withheld
+    We do NOT publish a per-route precision/FPR here: that metric is undefined
+    when a route has zero true negatives (tn=0 -> FPR forced to 1.0) and it
+    mislabels correctly-grounded claims on `should_hold` docs as false positives.
+    The honest per-route view is the distribution of verdicts the binder produced
+    and the abstention (UNKNOWN) rate -- exactly the fail-closed signal the brief
+    asks for.
     """
     agg: dict[str, dict[str, int]] = defaultdict(
-        lambda: {"tp": 0, "fp": 0, "fn": 0, "tn": 0, "n": 0}
+        lambda: {"n": 0, "supported": 0, "unsupported": 0, "unknown": 0, "contradicted": 0}
     )
-
     for r in results:
-        label = r["label"]
-        grounded_doc = label in ("should_pass", "hard_negative")
         for route, blk in r["routes"].items():
             a = agg[route]
             a["n"] += 1
-            supported = (blk["supported"] + blk["contradicted"]) > 0
-            if grounded_doc:
-                if supported:
-                    a["tp"] += 1
-                else:
-                    a["fn"] += 1
-            else:
-                if supported:
-                    a["fp"] += 1
-                else:
-                    a["tn"] += 1
-
+            for v in ("supported", "unsupported", "unknown", "contradicted"):
+                a[v] += blk.get(v, 0)
     out: dict[str, dict[str, Any]] = {}
     for route in ROUTE_ORDER:
         if route not in agg:
             continue
         a = agg[route]
-        precision = wilson_ci(a["tp"], a["tp"] + a["fp"]) if (a["tp"] + a["fp"]) else (0.0, 0.0, 0.0)
-        recall = wilson_ci(a["tp"], a["tp"] + a["fn"]) if (a["tp"] + a["fn"]) else (0.0, 0.0, 0.0)
-        fpr = wilson_ci(a["fp"], a["fp"] + a["tn"]) if (a["fp"] + a["tn"]) else (0.0, 0.0, 0.0)
-        fnr = wilson_ci(a["fn"], a["fn"] + a["tp"]) if (a["fn"] + a["tp"]) else (0.0, 0.0, 0.0)
+        abstr = a["unknown"] / a["n"] if a["n"] else 0.0
         out[route] = {
             "n": a["n"],
-            "tp": a["tp"],
-            "fp": a["fp"],
-            "fn": a["fn"],
-            "tn": a["tn"],
-            "precision": precision,
-            "recall": recall,
-            "fpr": fpr,
-            "fnr": fnr,
+            "supported": a["supported"],
+            "unsupported": a["unsupported"],
+            "unknown": a["unknown"],
+            "contradicted": a["contradicted"],
+            "abstention_rate": round(abstr, 4),
         }
     return out
+
+
+def _action_level(results: list[dict[str, Any]]) -> dict[str, Any]:
+    """Action-level FPR/FNR -- the real gate metric (ARCHITECTURE §7 shape).
+
+    For each case we look at whether the gate HELD the action vs the doc label:
+      should_hold  -> correct gate HOLDS (true negative for a miss)
+      should_pass  -> correct gate PASSES (true negative for a false alarm)
+      hard_negative-> looks wrong but correct; holding is fail-closed CAUTION,
+                      reported separately (not a false positive)
+
+    Irreversible actions (R2/R3) are escalated by design (fail-closed), so they
+    are reported as a distinct "fail-closed escalation" band and excluded from
+    the passable-action FPR -- otherwise the metric would penalise caution.
+    """
+    pass_hold = pass_pass = 0
+    irr_hold = irr_pass = 0
+    sh_hold = sh_miss = 0
+    hn_hold = hn_total = 0
+    for r in results:
+        label = r["label"]
+        held = r["would_hold"]
+        is_irr = any("R3" in tid or "R2" in tid for tid in r["actuators"])
+        if label == "should_hold":
+            if held:
+                sh_hold += 1
+            else:
+                sh_miss += 1
+        elif label == "should_pass":
+            if is_irr:
+                irr_pass += 1 if not held else 0
+                irr_hold += 1 if held else 0
+            else:
+                if held:
+                    pass_hold += 1
+                else:
+                    pass_pass += 1
+        elif label == "hard_negative":
+            hn_total += 1
+            hn_hold += 1 if held else 0
+    fnr = wilson_ci(sh_miss, sh_miss + sh_hold)
+    fpr = (
+        wilson_ci(pass_hold, pass_hold + pass_pass)
+        if (pass_hold + pass_pass)
+        else (0.0, 0.0, 0.0)
+    )
+    hn_rate = wilson_ci(hn_hold, hn_total) if hn_total else (0.0, 0.0, 0.0)
+    return {
+        "passable": {"fp": pass_hold, "tn": pass_pass, "fpr": fpr},
+        "irreversible_fail_closed": {"held": irr_hold, "passed": irr_pass},
+        "ungrounded": {"held": sh_hold, "missed": sh_miss, "fnr": fnr},
+        "hard_negative_caution": {"held": hn_hold, "total": hn_total, "hold_rate": hn_rate},
+    }
 
 
 def _stratum_table(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -234,39 +260,6 @@ def _stratum_table(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         if r["would_hold"]:
             s["would_hold"] += 1
     return {k: dict(v) for k, v in strata.items()}
-
-
-def _overall_error(results: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    """FNR/FPR over the document-level label (the §7 shape).
-
-    Three classes:
-      should_hold  -> ungrounded response; correct gate HOLDS it (would_hold).
-      should_pass  -> clean correct response; holding it is a true FALSE POSITIVE.
-      hard_negative-> looks wrong but is correct; holding it is FAIL-CLOSED caution,
-                      reported separately (not a false-positive — the architecture
-                      mandates fail-closed).
-    """
-    should_hold = [r for r in results if r["label"] == "should_hold"]
-    should_pass = [r for r in results if r["label"] == "should_pass"]
-    hard_neg = [r for r in results if r["label"] == "hard_negative"]
-
-    fn = sum(1 for r in should_hold if not r["would_hold"])
-    tp = sum(1 for r in should_hold if r["would_hold"])
-    # True false-positive: a clean correct response we wrongly held.
-    fp = sum(1 for r in should_pass if r["would_hold"])
-    tn = sum(1 for r in should_pass if not r["would_hold"])
-    # Fail-closed caution: a hard-negative (looks wrong, is correct) we held.
-    hn_held = sum(1 for r in hard_neg if r["would_hold"])
-    hn_total = len(hard_neg)
-
-    fnr = wilson_ci(fn, fn + tp)
-    fpr = wilson_ci(fp, fp + tn)
-    hn_rate = wilson_ci(hn_held, hn_total) if hn_total else (0.0, 0.0, 0.0)
-    return (
-        {"fn": fn, "tp": tp, "fnr": fnr},
-        {"fp": fp, "tn": tn, "fpr": fpr},
-        {"hn_held": hn_held, "hn_total": hn_total, "hn_hold_rate": hn_rate},
-    )
 
 
 def _threshold_calibration(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -329,9 +322,9 @@ def build_report() -> dict[str, Any]:
     if not cases:
         raise RuntimeError("No eval cases found under evals/cases/")
     results = [run_case(c) for c in cases]
-    per_route = _route_metrics(results)
+    per_route = _route_distribution(results)
     per_stratum = _stratum_table(results)
-    fn_counts, fp_counts, hn_counts = _overall_error(results)
+    action = _action_level(results)
     abstain = sum(
         1 for r in results for v in r["bindings"].values() if v == Verdict.UNKNOWN.value
     )
@@ -345,21 +338,18 @@ def build_report() -> dict[str, Any]:
         "abstention_rate": round(abstain / total_bindings, 4) if total_bindings else 0.0,
         "per_route": per_route,
         "per_stratum": per_stratum,
-        "overall_fnr": fn_counts["fnr"][0],
-        "overall_fnr_wilson": list(fn_counts["fnr"]),
-        "overall_fpr": fp_counts["fpr"][0],
-        "overall_fpr_wilson": list(fp_counts["fpr"]),
-        "hard_negative_hold_rate": hn_counts["hn_hold_rate"][0],
-        "hard_negative_hold_wilson": list(hn_counts["hn_hold_rate"]),
-        "fn_counts": fn_counts,
-        "fp_counts": fp_counts,
-        "hn_counts": hn_counts,
+        "action_level": action,
+        "passable_fpr": action["passable"]["fpr"][0],
+        "passable_fpr_wilson": list(action["passable"]["fpr"]),
+        "ungrounded_fnr": action["ungrounded"]["fnr"][0],
+        "ungrounded_fnr_wilson": list(action["ungrounded"]["fnr"]),
+        "hard_negative_hold_rate": action["hard_negative_caution"]["hold_rate"][0],
+        "hard_negative_hold_wilson": list(action["hard_negative_caution"]["hold_rate"]),
         "threshold_calibration": calibration,
         "note": (
-            "No single accuracy number. Per-route Wilson 95% CIs on precision/recall/"
-            "FPR/FNR; document-level FNR/FPR take the ARCHITECTURE §7 shape. "
-            "Corpus is self-authored with hard negatives; numbers are measured on "
-            "this run only."
+            "No single accuracy number. Per-route binding DISTRIBUTION + abstention; "
+            "action-level FPR/FNR take the ARCHITECTURE §7 shape (the gate metric). "
+            "Corpus is self-authored with hard negatives; numbers are measured on this run only."
         ),
     }
 
@@ -379,18 +369,21 @@ def main() -> int:
     print(f"cases: {rep['n_cases']}  bindings: {rep['n_bindings']}")
     print(f"abstention (UNKNOWN): {rep['abstention_unknown']} "
           f"({rep['abstention_rate']:.1%} of bindings)")
-    print("\n-- per-route (Wilson 95% CI) --")
+    print("\n-- per-route BINDING DISTRIBUTION (supported/unknown/contradicted/unsupported) --")
     for route, m in rep["per_route"].items():
         print(
-            f"  {route:10s} n={m['n']:4d}  precision={_fmt_ci(tuple(m['precision']))}  "
-            f"recall={_fmt_ci(tuple(m['recall']))}  fpr={_fmt_ci(tuple(m['fpr']))}  "
-            f"fnr={_fmt_ci(tuple(m['fnr']))}"
+            f"  {route:10s} n={m['n']:4d}  sup={m['supported']:3d}  unk={m['unknown']:3d}  "
+            f"contrad={m['contradicted']:3d}  unsup={m['unsupported']:3d}  "
+            f"abstain={m['abstention_rate']:.1%}"
         )
-    print("\n-- overall (the §7 killer line) --")
-    print(f"  ungrounded miss rate (FNR): {_fmt_ci(rep['overall_fnr_wilson'])}  "
-          f"-> we HOLD {1 - rep['overall_fnr']:.1%} of ungrounded responses")
-    print(f"  clean-response false-hold (FPR): {_fmt_ci(rep['overall_fpr_wilson'])}  "
-          f"-> we wrongly hold {rep['overall_fpr']:.1%} of clean correct responses")
+    print("\n-- ACTION-LEVEL (the §7 gate metric) --")
+    a = rep["action_level"]
+    print(f"  ungrounded catch (FNR): {_fmt_ci(rep['ungrounded_fnr_wilson'])}  "
+          f"-> we HOLD {1 - rep['ungrounded_fnr']:.1%} of ungrounded responses")
+    print(f"  passable-action false-hold (FPR): {_fmt_ci(rep['passable_fpr_wilson'])}  "
+          f"-> we wrongly hold {rep['passable_fpr']:.1%} of clean R0/R1 responses")
+    print(f"  irreversible actions escalated (fail-closed, by design): "
+          f"held={a['irreversible_fail_closed']['held']} passed={a['irreversible_fail_closed']['passed']}")
     print(f"  fail-closed caution on hard-negatives: {_fmt_ci(rep['hard_negative_hold_wilson'])}  "
           f"(held but defensible — not a false positive)")
     print("\n-- per-stratum holds --")

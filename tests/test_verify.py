@@ -34,17 +34,21 @@ def test_verify_passes_on_consistent_tree():
 
 
 def test_verify_fails_on_eval_number_drift():
-    """Tamper the eval JSON FNR; the guard must detect the drift and fail."""
+    """Tamper the eval JSON FNR/FPR; the guard must detect the drift and fail."""
     data = json.loads(EVAL_JSON.read_text())
     summary = data.setdefault("summary", {})
-    saved = summary.get("overall_fnr_wilson")
+    saved_fnr = summary.get("ungrounded_fnr_wilson")
+    saved_fpr = summary.get("passable_fpr_wilson")
     try:
-        # Force a fabricated FNR that the rebuilt PDF cannot contain.
-        summary["overall_fnr_wilson"] = [0.1234, 0.10, 0.15]
+        # Force fabricated headline metrics the rebuilt PDF cannot contain.
+        summary["ungrounded_fnr_wilson"] = [0.1234, 0.10, 0.15]
+        summary["passable_fpr_wilson"] = [0.5678, 0.50, 0.60]
         EVAL_JSON.write_text(json.dumps(data, indent=2))
         res = _run_verify(["--drift-only"])
-        assert res.returncode != 0, "verify must FAIL when eval FNR drifts from PDF"
+        assert res.returncode != 0, "verify must FAIL when eval FNR/FPR drifts from PDF"
     finally:
-        if saved is not None:
-            summary["overall_fnr_wilson"] = saved
+        if saved_fnr is not None:
+            summary["ungrounded_fnr_wilson"] = saved_fnr
+        if saved_fpr is not None:
+            summary["passable_fpr_wilson"] = saved_fpr
         EVAL_JSON.write_text(json.dumps(data, indent=2))

@@ -69,21 +69,45 @@ def _drift_guard() -> None:
 
     pdf_text = _pdf_fnr_text()
     assert pdf_text, "could not read README PDF text (run `make readme` first)"
-    fnr = eval_summary.get("overall_fnr_wilson") or [0.0, 0.0, 0.0]
+    # Guard BOTH headline gate metrics, not just FNR (the earlier FNR-only guard
+    # was too weak — GATE.md 3.5 requires every number in the PDF to be traceable).
+    fnr = eval_summary.get("ungrounded_fnr_wilson") or [0.0, 0.0, 0.0]
+    fpr = eval_summary.get("passable_fpr_wilson") or [0.0, 0.0, 0.0]
     fnr_pct = f"{fnr[0]:.1%}"
+    fpr_pct = f"{fpr[0]:.1%}"
     if fnr_pct not in pdf_text:
-        print(f"DRIFT: README PDF FNR {fnr_pct} != eval JSON FNR {fnr_pct} not present in PDF")
+        print(f"DRIFT: README PDF FNR {fnr_pct} not present in PDF")
         print("       regenerate the PDF with `make readme` after changing eval numbers")
         sys.exit(1)
-    print(f"drift guard OK: README PDF FNR {fnr_pct} matches eval JSON")
+    if fpr_pct not in pdf_text:
+        print(f"DRIFT: README PDF passable FPR {fpr_pct} not present in PDF")
+        print("       regenerate the PDF with `make readme` after changing eval numbers")
+        sys.exit(1)
+    print(f"drift guard OK: README PDF FNR {fnr_pct} and FPR {fpr_pct} match eval JSON")
 
     if BENCH_JSON.exists():
-        # T8.1: bench timing varies run-to-run, so we do NOT drift-check raw
-        # p95/p50 here — that would make the guard flaky.  The PDF is
-        # regenerated from the bench JSON by `make readme`; the guard only
-        # asserts that the bench JSON and PDF agree *at the moment they were
-        # both produced*, by re-running the PDF builder and diffing.
-        print("drift guard OK: bench JSON present (timing non-deterministic, not drift-checked)")
+        # Bench timing is non-deterministic run-to-run (p50 ~0.4-0.6ms), so an
+        # exact-match drift check would be flaky. We check the committed PDF's
+        # gate p50/p95 fall within a +/-15% tolerance band of the live bench —
+        # that is the defensible "every number traceable" check (GATE.md 3.5).
+        import re as _re
+        bench = json.loads(BENCH_JSON.read_text())
+        g = bench.get("gate_latency_ms", {})
+        live_p50 = g.get("p50")
+        live_p95 = g.get("p95")
+        if live_p50 is not None:
+            lo50, hi50 = live_p50 * 0.85, live_p50 * 1.15
+            nums = [float(x) for x in _re.findall(r"p50=([0-9.]+)", pdf_text)]
+            if nums and not any(lo50 <= n <= hi50 for n in nums):
+                print(f"DRIFT: README PDF gate p50 {nums} outside +/-15% band [{lo50:.3f},{hi50:.3f}] of live bench")
+                sys.exit(1)
+        if live_p95 is not None:
+            lo95, hi95 = live_p95 * 0.85, live_p95 * 1.15
+            nums = [float(x) for x in _re.findall(r"p95=([0-9.]+)", pdf_text)]
+            if nums and not any(lo95 <= n <= hi95 for n in nums):
+                print(f"DRIFT: README PDF gate p95 {nums} outside +/-15% band [{lo95:.3f},{hi95:.3f}] of live bench")
+                sys.exit(1)
+        print("drift guard OK: README PDF bench timings within +/-15% of live bench JSON")
 
 
 def main() -> int:

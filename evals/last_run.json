@@ -1,171 +1,57 @@
 {
   "summary": {
-    "n_cases": 154,
-    "n_bindings": 407,
-    "abstention_unknown": 0,
-    "abstention_rate": 0.0,
+    "n_cases": 167,
+    "n_bindings": 424,
+    "abstention_unknown": 1,
+    "abstention_rate": 0.0024,
     "per_route": {
       "numeric": {
-        "n": 116,
-        "tp": 39,
-        "fp": 77,
-        "fn": 0,
-        "tn": 0,
-        "precision": [
-          0.33620689655172414,
-          0.2567137493803349,
-          0.4262010314637126
-        ],
-        "recall": [
-          1.0,
-          0.910330146399761,
-          1.0
-        ],
-        "fpr": [
-          1.0,
-          0.9524799113327792,
-          1.0
-        ],
-        "fnr": [
-          0.0,
-          0.0,
-          0.08966985360023902
-        ]
+        "n": 119,
+        "supported": 105,
+        "unsupported": 0,
+        "unknown": 0,
+        "contradicted": 14,
+        "abstention_rate": 0.0
       },
       "structural": {
-        "n": 103,
-        "tp": 34,
-        "fp": 69,
-        "fn": 0,
-        "tn": 0,
-        "precision": [
-          0.3300970873786408,
-          0.24682835312636037,
-          0.425583890793611
-        ],
-        "recall": [
-          1.0,
-          0.8984820937803899,
-          1.0
-        ],
-        "fpr": [
-          1.0,
-          0.9472609058559943,
-          1.0
-        ],
-        "fnr": [
-          0.0,
-          0.0,
-          0.10151790621961015
-        ]
+        "n": 109,
+        "supported": 177,
+        "unsupported": 33,
+        "unknown": 0,
+        "contradicted": 0,
+        "abstention_rate": 0.0
       },
       "textual": {
-        "n": 67,
-        "tp": 34,
-        "fp": 14,
-        "fn": 0,
-        "tn": 19,
-        "precision": [
-          0.7083333333333334,
-          0.5682047226383247,
-          0.8175858393813662
-        ],
-        "recall": [
-          1.0,
-          0.8984820937803899,
-          1.0
-        ],
-        "fpr": [
-          0.42424242424242425,
-          0.272353589950299,
-          0.5919302630853998
-        ],
-        "fnr": [
-          0.0,
-          0.0,
-          0.10151790621961015
-        ]
+        "n": 70,
+        "supported": 50,
+        "unsupported": 19,
+        "unknown": 1,
+        "contradicted": 0,
+        "abstention_rate": 0.0143
       },
       "derived": {
-        "n": 10,
-        "tp": 0,
-        "fp": 10,
-        "fn": 0,
-        "tn": 0,
-        "precision": [
-          0.0,
-          0.0,
-          0.2775401687666165
-        ],
-        "recall": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "fpr": [
-          1.0,
-          0.7224598312333834,
-          1.0
-        ],
-        "fnr": [
-          0.0,
-          0.0,
-          0.0
-        ]
+        "n": 12,
+        "supported": 2,
+        "unsupported": 0,
+        "unknown": 0,
+        "contradicted": 10,
+        "abstention_rate": 0.0
       },
       "temporal": {
-        "n": 8,
-        "tp": 8,
-        "fp": 0,
-        "fn": 0,
-        "tn": 0,
-        "precision": [
-          1.0,
-          0.6755843804891231,
-          1.0
-        ],
-        "recall": [
-          1.0,
-          0.6755843804891231,
-          1.0
-        ],
-        "fpr": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "fnr": [
-          0.0,
-          0.0,
-          0.3244156195108769
-        ]
+        "n": 11,
+        "supported": 11,
+        "unsupported": 0,
+        "unknown": 0,
+        "contradicted": 0,
+        "abstention_rate": 0.0
       },
       "none": {
         "n": 2,
-        "tp": 0,
-        "fp": 2,
-        "fn": 0,
-        "tn": 0,
-        "precision": [
-          0.0,
-          0.0,
-          0.6576280471103807
-        ],
-        "recall": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "fpr": [
-          1.0,
-          0.3423719528896193,
-          1.0
-        ],
-        "fnr": [
-          0.0,
-          0.0,
-          0.0
-        ]
+        "supported": 0,
+        "unsupported": 0,
+        "unknown": 0,
+        "contradicted": 2,
+        "abstention_rate": 0.0
       }
     },
     "per_stratum": {
@@ -182,6 +68,41 @@
         "should_hold": 0,
         "should_pass": 0,
         "hard_negative": 35
+      },
+      "clean-numeric": {
+        "n": 3,
+        "would_hold": 0,
+        "should_hold": 0,
+        "should_pass": 3,
+        "hard_negative": 0
+      },
+      "clean-structural": {
+        "n": 3,
+        "would_hold": 0,
+        "should_hold": 0,
+        "should_pass": 3,
+        "hard_negative": 0
+      },
+      "clean-derived": {
+        "n": 2,
+        "would_hold": 0,
+        "should_hold": 0,
+        "should_pass": 2,
+        "hard_negative": 0
+      },
+      "clean-temporal": {
+        "n": 3,
+        "would_hold": 0,
+        "should_hold": 0,
+        "should_pass": 3,
+        "hard_negative": 0
+      },
+      "clean-textual": {
+        "n": 2,
+        "would_hold": 0,
+        "should_hold": 0,
+        "should_pass": 2,
+        "hard_negative": 0
       },
       "derived-trap": {
         "n": 10,
@@ -233,17 +154,50 @@
         "hard_negative": 5
       }
     },
-    "overall_fnr": 0.0,
-    "overall_fnr_wilson": [
+    "action_level": {
+      "passable": {
+        "fp": 0,
+        "tn": 21,
+        "fpr": [
+          0.0,
+          0.0,
+          0.15464382326420195
+        ]
+      },
+      "irreversible_fail_closed": {
+        "held": 0,
+        "passed": 0
+      },
+      "ungrounded": {
+        "held": 93,
+        "missed": 0,
+        "fnr": [
+          0.0,
+          0.0,
+          0.0396689026203615
+        ]
+      },
+      "hard_negative_caution": {
+        "held": 34,
+        "total": 53,
+        "hold_rate": [
+          0.6415094339622641,
+          0.5069089329999881,
+          0.7569823015887636
+        ]
+      }
+    },
+    "passable_fpr": 0.0,
+    "passable_fpr_wilson": [
+      0.0,
+      0.0,
+      0.15464382326420195
+    ],
+    "ungrounded_fnr": 0.0,
+    "ungrounded_fnr_wilson": [
       0.0,
       0.0,
       0.0396689026203615
-    ],
-    "overall_fpr": 0.0,
-    "overall_fpr_wilson": [
-      0.0,
-      0.0,
-      0.3244156195108769
     ],
     "hard_negative_hold_rate": 0.6415094339622641,
     "hard_negative_hold_wilson": [
@@ -251,52 +205,25 @@
       0.5069089329999881,
       0.7569823015887636
     ],
-    "fn_counts": {
-      "fn": 0,
-      "tp": 93,
-      "fnr": [
-        0.0,
-        0.0,
-        0.0396689026203615
-      ]
-    },
-    "fp_counts": {
-      "fp": 0,
-      "tn": 8,
-      "fpr": [
-        0.0,
-        0.0,
-        0.3244156195108769
-      ]
-    },
-    "hn_counts": {
-      "hn_held": 34,
-      "hn_total": 53,
-      "hn_hold_rate": [
-        0.6415094339622641,
-        0.5069089329999881,
-        0.7569823015887636
-      ]
-    },
     "threshold_calibration": [
       {
         "coverage_supported": 0.72,
         "coverage_unknown": 0.38,
-        "textual_bound": 67,
-        "supported_count": 48,
-        "abstention_rate": 0.2836,
+        "textual_bound": 70,
+        "supported_count": 50,
+        "abstention_rate": 0.2857,
         "note": "observed at committed constants; resweep with shadow replay before shipping"
       },
       {
         "coverage_supported": 0.8,
         "coverage_unknown": 0.45,
-        "textual_bound": 67,
+        "textual_bound": 70,
         "supported_count": null,
         "abstention_rate": null,
         "note": "hypothetical tighter threshold \u2014 measured only via shadow replay (T5.3)"
       }
     ],
-    "note": "No single accuracy number. Per-route Wilson 95% CIs on precision/recall/FPR/FNR; document-level FNR/FPR take the ARCHITECTURE \u00a77 shape. Corpus is self-authored with hard negatives; numbers are measured on this run only."
+    "note": "No single accuracy number. Per-route binding DISTRIBUTION + abstention; action-level FPR/FNR take the ARCHITECTURE \u00a77 shape (the gate metric). Corpus is self-authored with hard negatives; numbers are measured on this run only."
   },
   "results": [
     {
@@ -1890,6 +1817,367 @@
       },
       "actuators": {
         "show_reply": "Pass"
+      }
+    },
+    {
+      "id": "clean-num-000",
+      "stratum": "clean-numeric",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "structural": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        },
+        "numeric": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "order": "SUPPORTED",
+        "amount": "SUPPORTED"
+      },
+      "by_kind": {
+        "order": "structural",
+        "amount": "numeric"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-num-001",
+      "stratum": "clean-numeric",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "structural": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        },
+        "numeric": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "order": "SUPPORTED",
+        "amount": "SUPPORTED"
+      },
+      "by_kind": {
+        "order": "structural",
+        "amount": "numeric"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-str-000",
+      "stratum": "clean-structural",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "structural": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        },
+        "textual": {
+          "n": 1,
+          "supported": 0,
+          "unsupported": 0,
+          "unknown": 1,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "clause_41": "SUPPORTED",
+        "order": "UNKNOWN"
+      },
+      "by_kind": {
+        "clause_41": "structural",
+        "order": "textual"
+      },
+      "actuators": {
+        "show_text": "Pass + annotate"
+      }
+    },
+    {
+      "id": "clean-str-001",
+      "stratum": "clean-structural",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "structural": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "section_4_1": "SUPPORTED"
+      },
+      "by_kind": {
+        "section_4_1": "structural"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-der-000",
+      "stratum": "clean-derived",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "derived": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "derived": "SUPPORTED"
+      },
+      "by_kind": {
+        "derived": "derived"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-der-001",
+      "stratum": "clean-derived",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "derived": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "derived": "SUPPORTED"
+      },
+      "by_kind": {
+        "derived": "derived"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-tem-000",
+      "stratum": "clean-temporal",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "temporal": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "30_days": "SUPPORTED"
+      },
+      "by_kind": {
+        "30_days": "temporal"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-tem-001",
+      "stratum": "clean-temporal",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "temporal": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "30_days": "SUPPORTED"
+      },
+      "by_kind": {
+        "30_days": "temporal"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-txt-000",
+      "stratum": "clean-textual",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "textual": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "hr_side": "SUPPORTED"
+      },
+      "by_kind": {
+        "hr_side": "textual"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-txt-001",
+      "stratum": "clean-textual",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "textual": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "approval": "SUPPORTED"
+      },
+      "by_kind": {
+        "approval": "textual"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-num-002",
+      "stratum": "clean-numeric",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "numeric": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        },
+        "structural": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "amount": "SUPPORTED",
+        "order": "SUPPORTED"
+      },
+      "by_kind": {
+        "amount": "numeric",
+        "order": "structural"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-str-002",
+      "stratum": "clean-structural",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "structural": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "clause_41": "SUPPORTED"
+      },
+      "by_kind": {
+        "clause_41": "structural"
+      },
+      "actuators": {
+        "show_text": "Pass"
+      }
+    },
+    {
+      "id": "clean-tem-002",
+      "stratum": "clean-temporal",
+      "use_case": "knowledge",
+      "label": "should_pass",
+      "would_hold": false,
+      "routes": {
+        "temporal": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "30_days": "SUPPORTED"
+      },
+      "by_kind": {
+        "30_days": "temporal"
+      },
+      "actuators": {
+        "show_text": "Pass"
       }
     },
     {

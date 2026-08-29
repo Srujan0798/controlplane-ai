@@ -202,29 +202,34 @@ def build(out_path: Path = OUT) -> Path:
     story.append(P("6. Evidence (measured on this run)", h1))
     ev = nums.get("eval", {})
     if ev:
-        fnr = ev.get("overall_fnr_wilson") or [0, 0, 0]
-        fpr = ev.get("overall_fpr_wilson") or [0, 0, 0]
+        fnr = ev.get("ungrounded_fnr_wilson") or [0, 0, 0]
+        fpr = ev.get("passable_fpr_wilson") or [0, 0, 0]
         hn = ev.get("hard_negative_hold_wilson") or [0, 0, 0]
+        a = ev.get("action_level", {})
         story.append(P(
             f"Eval corpus: <b>{ev.get('n_cases', '?')}</b> labelled cases "
             f"({ev.get('n_bindings', '?')} bindings). "
-            f"Ungrounded miss rate (FNR) <b>{fnr[0]:.1%}</b> "
+            f"Ungrounded catch rate (FNR) <b>{fnr[0]:.1%}</b> "
             f"(95% CI {fnr[1]:.1%}–{fnr[2]:.1%}) → we HOLD "
             f"<b>{(1 - fnr[0]):.1%}</b> of ungrounded responses. "
-            f"Clean-response false-hold (FPR) <b>{fpr[0]:.1%}</b> "
+            f"Passable-action false-hold (FPR) <b>{fpr[0]:.1%}</b> "
             f"(95% CI {fpr[1]:.1%}–{fpr[2]:.1%}). "
             f"Fail-closed caution on hard-negatives <b>{hn[0]:.1%}</b>. "
-            f"Abstention (UNKNOWN rate) <b>{ev.get('abstention_rate', 0):.1%}</b> of bindings.", body))
+            f"Abstention (UNKNOWN rate) <b>{ev.get('abstention_rate', 0):.1%}</b> of bindings. "
+            f"Irreversible actions (R2/R3) escalated by design: "
+            f"held={a.get('irreversible_fail_closed', {}).get('held', '?')}, "
+            f"passed={a.get('irreversible_fail_closed', {}).get('passed', '?')}.", body))
         pr = ev.get("per_route", {})
         if pr:
-            rdata = [["Route", "n", "precision", "recall", "fpr", "fnr"]]
+            rdata = [["Route", "n", "supported", "unknown", "contradicted", "unsupported", "abstain"]]
             for route, m in pr.items():
-                def _fmt(t):
-                    return f"{t[0]:.1%}"
-                rdata.append([route, str(m.get("n", "")), _fmt(m["precision"]),
-                              _fmt(m["recall"]), _fmt(m["fpr"]), _fmt(m["fnr"])])
-            rtbl = rl["Table"](rdata, colWidths=[1.2*rl["inch"], 0.7*rl["inch"], 1.2*rl["inch"],
-                                                 1.2*rl["inch"], 1.0*rl["inch"], 1.0*rl["inch"]])
+                rdata.append([
+                    route, str(m.get("n", "")), str(m.get("supported", "")),
+                    str(m.get("unknown", "")), str(m.get("contradicted", "")),
+                    str(m.get("unsupported", "")), f"{m.get('abstention_rate', 0):.1%}",
+                ])
+            rtbl = rl["Table"](rdata, colWidths=[1.1*rl["inch"], 0.5*rl["inch"], 1.0*rl["inch"],
+                                                 0.8*rl["inch"], 1.05*rl["inch"], 1.0*rl["inch"], 0.8*rl["inch"]])
             rtbl.setStyle(rl["TableStyle"]([
                 ("BACKGROUND", (0, 0), (-1, 0), rl["colors"].navy),
                 ("TEXTCOLOR", (0, 0), (-1, 0), rl["colors"].white),

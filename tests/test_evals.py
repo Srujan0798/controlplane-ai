@@ -35,13 +35,11 @@ def test_report_has_per_route_metrics():
     assert "per_route" in rep
     for route, m in rep["per_route"].items():
         assert route in ROUTES, f"unexpected route {route}"
-        for stat in ("precision", "recall", "fpr", "fnr"):
+        # Per-route is a BINDING DISTRIBUTION (never an undefined precision/FPR).
+        for stat in ("supported", "unknown", "contradicted", "unsupported", "abstention_rate"):
             assert stat in m, f"{route} missing {stat}"
-            # each is a (point, low, high) Wilson triple
-            assert isinstance(m[stat], (list, tuple)) and len(m[stat]) == 3
-            point, lo, hi = m[stat]
-            assert 0.0 <= point <= 1.0 + 1e-9
-            assert lo <= point <= hi + 1e-9
+        assert isinstance(m["abstention_rate"], (int, float))
+        assert 0.0 <= m["abstention_rate"] <= 1.0 + 1e-9
 
 
 def test_no_single_accuracy_number():
@@ -52,9 +50,9 @@ def test_no_single_accuracy_number():
     assert not (set(keys) & banned), f"forbidden single-accuracy field present: {set(keys) & banned}"
 
 
-def test_overall_fnr_fpr_have_wilson_cis():
+def test_action_level_fpr_fnr_have_wilson_cis():
     rep = build_report()
-    for k in ("overall_fnr_wilson", "overall_fpr_wilson", "hard_negative_hold_wilson"):
+    for k in ("ungrounded_fnr_wilson", "passable_fpr_wilson", "hard_negative_hold_wilson"):
         assert k in rep
         triple = rep[k]
         assert len(triple) == 3

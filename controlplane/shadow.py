@@ -149,8 +149,8 @@ class MetricsStore:
             return
         data = json.loads(path.read_text())
         summary = data.get("summary", data)
-        fnr = summary.get("overall_fnr_wilson")
-        fpr = summary.get("overall_fpr_wilson")
+        fnr = summary.get("ungrounded_fnr_wilson")
+        fpr = summary.get("passable_fpr_wilson")
         if fnr:
             self._eval_fnr = fnr[0]
             self._eval_fnr_ci = list(fnr[1:3])

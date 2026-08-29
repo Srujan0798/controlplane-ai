@@ -225,6 +225,10 @@ def main(argv: list[str] | None = None) -> int:
 
     sweep = [_run_concurrency(args.n, c) for c in concurrencies]
     best = max(sweep, key=lambda r: r["throughput_rps"])
+    # Headline gate latency = single-request compute (concurrency=1), which is the
+    # stable, representative per-request number. Higher concurrency inflates p95 via
+    # GIL/contention and must NOT be reported as the gate's latency.
+    single = next((r for r in sweep if r["concurrency"] == 1), sweep[0])
     methodology = build_methodology(args.n, concurrencies)
 
     payload = {
@@ -232,13 +236,14 @@ def main(argv: list[str] | None = None) -> int:
         "concurrencies": concurrencies,
         "concurrency_sweep": sweep,
         "best_throughput_rps": best["throughput_rps"],
-        "per_stage_ms": best["per_stage_ms"],
-        "gate_latency_ms": best["gate_latency_ms"],
+        "per_stage_ms": single["per_stage_ms"],
+        "gate_latency_ms": single["gate_latency_ms"],
         "units": "milliseconds (per-stage compute, in-process)",
         "methodology": methodology,
         "note": (
             "Per-stage compute only — not API latency. 40ms is a LANE-1 TARGET, "
-            "never a measured p95 (content law 6)."
+            "never a measured p95 (content law 6). Gate latency is the concurrency=1 "
+            "single-request figure; the concurrency sweep reports throughput headroom."
         ),
     }
 
