@@ -1,16 +1,19 @@
 # Submit — ControlPlane.ai Round 2
 
-**Tag:** `v0.2.0-round2` · **Branch:** `main`
+**Public GitHub (only branch judges need):** https://github.com/Srujan0798/controlplane-ai (`main`)  
+**Frozen rollback tag:** `v0.2.0-round2`
 
-## Upload / hand in
+## Portal — five fields
 
-| # | Organizer ask | Our artifact |
+| # | Organizer field | Artifact |
 |---|---|---|
-| 1 | Detailed business proposal | `submission/ControlPlane_Round2_Proposal.pdf` (built from `round2/CONTROLPLANE_R2_FINAL.md`) |
-| 2 | Working prototype | Live demo of this repository |
-| 3 | Pitch presentation | `submission/ControlPlane_Round2_Pitch.pptx` |
+| 1 | Public GitHub link | https://github.com/Srujan0798/controlplane-ai |
+| 2 | Prototype video (`.mp4`) | `submission/ControlPlane_Round2_Prototype.mp4` |
+| 3 | README document (`.pdf`) | `submission/ControlPlane_Round2_README.pdf` |
+| 4 | Detailed business proposal (`.pdf`) | `submission/ControlPlane_Round2_Proposal.pdf` |
+| 5 | Pitch presentation (`.pptx`) | `submission/ControlPlane_Round2_Pitch.pptx` |
 
-Official brief: [`ps.md`](ps.md) (+ PDFs in this folder).
+Official brief: [`ps.md`](ps.md).
 
 ## Verify before upload
 
@@ -19,13 +22,15 @@ source .venv/bin/activate
 bash scripts/preflight-lite.sh
 make run
 # http://127.0.0.1:8787/?scenario=refund&mode=enforce&autorun=1
+# Gate (paste/upload): http://127.0.0.1:8787/gate
 ```
 
 | Check | Pass means |
 |---|---|
-| Refund | Edit + Escalate (held) |
+| Refund | Edit + Escalate (**held** with evidence packet — never “blocked”) |
+| Amount bind | `numeric` (not fixture) |
 | Flip | analyst Edit → hr_partner Pass |
-| Latency | Only quote `submission/latency_bench.json` |
+| Eval / latency | Only quote `make eval` / `submission/latency_bench.json` |
 
 ## Present
 

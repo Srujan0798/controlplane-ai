@@ -2,23 +2,25 @@
 
 **Admission-control layer for AI that acts.**  
 Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1  
-**Tag:** `v0.2.0-round2`
+
+**Public repo (single branch `main`):** https://github.com/Srujan0798/controlplane-ai  
+**Tag:** `v0.2.0-round2` (frozen baseline; `main` is the elevation tip judges should open)
 
 Every AI response is a set of **claims requesting permission to act**. Provenance is captured **outside** the model (`STEP → SPAN → CLAIM → ACTION`). Unproven claims cannot authorize irreversible actions. Lane 1 is deterministic — no LLM on the critical path.
 
 ---
 
-## 1. Submit
+## 1. Portal uploads (five fields)
 
-Read **[`docs/SUBMIT.md`](docs/SUBMIT.md)** then upload:
+| # | Portal field | Artifact |
+|---|---|---|
+| 1 | Public GitHub link | https://github.com/Srujan0798/controlplane-ai |
+| 2 | Prototype video | [`submission/ControlPlane_Round2_Prototype.mp4`](submission/ControlPlane_Round2_Prototype.mp4) |
+| 3 | README document (PDF) | [`submission/ControlPlane_Round2_README.pdf`](submission/ControlPlane_Round2_README.pdf) |
+| 4 | Business proposal (PDF) | [`submission/ControlPlane_Round2_Proposal.pdf`](submission/ControlPlane_Round2_Proposal.pdf) |
+| 5 | Pitch deck (PPTX) | [`submission/ControlPlane_Round2_Pitch.pptx`](submission/ControlPlane_Round2_Pitch.pptx) |
 
-| Deliverable | File |
-|---|---|
-| Business proposal | [`submission/ControlPlane_Round2_Proposal.pdf`](submission/ControlPlane_Round2_Proposal.pdf) |
-| Pitch deck | [`submission/ControlPlane_Round2_Pitch.pptx`](submission/ControlPlane_Round2_Pitch.pptx) |
-| Working prototype | This repo (demo below) |
-
-Canon sources: [`round2/CONTROLPLANE_R2_FINAL.md`](round2/CONTROLPLANE_R2_FINAL.md) · [`round2/R2S5.md`](round2/R2S5.md)
+Full checklist: [`docs/SUBMIT.md`](docs/SUBMIT.md) · Canon: [`round2/CONTROLPLANE_R2_FINAL.md`](round2/CONTROLPLANE_R2_FINAL.md) · [`round2/R2S5.md`](round2/R2S5.md)
 
 ---
 
