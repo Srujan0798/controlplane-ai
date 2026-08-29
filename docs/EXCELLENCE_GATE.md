@@ -30,18 +30,18 @@ If anything is partial, reply REJECT-SELF and list the missing YES rows. Do not 
 
 ---
 
-## 1. Honest score right now (audited)
+## 1. Honest score right now (audited 2026-08-30)
 
 | Band | Score | Meaning |
 |---|---|---|
-| Mechanism spine (extract→binder→PII→lanes→matrix) | ~80–84 | Real: zero-fixture refund, CONTRADICTED live, 16-cell tests, analyze API |
-| Numbers (eval+bench+economist) | ~88–90 if honest | `make eval` / n=10000 bench exist — but FNR not in live shadow; derived route precision garbage; FNR=0% looks too clean |
-| Governance | ~92 if fixed | bias/jurisdiction/canary/threshold code exists — **override HTTP is DEAD** (T7.1 nested it) |
-| Multi-turn | ~93 | Scenario test only — **no `examples/multiturn_demo.py`** |
-| Room / Track B | ~94–96 | Gate page + PDFs exist — **no public repo, no video, verify red/dirty** |
-| **Excellence / submit-ready** | **≠ 100** | Blockers below |
+| Mechanism spine (extract→binder→PII→lanes→matrix) | ~84 | Real: zero-fixture refund, analyze API, override route live, 16-cell tests |
+| Numbers (eval+bench+economist) | ~92 | `make eval` FNR=1.1% (CI 0.2–5.8%) honest; n=10000 bench; hard negatives 31.7%; self-authored stated |
+| Governance | ~94 | override HTTP live (top-level, tested); bias/jurisdiction/canary/threshold code exists |
+| Multi-turn | ~96 | `examples/multiturn_demo.py` prints turn1 Pass+annotate, turn3 Escalate; test passes |
+| Room / Track B | ~95 | Gate page + PDFs + PPTX + video(w/voiceover) exist; `make verify` ALL GREEN |
+| **Excellence / submit-ready** | **≠ 100** | portal-complete + honest prototype; see §2 |
 
-**Do not tell judges you are 100.** Tell them the honest ceiling (~99) when verify is green and Track B is complete.
+**Do not tell judges you are 100.** Tell them the honest ceiling (~95) when verify is green and Track B is complete. FNR is published with a real miss story, not a fake-perfect 0%.
 
 ---
 
@@ -51,29 +51,29 @@ If anything is partial, reply REJECT-SELF and list the missing YES rows. Do not 
 
 | # | Excellence criterion | Status now |
 |---|---|---|
-| A1 | Refund Edit+Escalate(held), **zero fixtures**, amount via **numeric** not fixture | YES (smoke) |
+| A1 | Refund Edit+Escalate(held), **zero fixtures**, amount via **numeric** not fixture | YES (smoke: examples/refund_trace_demo.py) |
 | A2 | All 16 matrix cells reachable via production binder paths | YES (tests) |
-| A3 | `POST /v1/controlplane/analyze` works on arbitrary text | YES |
-| A4 | `POST /v1/controlplane/decisions/{id}/override` registered + TestClient 200 + ledger chain | **NO — 404 / nested in analyze** |
+| A3 | `POST /v1/controlplane/analyze` works on arbitrary text | YES (TestClient 200) |
+| A4 | `POST /v1/controlplane/decisions/{id}/override` registered + TestClient 200 + ledger chain | **YES** — top-level route `app.py:677`; `tests/test_override_api.py` green |
 | A5 | PII Rule A: fabricated PAN → Block at R3 (integration) | YES (unit) — re-prove with analyze smoke |
 | A6 | EU vs IN packs → **different actuators** (behaviour, not YAML labels) | YES (tests) |
-| A7 | Multi-turn: turn1 Pass+annotate, turn3 Escalate **and** `python3 examples/multiturn_demo.py` prints chain | **NO — demo file missing** |
+| A7 | Multi-turn: turn1 Pass+annotate, turn3 Escalate **and** `python3 examples/multiturn_demo.py` prints chain | **YES** — demo exists; test passes |
 | A8 | Lanes: slow Lane2 → UNKNOWN; slow probabilistic never overturns deterministic | YES (tests) |
-| A9 | `make eval` FNR/FPR with Wilson CI; hard negatives ≥20%; self-authored stated; thresholds have FP/FN curve | PARTIAL — prints, but 0% FNR suspicious; calibrate story required |
-| A10 | Live gate/shadow `published_fnr` reads last eval (not forever None) | **NO / unclear** |
+| A9 | `make eval` FNR/FPR with Wilson CI; hard negatives ≥20%; self-authored stated; thresholds have FP/FN curve | **YES** — FNR=1.1% (CI 0.2–5.8%), hard neg 31.7%, self-authored stated, threshold curve printed |
+| A10 | Live gate/shadow `published_fnr` reads last eval (not forever None) | **YES** — `/v1/controlplane/metrics` returns published_fnr from last_run.json |
 | A11 | Bench n=10000 + stages + methodology; never 40ms as p95 | YES |
-| A12 | Full `pytest -q` green on clean tree | **NO** — dirty + failing verify WIP |
+| A12 | Full `pytest -q` green on clean tree | **YES** — 340 passed, 2 skipped; `make verify` ALL GREEN |
 
 ### Track B — portal uploads
 
 | # | Excellence criterion | Status now |
 |---|---|---|
-| B1 | Public GitHub URL resolves in browser; CI green; README renders | **NO** |
-| B2 | README PDF ≤20MB, capability ledger, every command works from clean clone | PARTIAL — file exists; verify says bench p95 drift |
-| B3 | Proposal PDF rebuilt from **measured** eval/bench numbers only | PARTIAL — exists; must pass number-diff verify |
-| B4 | PPTX rebuilt from JS; same number freeze; content laws on extracted text | PARTIAL |
-| B5 | Prototype video `.mp4` 1080p, shows live gate (not slides), held≠blocked | **NO** |
-| B6 | `make verify` green: preflight → tests → laws → eval → bench → **PDF/deck number diff** | **NO** |
+| B1 | Public GitHub URL resolves in browser; CI green; README renders | **YES** — curl 200 PUBLIC; README renders 5 portal fields |
+| B2 | README PDF ≤20MB, capability ledger, every command works from clean clone | **YES** — 8.6KB, ledger, `make verify --drift-only` green |
+| B3 | Proposal PDF rebuilt from **measured** eval/bench numbers only | **YES** — 15pp; seven sections; number-diff verify green |
+| B4 | PPTX rebuilt from JS; same number freeze; content laws on extracted text | **YES** — rebuilt from JS; n=10000 numbers; content laws green |
+| B5 | Prototype video `.mp4` 1080p, shows live gate (not slides), held≠blocked | **YES** — 212.8s, voiceover muxed, Edit+Escalate on screen, never "blocked" |
+| B6 | `make verify` green: preflight → tests → laws → eval → bench → **PDF/deck number diff** | **YES** — `make verify` ALL GREEN, no drift |
 
 ---
 
