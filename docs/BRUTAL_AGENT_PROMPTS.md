@@ -277,4 +277,4 @@ If an agent says any of these without evidence, send them back:
 - “should be fine for judges”
 - “100/100”
 - “pytest --ignore=…”
-- “blocked the refund”
+- claiming the refund was stopped or halted
