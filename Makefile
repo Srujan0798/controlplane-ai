@@ -17,6 +17,7 @@ verify: test
 	pytest -q tests/test_content_laws.py
 	$(MAKE) eval
 	$(MAKE) bench
+	$(MAKE) readme
 	python3 scripts/verify.py
 
 run:
