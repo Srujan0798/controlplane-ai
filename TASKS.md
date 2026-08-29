@@ -32,35 +32,32 @@ T0.2 · T0.3 · T1.1 · T1.2 · T1.3 · T1.4 · T1.5 · T1.6 · T1.7 · T2.1 · 
 
 \*T2.2 Rule A lives in `controlplane/pii.py` + `tests/test_pii.py` (not a separate `test_leakage.py`). Treat DONE unless you want a rename-only cleanup task.
 
-### FINISH / COMMIT WIP (files exist uncommitted — one agent per task, do not rewrite from scratch)
+### FINISH / COMMIT WIP (on disk, not fully closed — do not rewrite from scratch)
 
 | Agent prompt | Task | What to do |
 |---|---|---|
-| `Read TASKS.md §0, then finish tasks/T5.1.md` | T5.1 jurisdiction | WIP on disk: `policies/decision-support-{eu,in}.yaml`, `tests/test_jurisdiction.py`, edits in `policy.py`. Verify green, commit Owns only. |
-| `Read TASKS.md §0, then finish tasks/T5.2.md` | T5.2 feedback | WIP: `controlplane/feedback.py`, override route in `app.py`, `tests/test_feedback.py`. Close acceptance, commit. |
-| `Read TASKS.md §0, then finish tasks/T5.5.md` | T5.5 bias v2 | WIP: `controlplane/bias.py` + `tests/test_bias.py` (flip rate + Wilson). Keep ACL skew; commit. |
-| `Read TASKS.md §0, then finish tasks/T6.1.md` + `T6.2.md` | Multi-turn | WIP: `scenarios/multiturn.py`, `tests/test_multiturn.py`. Add `examples/multiturn_demo.py` if missing; commit. |
-| `Read TASKS.md §0, then finish tasks/T0.4.md` | Lawcheck merge | Untracked `lawcheck.py` + `test_lawcheck.py` vs committed `test_content_laws.py`. Merge to one module. |
-| `Read TASKS.md §0, then finish tasks/T3.1.md` + `T3.2.md` | Eval corpus/harness | Corpus already ~154 cases under `evals/cases/`; harness is `evals/harness.py` (not `run.py`). Raise case_pass_rate, wire `published_fnr` from `evals/last_run.json`, `make eval` green. |
+| `Read TASKS.md §0, then finish tasks/T5.2.md` | T5.2 feedback | Untracked: `controlplane/feedback.py`, `tests/test_feedback.py`, dirty `server/app.py` override route. Close acceptance + commit Owns only. |
+| `Read TASKS.md §0, then finish tasks/T6.1.md` and `tasks/T6.2.md` | Multi-turn | Untracked: `scenarios/multiturn.py`, `tests/test_multiturn.py`. Add `examples/multiturn_demo.py`; commit. |
+| `Read TASKS.md §0, then finish tasks/T3.2.md` | Eval harness | Corpus landed (`f249f28`). Harness = `evals/harness.py`. Raise case pass rate, wire `published_fnr` into shadow/gate from `evals/last_run.json`, `make eval` green. |
 
-### OPEN — assign next (nothing committed yet / incomplete)
+### OPEN — assign next
 
 | Priority | Prompt | Why |
 |---|---|---|
-| P0 human | `Do tasks/T0.1.md` | Public repo URL — submission blocker |
+| **P0 human** | `Do tasks/T0.1.md` | Public GitHub remote — submission blocker |
 | P1 | `Read TASKS.md §0, then do tasks/T3.4.md` | Bench n=10k + per-stage + methodology |
 | P1 | `Read TASKS.md §0, then do tasks/T5.3.md` | Threshold ships only after shadow FP/FN delta |
 | P1 | `Read TASKS.md §0, then do tasks/T5.4.md` | Canary auto-rollback 3× baseline |
-| P2 | `Read TASKS.md §0, then do tasks/T7.1.md` | **Upload-capable** gate console (video-shaped) |
+| P2 (after T3.2+T3.4) | `Read TASKS.md §0, then do tasks/T7.1.md` | Upload-capable gate console (video-shaped) |
 | P2 | `Read TASKS.md §0, then do tasks/T7.2.md` | README PDF |
 | P2 | `Read TASKS.md §0, then do tasks/T7.3.md` | Rebuild proposal PDF from real eval numbers |
 | P2 | `Read TASKS.md §0, then do tasks/T7.4.md` | Rebuild deck |
-| P2 human+agent | `Read TASKS.md §0, then do tasks/T7.5.md` | Prototype video script + record |
-| P3 | `Read TASKS.md §0, then do tasks/T7.6.md` / `T8.*` | Hostile Q&A v2 · verify · ACCEPTANCE |
+| P2 human+agent | `Read TASKS.md §0, then do tasks/T7.5.md` | Prototype video |
+| P3 | `Read TASKS.md §0, then do tasks/T7.6.md` / `T8.*` | Hostile Q&A · verify · ACCEPTANCE |
 
-**Hard rule from the plan:** Wave 7 (PDF/deck/video) must not start until T3.2 + T3.4 print real numbers.
+**Hard rule:** Wave 7 (PDF/deck/video) starts only after T3.2 + T3.4 print real numbers.
 
-**Max parallel without file fights:** finish-WIP set (T5.1 / T5.2 / T5.5 / T6.1 / T0.4) + T3.4 + T5.3 — check Owns first.
+**Safe parallel right now:** T5.2 · T6.1/T6.2 · T3.2 · T3.4 · T5.3 · T5.4 (check Owns — no two agents on `feedback.py`).
 
 ---
 
@@ -139,29 +136,23 @@ ARCHITECTURE · demo beat gets weaker → stop and ask the human.
 | T0.1 | **HUMAN** | Public GitHub remote |
 | T0.2 | **DONE** | `42ac273` content laws |
 | T0.3 | **DONE** | `1670e7e` CI on elevation branch |
-| T0.4 | **OPEN / WIP** | Untracked `lawcheck.py` + `test_lawcheck.py` |
-| T1.1 | **DONE** | `cd56bea` extract.py |
-| T1.2–T1.7 | **DONE** | `6eb8f4d`..`f3bfbb0` binder v2, matrix, fixture lockout |
+| T0.4 | **DONE** | `a2c1656` lawcheck reconciled |
+| T1.1–T1.7 | **DONE** | extract + binder v2 + matrix + fixture lockout |
 | T2.1–T2.3 | **DONE** | `60ecb95` pii + multi_usecase ACL |
-| T3.1 | **WIP** | ~154 YAML cases under `evals/cases/` — harden + hard negatives |
-| T3.2 | **WIP** | `evals/harness.py` + `make eval` — raise pass rate, publish FNR into shadow |
-| T3.3 | **DONE** | `60ecb95` economist.py |
+| T3.1 | **DONE** | `f249f28` labelled eval corpus |
+| T3.2 | **OPEN / harden** | harness exists — publish FNR into shadow, raise pass rate |
+| T3.3 | **DONE** | economist.py |
 | T3.4 | **OPEN** | load_bench n=10k + stages |
 | T4.1 | **DONE** | `6f0a1be` lanes.py |
-| T5.1 | **WIP** | eu/in packs + test_jurisdiction uncommitted |
+| T5.1 | **DONE** | `b0534c5` jurisdiction packs |
 | T5.2 | **WIP** | feedback.py + override route uncommitted |
 | T5.3 | **OPEN** | shadow threshold gate |
-| T5.4 | **OPEN** | canary state machine tests |
-| T5.5 | **WIP** | bias flip+Wilson uncommitted |
-| T6.1–T6.2 | **WIP** | multiturn scenario/tests uncommitted |
+| T5.4 | **OPEN** | canary tests |
+| T5.5 | **DONE** | `030e21a` bias flip + Wilson |
+| T6.1–T6.2 | **WIP** | multiturn uncommitted |
 | T7.* T8.* | **OPEN** | room / Track B / verify |
 
-**Suite (committed tip `6f0a1be`):** ~305 passed. **Eval smoke:** `make eval` prints FNR with Wilson CI.
-
-**Uncommitted WIP sitting in the tree right now** — assign FINISH agents before OPEN agents that share those files:
-`bias.py`, `policy.py`, `server/app.py`, `feedback.py`, `scenarios/multiturn.py`,
-`policies/decision-support-eu.yaml`, `policies/decision-support-in.yaml`,
-`tests/test_{bias,feedback,jurisdiction,multiturn,lawcheck}.py`, `evals/cases/*`.
+**Tip:** see `git log --oneline -15`. **Uncommitted right now:** `feedback.py`, `scenarios/multiturn.py`, `tests/test_feedback.py`, `tests/test_multiturn.py`, dirty `server/app.py`.
 
 ---
 
