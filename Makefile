@@ -16,7 +16,8 @@ eval:
 verify: test
 	pytest -q tests/test_content_laws.py
 	$(MAKE) eval
-	@echo "verify: tests + content laws + eval OK (bench optional: make bench)"
+	$(MAKE) bench
+	python3 scripts/verify.py
 
 run:
 	uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787
