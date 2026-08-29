@@ -8,7 +8,7 @@ coverage:
 	pytest --cov=controlplane --cov-report=term-missing
 
 bench:
-	CONTROLPLANE_RPM=100000 python3 scripts/load_bench.py -n 200
+	CONTROLPLANE_RPM=100000 python3 scripts/load_bench.py -n 10000 --sweep
 
 eval:
 	python3 -m evals.run
