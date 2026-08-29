@@ -40,5 +40,8 @@ e2e:
 pdf:
 	python3 scripts/build_proposal_pdf.py
 
+readme:
+	python3 scripts/build_readme_pdf.py
+
 sbom:
 	bash scripts/sbom.sh
