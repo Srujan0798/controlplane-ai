@@ -277,11 +277,9 @@ class ControlPlaneGate:
             ledger=ledger,
             claims=claims,
             actions=actions,
-            fixture_map=fixture_map,
             mode_override=mode_override,
             labeled_should_hold=None,
             ungated_text=None,
-            allow_fixtures=True,
         )
 
     def _rerun_refund(self, mode_override: str | None = None) -> GateResult:

@@ -92,14 +92,12 @@ def build_flip(
 
 def run_flip_scenario(principal_id: str = "analyst_01") -> EvidenceLedger:
     """Exercise the real gate end to end (bind -> entitle -> interlock)."""
-    led, claims, actions, fixture_map = build_flip(principal_id)
+    led, claims, actions, _ = build_flip(principal_id)
     gate = ControlPlaneGate()
     gate.run_prepared(
         use_case="flip",
         ledger=led,
         claims=claims,
         actions=actions,
-        fixture_map=fixture_map,
-        allow_fixtures=True,
     )
     return led
