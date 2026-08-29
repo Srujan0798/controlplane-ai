@@ -26,6 +26,15 @@ Each `tasks/T*.md` is the full prompt (Owns · contract · acceptance · verify)
 
 **Human first:** `tasks/T0.1.md` (public GitHub remote) — only you can `gh auth login`.
 
+
+> ## Before you accept any "done"
+>
+> **Read `tasks/GATE.md`.** A green test suite is not done. On 2026-08-29 the suite
+> reported 333 passing while the gate held **100% of all inputs** on two of three routes.
+> `GATE.md` carries the numeric bars — precision, FPR, true negatives, abstention — that
+> a task must actually clear, and the completion-report template that makes faking it
+> impossible. **"All tests pass" is not a completion report.**
+
 ---
 
 ## DISPATCH NOW (copy-paste to agents)
