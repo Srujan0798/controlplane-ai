@@ -30,6 +30,7 @@ from controlplane.security import (
     content_length_ok,
     cors_origins_from_env,
 )
+from controlplane.feedback import FeedbackStore
 from controlplane.shadow import MetricsStore
 from controlplane.scenarios.multi_usecase import (
     run_customer_support,
@@ -77,6 +78,14 @@ class AuditVerifyRequest(BaseModel):
 class SessionStartRequest(BaseModel):
     session_id: str = Field(min_length=1)
     principal_id: str = "anonymous"
+
+
+class OverrideRequest(BaseModel):
+    request_id: str = Field(min_length=1)
+    reviewer: str = Field(min_length=1)
+    verdict: str = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    prior_actuator: str = "Escalate"
 
 
 def audit_jsonl_bytes(found: dict[str, Any]) -> bytes:
@@ -164,9 +173,11 @@ def create_app(
         allow_headers=["Content-Type", "X-API-Key", "Authorization"],
         max_age=600,
     )
+    feedback = FeedbackStore()
     app.state.gate = gate
     app.state.store = store
     app.state.sessions = sessions
+    app.state.feedback = feedback
     app.state.started_at = time.time()
 
     def _persist(public_dict: dict[str, Any]) -> None:
@@ -482,6 +493,52 @@ def create_app(
     def audit_verify(body: AuditVerifyRequest) -> dict[str, bool]:
         valid = signing.verify(body.content.encode("utf-8"), body.signature)
         return {"valid": valid}
+
+    @app.post("/v1/controlplane/decisions/{decision_id}/override")
+    def override_decision(decision_id: str, body: OverrideRequest) -> dict[str, Any]:
+        """Reviewer override — written into the chained ledger when available."""
+        from controlplane.models import Principal
+        from controlplane.recorder import ProvenanceRecorder
+
+        live_ledger = None
+        for result in reversed(getattr(gate, "_history", []) or []):
+            if getattr(result, "request_id", None) == body.request_id:
+                live_ledger = getattr(result, "ledger", None)
+                break
+        if live_ledger is None:
+            rec = ProvenanceRecorder()
+            live_ledger = rec.begin_request(
+                body.request_id,
+                Principal(id=body.reviewer, clearance=frozenset()),
+                "override",
+            )
+            rec.finish_context_assembly(live_ledger)
+
+        rec_out = feedback.record_override(
+            live_ledger,
+            decision_id=decision_id,
+            reviewer=body.reviewer,
+            verdict=body.verdict,
+            reason=body.reason,
+            prior_actuator=body.prior_actuator,
+        )
+        proposal = feedback.propose_threshold(
+            name="reviewer_override",
+            current=0.0,
+            proposed=1.0,
+            shadow_fp_delta=0.0,
+            shadow_fn_delta=0.0,
+        )
+        return {
+            "decision_id": rec_out.decision_id,
+            "request_id": rec_out.request_id,
+            "reviewer": rec_out.reviewer,
+            "verdict": rec_out.verdict,
+            "reason": rec_out.reason,
+            "chain_valid": live_ledger.verify_chain(),
+            "canary_state": feedback.canary_state,
+            "threshold_proposal": proposal,
+        }
 
     @app.post("/v1/controlplane/sessions")
     def start_session(body: SessionStartRequest) -> dict[str, Any]:
