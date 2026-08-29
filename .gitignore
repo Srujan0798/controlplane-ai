@@ -38,3 +38,6 @@ archive/
 htmlcov/
 .coverage.*
 build/
+
+# prototype video work
+submission/_video_work/
