@@ -1,110 +1,167 @@
 # TASKS.md — how to dispatch agents
 
-**Give an agent one line:**
+**Give an agent exactly this:**
 
 ```
-Read TASKS.md section 0, then do tasks/T1.2.md
+You are on branch feature/round2-elevation in /Users/srujansai/Desktop/SEBI.
+Read TASKS.md §0 (coordination protocol) and §1 (status — skip DONE tasks).
+Then execute ONLY tasks/<ID>.md end-to-end: TDD, Owns-only edits, pytest -q green,
+commit with message "<ID>: <short>", do not push, do not touch frozen files.
+Report: status DONE|BLOCKED, commit SHA, pytest line, concerns.
 ```
 
-That is the whole handoff. Each `tasks/T*.md` is a self-contained prompt carrying the
-files it owns, its contract, its acceptance criteria, and the command that proves it done.
+Each `tasks/T*.md` is the full prompt (Owns · contract · acceptance · verify).
 
 | | |
 |---|---|
-| **One task per agent** | `tasks/T0.1.md` … `tasks/T8.4.md` — 33 files |
-| **Full plan and rationale** | this file, below |
-| **Why each task exists** | `docs/superpowers/specs/2026-08-29-round2-100-design.md` |
-| **What actually ships** | `docs/superpowers/specs/2026-08-29-round2-submission-protocol.md` |
+| **One task per agent** | `tasks/T0.1.md` … `tasks/T8.4.md` |
+| **Why** | `docs/superpowers/specs/2026-08-29-round2-100-design.md` |
+| **What ships** | `docs/superpowers/specs/2026-08-29-round2-submission-protocol.md` |
+| **Branch** | `feature/round2-elevation` · never move tag `v0.2.0-round2` |
+| **Pitch shape** | **VIDEO / upload portal** (not live paste-as-primary). T7.1 = upload-capable gate screen. |
 
-**Start with `tasks/T0.1.md` — it needs a human, and it is the only deliverable that
-can fail on submission day with no recovery.**
+**Human first:** `tasks/T0.1.md` (public GitHub remote) — only you can `gh auth login`.
 
-**Parallel-safe right now:** T0.4 · T1.2 · T1.3 · T1.4 · T2.1 · T2.3 · T3.1 · T5.1 · T5.2 · T5.5
-(disjoint file ownership, no unmet dependencies — dispatch all ten at once if you have the agents).
+---
+
+## DISPATCH NOW (copy-paste to agents)
+
+### Do NOT assign (already committed DONE)
+
+T0.2 · T0.3 · T1.1 · T1.2 · T1.3 · T1.4 · T1.5 · T1.6 · T1.7 · T2.1 · T2.2* · T2.3 · T3.3 · T4.1
+
+\*T2.2 Rule A lives in `controlplane/pii.py` + `tests/test_pii.py` (not a separate `test_leakage.py`). Treat DONE unless you want a rename-only cleanup task.
+
+### FINISH / COMMIT WIP (files exist uncommitted — one agent per task, do not rewrite from scratch)
+
+| Agent prompt | Task | What to do |
+|---|---|---|
+| `Read TASKS.md §0, then finish tasks/T5.1.md` | T5.1 jurisdiction | WIP on disk: `policies/decision-support-{eu,in}.yaml`, `tests/test_jurisdiction.py`, edits in `policy.py`. Verify green, commit Owns only. |
+| `Read TASKS.md §0, then finish tasks/T5.2.md` | T5.2 feedback | WIP: `controlplane/feedback.py`, override route in `app.py`, `tests/test_feedback.py`. Close acceptance, commit. |
+| `Read TASKS.md §0, then finish tasks/T5.5.md` | T5.5 bias v2 | WIP: `controlplane/bias.py` + `tests/test_bias.py` (flip rate + Wilson). Keep ACL skew; commit. |
+| `Read TASKS.md §0, then finish tasks/T6.1.md` + `T6.2.md` | Multi-turn | WIP: `scenarios/multiturn.py`, `tests/test_multiturn.py`. Add `examples/multiturn_demo.py` if missing; commit. |
+| `Read TASKS.md §0, then finish tasks/T0.4.md` | Lawcheck merge | Untracked `lawcheck.py` + `test_lawcheck.py` vs committed `test_content_laws.py`. Merge to one module. |
+| `Read TASKS.md §0, then finish tasks/T3.1.md` + `T3.2.md` | Eval corpus/harness | Corpus already ~154 cases under `evals/cases/`; harness is `evals/harness.py` (not `run.py`). Raise case_pass_rate, wire `published_fnr` from `evals/last_run.json`, `make eval` green. |
+
+### OPEN — assign next (nothing committed yet / incomplete)
+
+| Priority | Prompt | Why |
+|---|---|---|
+| P0 human | `Do tasks/T0.1.md` | Public repo URL — submission blocker |
+| P1 | `Read TASKS.md §0, then do tasks/T3.4.md` | Bench n=10k + per-stage + methodology |
+| P1 | `Read TASKS.md §0, then do tasks/T5.3.md` | Threshold ships only after shadow FP/FN delta |
+| P1 | `Read TASKS.md §0, then do tasks/T5.4.md` | Canary auto-rollback 3× baseline |
+| P2 | `Read TASKS.md §0, then do tasks/T7.1.md` | **Upload-capable** gate console (video-shaped) |
+| P2 | `Read TASKS.md §0, then do tasks/T7.2.md` | README PDF |
+| P2 | `Read TASKS.md §0, then do tasks/T7.3.md` | Rebuild proposal PDF from real eval numbers |
+| P2 | `Read TASKS.md §0, then do tasks/T7.4.md` | Rebuild deck |
+| P2 human+agent | `Read TASKS.md §0, then do tasks/T7.5.md` | Prototype video script + record |
+| P3 | `Read TASKS.md §0, then do tasks/T7.6.md` / `T8.*` | Hostile Q&A v2 · verify · ACCEPTANCE |
+
+**Hard rule from the plan:** Wave 7 (PDF/deck/video) must not start until T3.2 + T3.4 print real numbers.
+
+**Max parallel without file fights:** finish-WIP set (T5.1 / T5.2 / T5.5 / T6.1 / T0.4) + T3.4 + T5.3 — check Owns first.
 
 ---
 
 # Execution board — Round 2 elevation
 
-**Hand this to agents.** Every task below is self-contained: it names the files it
-owns, its contract, its acceptance criteria, and the command that proves it done.
+**Companions:** `docs/superpowers/specs/2026-08-29-round2-100-design.md` ·
+`docs/superpowers/specs/2026-08-29-round2-submission-protocol.md`
 
-**Companions:** [`2026-08-29-round2-100-design.md`](2026-08-29-round2-100-design.md) (why) ·
-[`2026-08-29-round2-submission-protocol.md`](2026-08-29-round2-submission-protocol.md) (what ships)
-
-**Branch:** `feature/round2-elevation` · **Fallback tag:** `v0.2.0-round2` (never moved)
+**Branch:** `feature/round2-elevation` · **Fallback:** `git checkout v0.2.0-round2`
 
 ---
 
 ## 0. Coordination protocol — read before touching anything
 
-Multiple agents share one working directory. On 2026-08-29 two agents wrote the
-same Phase-0 file within minutes and one silently overwrote the other. These
-rules exist because that already happened.
+Multiple agents share one working directory. These rules exist because two agents
+already overwrote the same Phase-0 file once.
 
 ### 0.1 File ownership is exclusive
 
-Each task lists **Owns**. An agent may create or modify **only** files in its own
-`Owns` list. If your task needs a change in a file another task owns, **stop and
-open a new task** — do not edit it.
+Each task lists **Owns**. Create/modify **only** those files. Need another file?
+Stop and open a new task.
 
 ### 0.2 Frozen — no agent writes these
 
 | Path | Why |
 |---|---|
-| `docs/ARCHITECTURE.md` | System of record. Reopening it re-risks contradictions that took five adversarial merges to remove. |
-| `controlplane/interlock.py` — `MATRIX` | Sixteen transcribed cells. Six of seven models corrupted it when asked to redraw it. |
-| `controlplane/models.py` — `Actuator`, `BlastTier` | Exactly five actuators, exactly four tiers. |
-| `AGENTS.md` | The invariant list. |
+| `docs/ARCHITECTURE.md` | System of record |
+| `controlplane/interlock.py` — `MATRIX` | Sixteen transcribed cells |
+| `controlplane/models.py` — `Actuator`, `BlastTier` | Exactly five / four |
+| `AGENTS.md` | Invariant list |
 
-Everything new **feeds** the interlock. The interlock stays sole decider.
+Everything new **feeds** the interlock. Interlock stays sole decider.
 
-### 0.3 Before you start a task
+### 0.3 Before you start
 
 ```bash
-git pull --rebase
-git log --oneline -5          # is someone already doing this?
-ls <every path in your Owns>  # does it already exist?
-pytest -q                     # must be green before you begin
+git status -sb
+git log --oneline -8
+ls <every path in your Owns>
+pytest -q
 ```
 
-If a file in your `Owns` already exists and is non-trivial, **another agent got
-there first.** Stop, report, and take a different task.
+If Owns already has non-trivial work **and the task is marked DONE or FINISH-WIP**,
+do not rewrite — finish acceptance + commit only. If DONE in §1, pick another task.
 
 ### 0.4 Before you commit
 
 ```bash
-pytest -q                     # full suite, never just your file
-git pull --rebase
+pytest -q
+git pull --rebase   # if remote exists
 ```
 
-Never commit red. Never commit a file outside your `Owns`. Prefix the message
-with the task ID: `T2.1: Aho-Corasick PII detector`.
+Never commit red. Never commit outside Owns. Message: `T5.1: jurisdiction axis`.
+**Do not push** unless the human asked.
 
 ### 0.5 TDD is mandatory
 
-Write the failing test. **Run it and watch it fail for the right reason.** Then
-implement. A test that passed the first time proves nothing — if you did not see
-it red, delete it and start again. This applies especially to regression guards:
-prove the guard catches a violation before trusting it.
+Failing test first. Watch it fail for the right reason. Then implement.
 
 ### 0.6 Escalate, do not guess
 
-Stop and ask a human when: a frozen file seems to need changing · the acceptance
-criteria are ambiguous · a task's contract conflicts with `ARCHITECTURE.md` · a
-demo beat gets *weaker* after your change.
+Frozen file seems to need a change · acceptance ambiguous · conflicts with
+ARCHITECTURE · demo beat gets weaker → stop and ask the human.
+
+### 0.7 Content laws
+
+`pytest -q tests/test_content_laws.py` must stay green. Never say the refund was
+"blocked" — say **held / escalated with evidence packet**. Never quote 40ms as p95.
 
 ---
 
-## 1. Status
+## 1. Status (2026-08-29 evening) — trust this over older prose below
 
-| Wave | State |
-|---|---|
-| W0 · Blocker + content laws | T0.2, T0.3 **done** (`42ac273`, `1670e7e`) · T0.1 **blocked on human** · T0.4 open |
-| W1 · Extraction + binding | T1.1 **in flight** · rest open |
-| W2–W8 | open |
+| ID | State | Evidence |
+|---|---|---|
+| T0.1 | **HUMAN** | Public GitHub remote |
+| T0.2 | **DONE** | `42ac273` content laws |
+| T0.3 | **DONE** | `1670e7e` CI on elevation branch |
+| T0.4 | **OPEN / WIP** | Untracked `lawcheck.py` + `test_lawcheck.py` |
+| T1.1 | **DONE** | `cd56bea` extract.py |
+| T1.2–T1.7 | **DONE** | `6eb8f4d`..`f3bfbb0` binder v2, matrix, fixture lockout |
+| T2.1–T2.3 | **DONE** | `60ecb95` pii + multi_usecase ACL |
+| T3.1 | **WIP** | ~154 YAML cases under `evals/cases/` — harden + hard negatives |
+| T3.2 | **WIP** | `evals/harness.py` + `make eval` — raise pass rate, publish FNR into shadow |
+| T3.3 | **DONE** | `60ecb95` economist.py |
+| T3.4 | **OPEN** | load_bench n=10k + stages |
+| T4.1 | **DONE** | `6f0a1be` lanes.py |
+| T5.1 | **WIP** | eu/in packs + test_jurisdiction uncommitted |
+| T5.2 | **WIP** | feedback.py + override route uncommitted |
+| T5.3 | **OPEN** | shadow threshold gate |
+| T5.4 | **OPEN** | canary state machine tests |
+| T5.5 | **WIP** | bias flip+Wilson uncommitted |
+| T6.1–T6.2 | **WIP** | multiturn scenario/tests uncommitted |
+| T7.* T8.* | **OPEN** | room / Track B / verify |
 
-Suite at time of writing: **214 passed, 2 skipped.** Baseline was 135.
+**Suite (committed tip `6f0a1be`):** ~305 passed. **Eval smoke:** `make eval` prints FNR with Wilson CI.
+
+**Uncommitted WIP sitting in the tree right now** — assign FINISH agents before OPEN agents that share those files:
+`bias.py`, `policy.py`, `server/app.py`, `feedback.py`, `scenarios/multiturn.py`,
+`policies/decision-support-eu.yaml`, `policies/decision-support-in.yaml`,
+`tests/test_{bias,feedback,jurisdiction,multiturn,lawcheck}.py`, `evals/cases/*`.
 
 ---
 
