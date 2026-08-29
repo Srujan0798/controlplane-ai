@@ -1,13 +1,17 @@
 # TASKS.md — how to dispatch agents
 
+> **Excellence > green tests.** Read `docs/EXCELLENCE_GATE.md` first.  
+> `pytest passed` alone is **NOT DONE**. Dummy / nested-broken / uncommitted = **REJECT**.
+
 **Give an agent exactly this:**
 
 ```
 You are on branch feature/round2-elevation in /Users/srujansai/Desktop/SEBI.
-Read TASKS.md §0 (coordination protocol) and §1 (status — skip DONE tasks).
-Then execute ONLY tasks/<ID>.md end-to-end: TDD, Owns-only edits, pytest -q green,
-commit with message "<ID>: <short>", do not push, do not touch frozen files.
-Report: status DONE|BLOCKED, commit SHA, pytest line, concerns.
+Read docs/EXCELLENCE_GATE.md §0 (DONE definition) and TASKS.md §0–§1.
+Then execute ONLY tasks/<ID>.md. TDD. Owns-only. Full pytest -q (0 failed, no --ignore).
+HTTP routes need TestClient/curl smoke — Store unit tests are not enough.
+If anything is partial: reply REJECT-SELF with missing YES rows. Never claim DONE early.
+Do not push. Do not touch frozen files. Report: DONE|REJECT-SELF · SHA · pytest · smokes · concerns.
 ```
 
 Each `tasks/T*.md` is the full prompt (Owns · contract · acceptance · verify).
