@@ -190,7 +190,9 @@ Exactly **two** live routes. Third live decision-support / bias route **refused*
 
 Third live bias route · per-response bias · production load as mechanism proof · real payments/PII · live IAM repair · LLM-as-judge primary · confidence/risk scores · open-web truth · generative rewrite · fabricated FNR · Lane-3 on critical path · triage SLA UI · weights/logits · collapsing dual-action · calling refund “blocked.”
 
-**Success iff all binary criteria hold** (R2S1 §5 / R2S3 checks): provenance before claims · one graph · UNSUPPORTED default · absence ≠ contradiction · claim-level proof · dual-action independent · hard gate real · entitlement flip · matrix fidelity · packet · surgical edit · FNR honesty · no confidence driver · injection cannot author provenance · refund language fidelity · paraphrase binding · per-claim surface · parametric gate · worst-claim weighting · UNKNOWN never SUPPORTED · speculative release forbidden · model cannot self-declare binding · hold-back present · full 4×4 · set-membership visible.
+### Measured results (this build)
+
+All numbers are produced by `make eval` and `make bench` and regenerate on every run — they are measured, never asserted. The capability ledger and per-route Wilson CIs live in the generated README PDF (`submission/ControlPlane_Round2_README.pdf`) and `evals/last_run.json`. Shape of the published claim (ARCHITECTURE §7): we hold **X%** of ungrounded responses at **Y ms** p50 — and here is the **Z%** we don't, with a Wilson interval. The FNR schema is typed and empty until earned; this build earns it on the committed 150+ labelled corpus (incl. hard negatives).
 
 ---
 
@@ -336,6 +338,8 @@ python3 examples/knowledge_flip_demo.py
 
 ## 7. Buyers
 
+### Target users
+
 Beachhead = high-consequence routes (refund-class R3 + mixed-governance knowledge) — not “all enterprise AI safety.”
 
 | Role | Who | Buys / operates |
@@ -353,6 +357,8 @@ Split that matters: who **pays when it fails** ≠ who **runs it** ≠ who **typ
 ---
 
 ## 8. Impact Logic
+
+### Business case
 
 No fabricated ROI. No “99%.” No net-savings slide. Value = **mechanism → consequence**; buyer fills middle terms. Tail risk, not average case.
 
