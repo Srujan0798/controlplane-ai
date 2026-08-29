@@ -1,9 +1,9 @@
 {
   "summary": {
-    "n_cases": 167,
-    "n_bindings": 424,
-    "abstention_unknown": 1,
-    "abstention_rate": 0.0024,
+    "n_cases": 168,
+    "n_bindings": 426,
+    "abstention_unknown": 2,
+    "abstention_rate": 0.0047,
     "per_route": {
       "numeric": {
         "n": 119,
@@ -14,20 +14,20 @@
         "abstention_rate": 0.0
       },
       "structural": {
-        "n": 109,
-        "supported": 177,
+        "n": 110,
+        "supported": 178,
         "unsupported": 33,
         "unknown": 0,
         "contradicted": 0,
         "abstention_rate": 0.0
       },
       "textual": {
-        "n": 70,
+        "n": 71,
         "supported": 50,
         "unsupported": 19,
-        "unknown": 1,
+        "unknown": 2,
         "contradicted": 0,
-        "abstention_rate": 0.0143
+        "abstention_rate": 0.0282
       },
       "derived": {
         "n": 12,
@@ -146,6 +146,13 @@
         "should_pass": 0,
         "hard_negative": 0
       },
+      "structural-miss": {
+        "n": 1,
+        "would_hold": 0,
+        "should_hold": 1,
+        "should_pass": 0,
+        "hard_negative": 0
+      },
       "unentitled-span": {
         "n": 19,
         "would_hold": 19,
@@ -170,11 +177,11 @@
       },
       "ungrounded": {
         "held": 93,
-        "missed": 0,
+        "missed": 1,
         "fnr": [
-          0.0,
-          0.0,
-          0.0396689026203615
+          0.010638297872340425,
+          0.0018803473390524767,
+          0.057824318161102874
         ]
       },
       "hard_negative_caution": {
@@ -193,11 +200,11 @@
       0.0,
       0.15464382326420195
     ],
-    "ungrounded_fnr": 0.0,
+    "ungrounded_fnr": 0.010638297872340425,
     "ungrounded_fnr_wilson": [
-      0.0,
-      0.0,
-      0.0396689026203615
+      0.010638297872340425,
+      0.0018803473390524767,
+      0.057824318161102874
     ],
     "hard_negative_hold_rate": 0.6415094339622641,
     "hard_negative_hold_wilson": [
@@ -209,15 +216,15 @@
       {
         "coverage_supported": 0.72,
         "coverage_unknown": 0.38,
-        "textual_bound": 70,
+        "textual_bound": 71,
         "supported_count": 50,
-        "abstention_rate": 0.2857,
+        "abstention_rate": 0.2958,
         "note": "observed at committed constants; resweep with shadow replay before shipping"
       },
       {
         "coverage_supported": 0.8,
         "coverage_unknown": 0.45,
-        "textual_bound": 70,
+        "textual_bound": 71,
         "supported_count": null,
         "abstention_rate": null,
         "note": "hypothetical tighter threshold \u2014 measured only via shadow replay (T5.3)"
@@ -5340,6 +5347,40 @@
       "actuators": {
         "show_text": "Edit",
         "issue_refund": "Escalate"
+      }
+    },
+    {
+      "id": "struct-miss-000",
+      "stratum": "structural-miss",
+      "use_case": "decision-support",
+      "label": "should_hold",
+      "would_hold": false,
+      "routes": {
+        "structural": {
+          "n": 1,
+          "supported": 1,
+          "unsupported": 0,
+          "unknown": 0,
+          "contradicted": 0
+        },
+        "textual": {
+          "n": 1,
+          "supported": 0,
+          "unsupported": 0,
+          "unknown": 1,
+          "contradicted": 0
+        }
+      },
+      "bindings": {
+        "clause_41": "SUPPORTED",
+        "permits_this_refund": "UNKNOWN"
+      },
+      "by_kind": {
+        "clause_41": "structural",
+        "permits_this_refund": "textual"
+      },
+      "actuators": {
+        "show_text": "Pass + annotate"
       }
     },
     {

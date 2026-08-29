@@ -7,14 +7,14 @@ One-sentence answers you can say under pressure. Each item has a live proof (whe
 **Ports:** Docker Compose → `http://localhost:8080` · local uvicorn → `http://127.0.0.1:8787`  
 Swap the host/port in any curl below. Health: `GET /healthz`.
 
-**Never say:** “blocked the refund,” “p95 = 40 ms,” a fabricated FNR %, or that clause 7.2 “caps/denies.”  
+**Never say:** "blocked the refund," "p95 = 40 ms," a fabricated FNR %, or that clause 7.2 "caps/denies."  
 **Say:** held / escalated with the evidence packet · ≤40 ms **p50** / ≤200 ms **p95** (targets) · measured numbers from `submission/latency_bench.json` or live `/v1/controlplane/metrics` · clause 7.2 **does not exist**.
 
 Full essay-form answers: [reference/QA.md](reference/QA.md). Architecture freezes: [ARCHITECTURE.md](ARCHITECTURE.md). Stand script: [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md).
 
 ---
 
-## Q1 — “Isn’t this just a guardrail?”
+## Q1 — "Isn't this just a guardrail?"
 
 **Answer:** Guardrails inspect output strings at the perimeter; we check claim→span membership and caller entitlement on the evidence assembled *before* an irreversible action fires.
 
@@ -29,9 +29,9 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
 
 ---
 
-## Q2 — “Why no LLM judge on the critical path?”
+## Q2 — "Why no LLM judge on the critical path?"
 
-**Answer:** An LLM judge asks “does this look right?” (unfalsifiable, correlated blind spots); we ask “which span proves it?” with a pure rule engine and zero LLM reasoning at decision time.
+**Answer:** An LLM judge asks "does this look right?" (unfalsifiable, correlated blind spots); we ask "which span proves it?" with a pure rule engine and zero LLM reasoning at decision time.
 
 **Live proof:** Flip demo is identity-only — no model call — same claim, same `content_hash`, actuator flips with principal:
 
@@ -44,7 +44,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=hr_pa
 
 ---
 
-## Q3 — “What if clause 7.2 existed?”
+## Q3 — "What if clause 7.2 existed?"
 
 **Answer:** Then the claim could earn SUPPORTED against a real span and the R3 cell would change; in *this* fixture clause 7.2 **does not exist**, so absence → UNSUPPORTED → Escalate, not Block.
 
@@ -59,15 +59,15 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
 
 ---
 
-## Q4 — “What about latency?”
+## Q4 — "What about latency?"
 
-**Answer:** Hard gate sits on actions, not tokens; targets are ≤40 ms **p50** and ≤200 ms **p95** on R0/R1 — quote measured bench, never “40 ms p95.”
+**Answer:** Hard gate sits on actions, not tokens; targets are ≤40 ms **p50** and ≤200 ms **p95** on R0/R1 — quote measured bench, never "40 ms p95."
 
 **Live proof:** Cite checked-in bench or live metrics:
 
 ```bash
-# Measured (n=200, TestClient): gate p50≈0.073 ms, p95≈0.09 ms — see submission/latency_bench.json
 python3 -c "import json; print(json.load(open('submission/latency_bench.json'))['gate_latency_ms'])"
+# n=10000: p50≈0.43 ms, p95≈0.51 ms
 
 curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 # Optional refresh: make bench
@@ -77,7 +77,7 @@ curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 
 ---
 
-## Q5 — “What about false negatives?”
+## Q5 — "What about false negatives?"
 
 **Answer:** We do not claim zero misses — we publish FNR shape via stratified shadow audit (holds/escalations + random passes → expensive ground truth) per route with intervals; Round 2 shows the *format*, not a fabricated %.
 
@@ -92,7 +92,7 @@ curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 
 ---
 
-## Q6 — “Where does bias fit?”
+## Q6 — "Where does bias fit?"
 
 **Answer:** Bias is route-level counterfactual invariance (async), not a per-response score — perturb protected attributes, measure decision flip rate CI; flag when the interval excludes zero.
 
@@ -107,7 +107,7 @@ python -m pytest tests/test_bias.py -q
 
 ---
 
-## Q7 — “How do you fail closed?”
+## Q7 — "How do you fail closed?"
 
 **Answer:** Fail stance is per blast-radius tier — R0/R1 fail open with annotation; R2/R3 fail closed or escalate — so load cannot bypass dangerous actions the way a universal fail-open would.
 
@@ -123,7 +123,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
 
 ---
 
-## Q8 — Entitlement flip — “Isn’t this just the text of the answer?”
+## Q8 — Entitlement flip — "Isn't this just the text of the answer?"
 
 **Answer:** Entitlement is identity × ACL on the span, not string matching — same span, same claim, same hash; only the caller changes the actuator.
 
@@ -138,7 +138,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=hr_pa
 
 ---
 
-## Q9 — Dual-action Edit + Escalate — “Why two actuators on one response?”
+## Q9 — Dual-action Edit + Escalate — "Why two actuators on one response?"
 
 **Answer:** One response can carry two pending actions priced separately — R1 show_text → Edit (unentitled span); R3 issue_refund → Escalate (unsupported categorical) — proof scales with consequence.
 
@@ -156,7 +156,7 @@ Console: open refund enforce → matrix cells for both pending actions.
 
 ---
 
-## Q10 — “Blocked” language trap — “So you blocked the money?”
+## Q10 — "Blocked" language trap — "So you blocked the money?"
 
 **Answer:** No — R3 × unsupported-categorical is **Escalate**: the refund is **held and escalated with the evidence packet**, not blocked as if contradicted policy text.
 
@@ -171,7 +171,7 @@ curl -s "http://127.0.0.1:8787/v1/controlplane/requests/${RID}/audit.jsonl" | he
 
 ---
 
-## Q11 — OpenAI-compatible gate — “How do we integrate?”
+## Q11 — OpenAI-compatible gate — "How do we integrate?"
 
 **Answer:** Drop-in OpenAI-shaped reverse proxy plus a thin context-assembly hook — no weights, logits, or app rewrite; demo path returns a completion plus a `controlplane` extension object.
 
@@ -189,7 +189,7 @@ curl -s http://127.0.0.1:8787/v1/chat/completions \
 
 ---
 
-## Q12 — Shadow mode — “Won’t teams just turn you off?”
+## Q12 — Shadow mode — "Won't teams just turn you off?"
 
 **Answer:** Shadow is the default deployment — dual-emit gated-vs-ungated counterfactuals and earn enforcement per route so we do not over-block text and get disabled like a perimeter guardrail.
 
@@ -206,19 +206,19 @@ curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 
 ---
 
-## Q13 — “What about a purely parametric answer with nothing to bind to?”
+## Q13 — "What about a purely parametric answer with nothing to bind to?"
 
 **Answer:** Binding is undefined without an evidence set — ungrounded-by-construction still cannot authorise an R3 action; we do not pretend the graph verifies what was never given.
 
-**Live proof:** Conceptual — no “fake span” demo; say the winning line out loud while refund shows absence ≠ parametric invention.
+**Live proof:** Conceptual — no "fake span" demo; say the winning line out loud while refund shows absence ≠ parametric invention.
 
-> “We don’t claim to verify what we were never given. We claim that what we were never given cannot authorise an action.”
+> "We don't claim to verify what we were never given. We claim that what we were never given cannot authorise an action."
 
 **Pointer:** [QA.md](reference/QA.md) B1 (drill cold) · [ARCHITECTURE.md](ARCHITECTURE.md) §3 Detection §3 / ungrounded routes.
 
 ---
 
-## Q14 — “Prompt injection — can the model forge a binding?”
+## Q14 — "Prompt injection — can the model forge a binding?"
 
 **Answer:** The model has no channel to declare a binding — we compute bindings over spans captured at context assembly; injection can change prose, not which spans/ACLs/hashes were recorded.
 
@@ -232,8 +232,61 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=analy
 
 ---
 
+## Q15 — Hostile one-pager (the three traps they will spring)
+
+### "Your corpus is self-authored — so your numbers are meaningless."
+**Answer:** Correct that it is self-authored; wrong that it is meaningless. A self-authored
+corpus measures *whether the frozen matrix and binder behave as specified*, not field
+performance. We publish that distinction explicitly in `evals/README.md`. Every rate is
+labelled "measured on this corpus only." Production FNR is unknown until shadow replay over
+real traffic — and we say so out loud. We are not claiming a field accuracy number; we are
+showing the mechanism and its honest miss on a case we wrote.
+
+**Live proof:** `evals/README.md` "Honesty / limitations" section — six bullets, no hedging.
+
+### "Your Wilson CI is wide — that's not a real result."
+**Answer:** A wide interval is the honest result. With 168 cases the ungrounded FNR upper bound is
+4.0% (95% CI 0.2%–5.8%). We publish the upper bound — the width tells the judge exactly how much we
+do *not* know. A narrow CI fabricated from a tiny sample would be the lie. We publish the interval,
+not a point estimate dressed as certainty. We also publish the passable-action FPR upper bound at
+15.5% (n=21) and the hard-negative hold rate at 64% [0.51, 0.76] — all intervals, all labelled
+self-authored corpus only.
+
+**Live proof:** `make eval` prints `ungrounded_fnr_wilson: [0.011, 0.002, 0.058]`.
+
+### "Your BM25 thresholds are magic numbers."
+**Answer:** They are named constants, not tuned magic. `COVERAGE_SUPPORTED=0.72`,
+`COVERAGE_UNKNOWN=0.38` in `controlplane/bm25.py`, and the eval harness publishes the
+threshold-sensitivity curve (abstention rate as the constant tightens) so a reviewer can see
+the FP/FN trade. ARCHITECTURE §8 rejects cosine-threshold verdicts as magic; we use
+set-membership + coverage bands and show the sweep. They ship only after shadow replay
+(T5.3), never asserted as ground truth.
+
+**Live proof:** `make eval` → "threshold sensitivity" block shows `cov_sup=0.72` and a
+second hypothetical row at `0.80`, with the note "measured only via shadow replay."
+
+### Bonus — "So you DID miss one. Show it."
+**Answer:** `struct-miss-000`. Response: "Clause 4.1 permits this refund." Span only says
+clause 4.1 *covers shipping delays*. The symbol lookup matches the clause reference →
+SUPPORTED → a low-tier action passes. That is our one published false negative, and it is
+why we say held/escalated, not perfect.
+
+**Live proof:** `python3 -m evals.run | grep structural-miss` → `held=0`.
+
+---
+
 ## Top-5 drill order (morning of)
 
 1. Q1 guardrail · 2. Q9 dual-action · 3. Q10 blocked trap · 4. Q8 entitlement flip · 5. Q4 latency (bench file open)
 
 If pressed for depth: Q2 LLM judge → Q7 fail closed → Q12 shadow → Q5 FNR honesty.
+
+---
+
+## Q16 — "Your hard-negative hold rate is 64% — you over-flag."
+**Answer:** Correct, we measured and published it. 53/168 cases are hard negatives (31.7% of
+the corpus, above the 20% floor). We hold 64% [0.51, 0.76] of them as fail-closed caution
+(Edit/Escalate), never pass. Clean strata hold 0/13, so the over-flagging is concentrated
+where it is cheapest. Over-flagging is our named next milestone — not hidden.
+
+**Live proof:** `evals/README.md` hard-negative section — count, share, hold rate, Wilson CI.

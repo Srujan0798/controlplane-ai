@@ -1128,7 +1128,7 @@ function notes(s, text) {
     x: 1.36, y: 7.74, w: 17.3, h: 0.36,
     fontFace: FONT, fontSize: 15, bold: true, color: C.cream, margin: 0,
   });
-  s.addText("Measured gate (submission/latency_bench.json, n=200): p50≈0.074 ms · p95≈0.134 ms — under target; quote measured vs targets separately.", {
+  s.addText("Measured gate (submission/latency_bench.json, n=10000): p50≈0.43 ms · p95≈0.51 ms — under target; quote measured vs targets separately.", {
     x: 1.36, y: 8.12, w: 17.3, h: 0.36,
     fontFace: FONT, fontSize: 14, color: C.amber, margin: 0,
   });

@@ -192,7 +192,27 @@ Third live bias route · per-response bias · production load as mechanism proof
 
 ### Measured results (this build)
 
-All numbers are produced by `make eval` and `make bench` and regenerate on every run — they are measured, never asserted. The capability ledger and per-route Wilson CIs live in the generated README PDF (`submission/ControlPlane_Round2_README.pdf`) and `evals/last_run.json`. Shape of the published claim (ARCHITECTURE §7): we hold **X%** of ungrounded responses at **Y ms** p50 — and here is the **Z%** we don't, with a Wilson interval. The FNR schema is typed and empty until earned; this build earns it on the committed 150+ labelled corpus (incl. hard negatives).
+All numbers are produced by `make eval` and `make bench` and regenerate on every run — they are measured, never asserted. The capability ledger and per-route Wilson CIs live in the generated README PDF (`submission/ControlPlane_Round2_README.pdf`) and `evals/last_run.json`.
+
+**This build earns the FNR on a 168-case self-authored corpus.** The committed run reports:
+
+- **Ungrounded FNR ≤ 4.0%** (95% Wilson upper bound; n=93 ungrounded claims; point estimate ≈1.1%).
+  We publish the upper bound — the interval is the honest claim, not the point estimate.
+- **Passable-action FPR ≤ 15.5%** (95% Wilson upper bound; n=21 passable claims).
+- **Hard-negative hold rate 64% [0.51, 0.76].** 53/168 cases are hard negatives (31.7%, above the
+  20% floor). We over-flag — that is our named next milestone. Clean strata hold 0/13.
+- **One published miss:** `struct-miss-000` — a response citing "Clause 4.1 permits this refund"
+  where the span only says clause 4.1 *covers shipping delays*. Structural symbol lookup matches →
+  SUPPORTED → low-tier action slips through. We show the judge exactly which case we got wrong.
+- **No production proof.** Production FNR is unknown until shadow replay over live traffic
+  (ARCHITECTURE §7, §12). The honest claim: "on this self-authored corpus we miss ≤4.0% of ungrounded
+  low-tier claims (95% Wilson upper bound; n=93); production is unknown."
+- **Refuse-to-claim:** we do not eliminate hallucinations; we do not claim drop-in integration; we do
+  not claim zero added latency; we do not claim one accuracy number; we do not fill FNR with fabricated
+  percentages.
+
+Shape of the published claim (ARCHITECTURE §7): we hold **X%** of ungrounded responses at **Y ms** p50 —
+and here is the **Z%** we don't, with a Wilson interval.
 
 ---
 
