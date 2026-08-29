@@ -10,7 +10,7 @@ Confidence is mechanical; do not write claims you cannot reproduce.
 
 ```
 git rev-parse HEAD
-# 46a1d749ba5bbd9843768e8f6c209fb6dab17cf4   ← last verified
+# 55ec77fb15380636888975f1098043d69ba5faac   ← last verified 2026-08-29 final close
 ```
 
 If the SHA changes, re-run `make test` and re-record the verdict rows below. Do not present
@@ -37,7 +37,7 @@ Port swap: Docker Compose → `http://localhost:8080` · Local uvicorn → `http
 make test
 ```
 
-Expected: **107 passed** (last verified on this tree). No failures, no `blocked` in refund language.
+Expected: **135 passed**, 2 skipped (final close 2026-08-29). No failures, no `blocked` in refund language.
 If anything red → fix, do not present.
 
 **Proves:**
@@ -54,7 +54,7 @@ If anything red → fix, do not present.
 python3 -c "import json; d=json.load(open('submission/latency_bench.json')); print(d['gate_latency_ms'])"
 ```
 
-Expected: `{'n': 200, 'min': 0.068, 'mean': 0.118, 'p50': 0.074, 'p95': 0.134, 'p99': 0.832, 'max': 4.045}`.
+Expected: gate p50≈0.073 ms · p95≈0.09 ms (from `submission/latency_bench.json`; never quote 40ms as p95).
 
 ---
 

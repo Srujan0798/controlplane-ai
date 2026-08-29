@@ -1,13 +1,14 @@
 # EXECUTION.md
 
-**Active wave:** wave-8 (closing)
+**Active wave:** CLOSED — prize-day ready  
+**Known-good tip (final close):** `55ec77fb15380636888975f1098043d69ba5faac` (`55ec77f`)
 
 | Wave | Name | Status | Tasks | Commit | Notes |
 |---|---|---|---|---|---|
-| 1–5 | Historical product waves | **SHIPPED** ✅ | — | `7c4a7bc`…`dee3513` | merged on main |
-| 0 | Adaptoid thin OS | **READY** | scaffold | — | — |
-| 6 | Room impact | **SHIPPED** ✅ | 8 | see `work/reports/wave-6/` | OG meta, entitlement UI, error chrome, demo, brand |
-| 7 | Enterprise edges | **SHIPPED** ✅ | 8 | see `work/reports/wave-7/` | CORS, JSON logs, shutdown, idempotency, coverage CI, fail-stance, shadow CSV, OpenAPI |
-| 8 | Evidence / confidence | **SHIPPED** ✅ | 8 | see `work/reports/wave-8/` | audit, abuse map, prize matrix, handoff, tag, CONTRIBUTING |
+| 1–5 | Historical product | **SHIPPED** ✅ | — | `7c4a7bc`…`dee3513` | core + merge |
+| 0 | Scaffold / OS spine | **SHIPPED** ✅ | — | `46a1d74`…`55ec77f` | cleaned; Adaptoid copies removed |
+| 6 | Room impact | **SHIPPED** ✅ | 8/8 | `work/reports/wave-6/` | console polish |
+| 7 | Enterprise edges | **SHIPPED** ✅ | 8/8 | `work/reports/wave-7/` | CORS, logs, fail-stance, … |
+| 8 | Evidence / confidence | **SHIPPED** ✅ | 8/8 | `work/reports/wave-8/` | acceptance, audit, matrix |
 
-Update Status → SHIPPED and fill Commit when wave reports merge green.
+**Final close verify (2026-08-29):** preflight PASS · 135 passed / 2 skipped · refund Edit+Escalate · flip Edit→Pass · desk-law live · submission pack present.
