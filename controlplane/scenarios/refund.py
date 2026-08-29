@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 from controlplane.binder import bind_claims
+from controlplane.extract import extract_claims
 from controlplane.interlock import decide
 from controlplane.ledger import EvidenceLedger
 from controlplane.models import (
     Action,
-    AssertionStrength,
     BlastTier,
     Claim,
-    ClaimKind,
     Principal,
     StepKind,
 )
@@ -18,6 +17,34 @@ from controlplane.recorder import ProvenanceRecorder
 UNGATED_RESPONSE = (
     "Approved. Refund of ₹1,84,000 issued under clause 7.2 of the vendor agreement."
 )
+
+# Not in the ungated response; extracted (never Claim literals) so the
+# entitlement beat and clause-4.1 support beat stay live while fixtures remain.
+DEMO_SUPPLEMENTAL = (
+    "Clause 4.1 covers shipping delays. "
+    "customer account flagged for goodwill override."
+)
+
+
+def refund_demo_actions() -> list[Action]:
+    return [
+        Action("show_text", "Show text to the customer", BlastTier.R1),
+        Action(
+            "issue_refund",
+            "Issue the refund",
+            BlastTier.R3,
+            args={"amount": 184000, "currency": "INR", "order": "ORD-9"},
+            irreversibility=True,
+        ),
+    ]
+
+
+def extract_demo_claims(actions: list[Action] | None = None) -> list[Claim]:
+    actions = actions or refund_demo_actions()
+    return extract_claims(
+        f"{UNGATED_RESPONSE} {DEMO_SUPPLEMENTAL}",
+        actions=actions,
+    )
 
 
 def run_refund_scenario() -> EvidenceLedger:
@@ -84,51 +111,8 @@ def run_refund_scenario() -> EvidenceLedger:
 
     rec.finish_context_assembly(led)
 
-    claims = [
-        Claim(
-            "approval",
-            "Approved refunds follow the published vendor schedule.",
-            ClaimKind.TEXTUAL,
-            AssertionStrength.CATEGORICAL,
-            {"show_text": 1.0},
-        ),
-        Claim(
-            "amount",
-            "Refund of ₹1,84,000",
-            ClaimKind.NUMERIC,
-            AssertionStrength.CATEGORICAL,
-            {"show_text": 1.0, "issue_refund": 1.0},
-        ),
-        Claim(
-            "order",
-            "order ORD-9",
-            ClaimKind.STRUCTURAL,
-            AssertionStrength.CATEGORICAL,
-            {"issue_refund": 1.0},
-        ),
-        Claim(
-            "vendor_41",
-            "Clause 4.1 covers shipping delays",
-            ClaimKind.STRUCTURAL,
-            AssertionStrength.CATEGORICAL,
-            {"show_text": 1.0},
-        ),
-        Claim(
-            "hr_side",
-            "customer account flagged for goodwill override",
-            ClaimKind.TEXTUAL,
-            AssertionStrength.CATEGORICAL,
-            # Text-path only: weighting this onto R3 would Block, not Escalate.
-            {"show_text": 1.0},
-        ),
-        Claim(
-            "clause_72",
-            "Clause 7.2 permits this refund",
-            ClaimKind.STRUCTURAL,
-            AssertionStrength.CATEGORICAL,
-            {"show_text": 1.0, "issue_refund": 1.0},
-        ),
-    ]
+    actions = refund_demo_actions()
+    claims = extract_demo_claims(actions)
     bind_claims(
         led,
         claims,
@@ -138,15 +122,6 @@ def run_refund_scenario() -> EvidenceLedger:
         },
     )
 
-    decide(led, Action("show_text", "Show text to the customer", BlastTier.R1))
-    decide(
-        led,
-        Action(
-            "issue_refund",
-            "Issue the refund",
-            BlastTier.R3,
-            args={"amount": 184000, "currency": "INR", "order": "ORD-9"},
-            irreversibility=True,
-        ),
-    )
+    for action in actions:
+        decide(led, action)
     return led

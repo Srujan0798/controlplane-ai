@@ -212,11 +212,9 @@ class ControlPlaneGate:
         )
 
     def _rerun_refund(self, mode_override: str | None = None) -> GateResult:
-        from controlplane.scenarios.refund import UNGATED_RESPONSE
+        from controlplane.scenarios.refund import UNGATED_RESPONSE, extract_demo_claims
         from controlplane.models import (
-            AssertionStrength,
             BlastTier,
-            ClaimKind,
             Principal,
             StepKind,
         )
@@ -278,58 +276,21 @@ class ControlPlaneGate:
         )
         rec.finish_context_assembly(led)
 
-        claims = [
-            Claim(
-                "approval",
-                "Approved",
-                ClaimKind.TEXTUAL,
-                AssertionStrength.CATEGORICAL,
-                {"show_text": 0.5, "issue_refund": 0.2},
-            ),
-            Claim(
-                "amount",
-                "Refund of ₹1,84,000",
-                ClaimKind.NUMERIC,
-                AssertionStrength.CATEGORICAL,
-                {"show_text": 1.0, "issue_refund": 1.0},
-            ),
-            Claim(
-                "order",
-                "order ORD-9",
-                ClaimKind.STRUCTURAL,
-                AssertionStrength.CATEGORICAL,
-                {"issue_refund": 1.0},
-            ),
-            Claim(
-                "vendor_41",
-                "Clause 4.1 covers shipping delays",
-                ClaimKind.STRUCTURAL,
-                AssertionStrength.CATEGORICAL,
-                {"show_text": 1.0},
-            ),
-            Claim(
-                "hr_side",
-                "customer account flagged for goodwill override",
-                ClaimKind.TEXTUAL,
-                AssertionStrength.CATEGORICAL,
-                {"show_text": 1.0},
-            ),
-            Claim(
-                "clause_72",
-                "Clause 7.2 permits this refund",
-                ClaimKind.STRUCTURAL,
-                AssertionStrength.CATEGORICAL,
-                {"show_text": 1.0, "issue_refund": 1.0},
+        actions = [
+            Action("show_text", "show_text", BlastTier.R1),
+            Action(
+                "issue_refund",
+                "issue_refund",
+                BlastTier.R3,
+                args={"amount": 184000, "currency": "INR", "order": "ORD-9"},
+                irreversibility=True,
             ),
         ]
+        claims = extract_demo_claims(actions)
         fixture_map: dict[str, tuple[str, ...] | None] = {
             "amount": (amount_span,),
             "clause_72": None,
         }
-        actions = [
-            Action("show_text", "show_text", BlastTier.R1),
-            Action("issue_refund", "issue_refund", BlastTier.R3, irreversibility=True),
-        ]
         return self.run_prepared(
             use_case="decision-support",
             ledger=led,
