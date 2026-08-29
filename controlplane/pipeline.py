@@ -150,6 +150,17 @@ class ControlPlaneGate:
             )
 
         bind_claims(ledger, claims, fixture_map=fixture_map)
+        # PII Rule A: unbound sensitive entities in the ungated response force
+        # the Contradicted column (Block at R2/R3). Spans already in the ledger
+        # cover entitled disclosures; absence is the leak signal.
+        if ungated_text:
+            from controlplane.pii import apply_pii_rule_a
+
+            apply_pii_rule_a(
+                ledger,
+                ungated_text,
+                action_ids=[a.action_id for a in actions],
+            )
         findings = {cid: audit_claim(ledger, cid) for cid in ledger.claims}
         decisions: dict[str, Decision] = {}
         for action in actions:

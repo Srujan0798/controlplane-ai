@@ -1,5 +1,6 @@
 from controlplane.models import Actuator, AssertionStrength, Verdict
 from controlplane.scenarios.multi_usecase import (
+    run_acl_violation_refund,
     run_customer_support,
     run_decision_refund,
     run_knowledge_copilot,
@@ -58,3 +59,14 @@ def test_refund_r3_unsupported_categorical_escalate():
     assert led.bindings[claim_id].verdict == Verdict.UNSUPPORTED
     assert led.claims[claim_id].assertion == AssertionStrength.CATEGORICAL
     assert all("7.2" not in span.content for span in led.spans.values())
+    # F7: mixed-ACL set present — principal cannot read hr-confidential
+    assert led.principal.clearance == frozenset({"vendor-public"})
+    assert any("hr-confidential" in s.acl for s in led.spans.values())
+
+
+def test_acl_violation_route_blocks_at_r3():
+    led = run_acl_violation_refund()
+    d = led.decisions["issue_refund"]
+    assert d.actuator == Actuator.BLOCK
+    assert d.matrix_row == "R3"
+    assert "Contradicted" in d.matrix_col or "entitlement" in d.matrix_col.lower()

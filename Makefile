@@ -1,4 +1,4 @@
-.PHONY: test coverage bench run judge e2e pdf sbom
+.PHONY: test coverage bench eval run judge e2e pdf sbom verify
 
 test:
 	pytest -q
@@ -9,6 +9,14 @@ coverage:
 
 bench:
 	CONTROLPLANE_RPM=100000 python3 scripts/load_bench.py -n 200
+
+eval:
+	python3 -m evals.harness
+
+verify: test
+	pytest -q tests/test_content_laws.py
+	$(MAKE) eval
+	@echo "verify: tests + content laws + eval OK (bench optional: make bench)"
 
 run:
 	uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787

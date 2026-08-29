@@ -26,7 +26,14 @@ def _run(
     span_content: str,
     claim: Claim,
     action: Action,
+    span_acl: frozenset[str] | None = None,
+    extra_spans: list[tuple[str, frozenset[str], str]] | None = None,
+    fixture_map: dict[str, tuple[str, ...] | None] | None = None,
 ) -> EvidenceLedger:
+    """Build a mini ledger. `span_acl` defaults to principal.clearance for the
+    primary span; pass a stricter ACL (and optional extra_spans) so entitlement
+    violations are reachable — F7 fix: mixed-ACL sets, not acl=clearance always.
+    """
     rec = ProvenanceRecorder()
     led = rec.begin_request(
         request_id=request_id,
@@ -39,11 +46,16 @@ def _run(
         led,
         step_id,
         source_id=source_id,
-        acl=principal.clearance,
+        acl=span_acl if span_acl is not None else principal.clearance,
         content=span_content,
     )
+    for i, (src, acl, content) in enumerate(extra_spans or []):
+        sid = rec.record_step(led, StepKind.RETRIEVAL, f"{step_name}_extra_{i}")
+        rec.record_span(led, sid, source_id=src, acl=acl, content=content)
     rec.finish_context_assembly(led)
-    bind_claims(led, [claim], fixture_map={claim.claim_id: None})
+    # Default: claim unsupported (None spans) unless caller supplies fixture_map.
+    fm = fixture_map if fixture_map is not None else {claim.claim_id: None}
+    bind_claims(led, [claim], fixture_map=fm)
     decide(led, action)
     return led
 
@@ -106,7 +118,11 @@ def run_knowledge_copilot() -> EvidenceLedger:
 
 
 def run_decision_refund() -> EvidenceLedger:
-    """R3 issue_refund: unsupported + categorical → Escalate."""
+    """R3 issue_refund: unsupported + categorical → Escalate.
+
+    Mixed-ACL: also records an hr-confidential span the principal cannot read,
+    so an ACL violation is structurally possible on this route (F7).
+    """
     return _run(
         request_id="decision-refund-ord-9",
         principal=Principal(
@@ -135,4 +151,43 @@ def run_decision_refund() -> EvidenceLedger:
             args={"amount": 184000, "currency": "INR", "order": "ORD-9"},
             irreversibility=True,
         ),
+        extra_spans=[
+            (
+                "doc:hr-exception-desk",
+                frozenset({"hr-confidential"}),
+                "Internal exception desk: customer account flagged for goodwill override.",
+            )
+        ],
+    )
+
+
+def run_acl_violation_refund() -> EvidenceLedger:
+    """R3: claim binds to hr-confidential span principal cannot read → Block."""
+    claim_text = "customer account flagged for goodwill override"
+    return _run(
+        request_id="decision-acl-ord-9",
+        principal=Principal(
+            id="ds-agent-3",
+            roles=frozenset({"decision-support"}),
+            clearance=frozenset({"vendor-public"}),
+        ),
+        action_intent="decision-support-refund",
+        step_name="hr_internal_note",
+        source_id="doc:hr-exception-desk",
+        span_content=claim_text,
+        span_acl=frozenset({"hr-confidential"}),
+        claim=Claim(
+            "hr_side",
+            claim_text,
+            ClaimKind.TEXTUAL,
+            AssertionStrength.CATEGORICAL,
+            {"issue_refund": 1.0},
+        ),
+        action=Action(
+            "issue_refund",
+            "Issue the refund",
+            BlastTier.R3,
+            irreversibility=True,
+        ),
+        fixture_map={},  # bind by substring to the unentitled span
     )
