@@ -1,0 +1,23 @@
+policy_version: pack-decision-in-v1
+use_case: decision-support-in
+description: India geography pack — DPDP Act 2023; lighter annotate stance on hedges
+jurisdiction: in
+regulatory_basis: DPDP Act 2023
+retention_days: 180
+default_tier: R1
+mode: enforce
+latency_budget_ms_p50: 40
+latency_budget_ms_p95: 200
+fail_stance: open_annotate
+tier_overrides:
+  show_reply: R1
+actions:
+  show_reply:
+    tier: R1
+    irreversibility: false
+  show_text:
+    tier: R1
+    irreversibility: false
+  issue_refund:
+    tier: R3
+    irreversibility: true

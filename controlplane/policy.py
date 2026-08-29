@@ -1,7 +1,7 @@
 """Versioned policy packs — governance without redrawing the matrix."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -85,11 +85,23 @@ class PolicyPack:
     latency_budget_ms_p95: int
     fail_stance: str
     actions: dict[str, ActionPolicy]
+    jurisdiction: str = ""
+    regulatory_basis: str = ""
+    retention_days: int = 90
+    tier_overrides: dict[str, str] = field(default_factory=dict)
 
     def action(self, name: str) -> ActionPolicy:
-        if name in self.actions:
-            return self.actions[name]
-        return ActionPolicy(name=name, tier=self.default_tier, irreversibility=False)
+        base = self.actions.get(name)
+        if base is None:
+            base = ActionPolicy(name=name, tier=self.default_tier, irreversibility=False)
+        override = (self.tier_overrides or {}).get(name)
+        if override:
+            return ActionPolicy(
+                name=base.name,
+                tier=BlastTier(override),
+                irreversibility=base.irreversibility,
+            )
+        return base
 
 
 def _parse_pack(raw: dict[str, Any]) -> PolicyPack:
@@ -111,6 +123,10 @@ def _parse_pack(raw: dict[str, Any]) -> PolicyPack:
         latency_budget_ms_p95=int(raw.get("latency_budget_ms_p95", 200)),
         fail_stance=raw.get("fail_stance", "closed"),
         actions=actions,
+        jurisdiction=str(raw.get("jurisdiction", "") or ""),
+        regulatory_basis=str(raw.get("regulatory_basis", "") or ""),
+        retention_days=int(raw.get("retention_days", 90)),
+        tier_overrides=dict(raw.get("tier_overrides") or {}),
     )
 
 
@@ -152,6 +168,10 @@ class PolicyRegistry:
                     "latency_budget_ms_p50": pack.latency_budget_ms_p50,
                     "latency_budget_ms_p95": pack.latency_budget_ms_p95,
                     "fail_stance": pack.fail_stance,
+                    "jurisdiction": pack.jurisdiction,
+                    "regulatory_basis": pack.regulatory_basis,
+                    "retention_days": pack.retention_days,
+                    "tier_overrides": dict(pack.tier_overrides),
                     "actions": {
                         name: {
                             "tier": ap.tier.value,

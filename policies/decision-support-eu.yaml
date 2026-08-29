@@ -1,0 +1,23 @@
+policy_version: pack-decision-eu-v1
+use_case: decision-support-eu
+description: EU geography pack — GDPR Art. 22 / EU AI Act Art. 14; stricter reply tier
+jurisdiction: eu
+regulatory_basis: EU AI Act Art. 14 · GDPR Art. 22
+retention_days: 30
+default_tier: R2
+mode: enforce
+latency_budget_ms_p50: 40
+latency_budget_ms_p95: 200
+fail_stance: closed_escalate
+tier_overrides:
+  show_reply: R2
+actions:
+  show_reply:
+    tier: R2
+    irreversibility: false
+  show_text:
+    tier: R1
+    irreversibility: false
+  issue_refund:
+    tier: R3
+    irreversibility: true
