@@ -11,5 +11,5 @@ gh repo edit srujansai/controlplane-ai --visibility public || true
 git push -u origin feature/round2-elevation
 git push origin --tags || true
 # optional: also push main if desired
-echo "Public URL: https://github.com/srujansai/controlplane-ai"
-gh repo view srujansai/controlplane-ai --json url,visibility,isPrivate
+echo "Public URL: https://github.com/Srujan0798/controlplane-ai"
+gh repo view Srujan0798/controlplane-ai --json url,visibility,isPrivate
