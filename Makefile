@@ -11,7 +11,7 @@ bench:
 	CONTROLPLANE_RPM=100000 python3 scripts/load_bench.py -n 200
 
 eval:
-	python3 -m evals.harness
+	python3 -m evals.run
 
 verify: test
 	pytest -q tests/test_content_laws.py
