@@ -27,6 +27,10 @@ def test_override_writes_to_chained_ledger():
 
 def test_threshold_proposal_prints_shadow_delta():
     store = FeedbackStore()
+    # T5.3: a proposal only ships after a recorded shadow replay.
+    store.record_shadow_replay(
+        name="bm25_coverage_supported", traces=2000, fp_delta=0.01, fn_delta=-0.02
+    )
     prop = store.propose_threshold(
         name="bm25_coverage_supported",
         current=0.72,
@@ -34,6 +38,7 @@ def test_threshold_proposal_prints_shadow_delta():
         shadow_fp_delta=0.01,
         shadow_fn_delta=-0.02,
     )
+    assert prop["ship"] is True
     assert prop["shadow_fp_delta"] == 0.01
     assert prop["shadow_fn_delta"] == -0.02
     assert "shadow" in prop["note"].lower()
