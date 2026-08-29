@@ -10,7 +10,7 @@ Swap the host/port in any curl below. Health: `GET /healthz`.
 **Never say:** “blocked the refund,” “p95 = 40 ms,” a fabricated FNR %, or that clause 7.2 “caps/denies.”  
 **Say:** held / escalated with the evidence packet · ≤40 ms **p50** / ≤200 ms **p95** (targets) · measured numbers from `submission/latency_bench.json` or live `/v1/controlplane/metrics` · clause 7.2 **does not exist**.
 
-Full essay-form answers: [QA.md](QA.md). Architecture freezes: [ARCHITECTURE.md](ARCHITECTURE.md). Stand script: [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md).
+Full essay-form answers: [reference/QA.md](reference/QA.md). Architecture freezes: [ARCHITECTURE.md](ARCHITECTURE.md). Stand script: [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md).
 
 ---
 
@@ -25,7 +25,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
 # Expect: show_text → Edit, issue_refund → Escalate; clause 7.2 UNSUPPORTED (absent)
 ```
 
-**Pointer:** [QA.md](QA.md) A1 · [ARCHITECTURE.md](ARCHITECTURE.md) §2, §8 · pitch Slide 8.
+**Pointer:** [QA.md](reference/QA.md) A1 · [ARCHITECTURE.md](ARCHITECTURE.md) §2, §8 · pitch Slide 8.
 
 ---
 
@@ -40,7 +40,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=analy
 curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=hr_partner_01' # → Pass
 ```
 
-**Pointer:** [QA.md](QA.md) A1/A3 · [ARCHITECTURE.md](ARCHITECTURE.md) §4 (rule engine), §8 (rejected LLM-as-judge / Interrogator).
+**Pointer:** [QA.md](reference/QA.md) A1/A3 · [ARCHITECTURE.md](ARCHITECTURE.md) §4 (rule engine), §8 (rejected LLM-as-judge / Interrogator).
 
 ---
 
@@ -55,7 +55,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
   | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('response_overlay',{}).get('actuators_applied', d))"
 ```
 
-**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §9, §10.1 · [QA.md](QA.md) Team alignment (running example).
+**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §9, §10.1 · [QA.md](reference/QA.md) Team alignment (running example).
 
 ---
 
@@ -73,7 +73,7 @@ curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 # Optional refresh: make bench
 ```
 
-**Pointer:** [QA.md](QA.md) C1 · [ARCHITECTURE.md](ARCHITECTURE.md) §5 · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) Never-say table.
+**Pointer:** [QA.md](reference/QA.md) C1 · [ARCHITECTURE.md](ARCHITECTURE.md) §5 · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) Never-say table.
 
 ---
 
@@ -88,7 +88,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=shadow'
 curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 ```
 
-**Pointer:** [QA.md](QA.md) D1 · [ARCHITECTURE.md](ARCHITECTURE.md) §7 (publish error bars).
+**Pointer:** [QA.md](reference/QA.md) D1 · [ARCHITECTURE.md](ARCHITECTURE.md) §7 (publish error bars).
 
 ---
 
@@ -103,7 +103,7 @@ curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 python -m pytest tests/test_bias.py -q
 ```
 
-**Pointer:** [QA.md](QA.md) D4 · [ARCHITECTURE.md](ARCHITECTURE.md) §3 Responsibility · §10.9 (do not drop bias).
+**Pointer:** [QA.md](reference/QA.md) D4 · [ARCHITECTURE.md](ARCHITECTURE.md) §3 Responsibility · §10.9 (do not drop bias).
 
 ---
 
@@ -119,7 +119,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
   | python3 -c "import sys,json; o=json.load(sys.stdin)['response_overlay']; print('action_allowed=', o.get('action_allowed'), 'shadow=', o.get('shadow'))"
 ```
 
-**Pointer:** [QA.md](QA.md) C4 · [ARCHITECTURE.md](ARCHITECTURE.md) §4 (fail stance ≠ matrix action).
+**Pointer:** [QA.md](reference/QA.md) C4 · [ARCHITECTURE.md](ARCHITECTURE.md) §4 (fail stance ≠ matrix action).
 
 ---
 
@@ -134,7 +134,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=analy
 curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=hr_partner_01' # → Pass
 ```
 
-**Pointer:** [QA.md](QA.md) A3, B4 · [ARCHITECTURE.md](ARCHITECTURE.md) §3 leakage · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) step 5b.
+**Pointer:** [QA.md](reference/QA.md) A3, B4 · [ARCHITECTURE.md](ARCHITECTURE.md) §3 leakage · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) step 5b.
 
 ---
 
@@ -152,7 +152,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
 
 Console: open refund enforce → matrix cells for both pending actions.
 
-**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §9 (two pending actions) · [QA.md](QA.md) Readiness bar · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) step 3.
+**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §9 (two pending actions) · [QA.md](reference/QA.md) Readiness bar · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) step 3.
 
 ---
 
@@ -167,7 +167,7 @@ RID=$(curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=en
 curl -s "http://127.0.0.1:8787/v1/controlplane/requests/${RID}/audit.jsonl" | head
 ```
 
-**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §10.2 · [QA.md](QA.md) Team alignment · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) Never-say.
+**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §10.2 · [QA.md](reference/QA.md) Team alignment · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) Never-say.
 
 ---
 
@@ -185,7 +185,7 @@ curl -s http://127.0.0.1:8787/v1/chat/completions \
 # Expect HOLD overlay text + controlplane extension (not bare upstream chat)
 ```
 
-**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §5.10 · [QA.md](QA.md) C2 · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) step 6.
+**Pointer:** [ARCHITECTURE.md](ARCHITECTURE.md) §5.10 · [QA.md](reference/QA.md) C2 · [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) step 6.
 
 ---
 
@@ -202,7 +202,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=shadow' 
 curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 ```
 
-**Pointer:** [QA.md](QA.md) C3, C5 · [ARCHITECTURE.md](ARCHITECTURE.md) §5.9.
+**Pointer:** [QA.md](reference/QA.md) C3, C5 · [ARCHITECTURE.md](ARCHITECTURE.md) §5.9.
 
 ---
 
@@ -214,7 +214,7 @@ curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 
 > “We don’t claim to verify what we were never given. We claim that what we were never given cannot authorise an action.”
 
-**Pointer:** [QA.md](QA.md) B1 (drill cold) · [ARCHITECTURE.md](ARCHITECTURE.md) §3 Detection §3 / ungrounded routes.
+**Pointer:** [QA.md](reference/QA.md) B1 (drill cold) · [ARCHITECTURE.md](ARCHITECTURE.md) §3 Detection §3 / ungrounded routes.
 
 ---
 
@@ -228,7 +228,7 @@ curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool
 curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/flip?principal=analyst_01' | python3 -m json.tool | head -40
 ```
 
-**Pointer:** [QA.md](QA.md) B5 · [ARCHITECTURE.md](ARCHITECTURE.md) §8 (model-emitted citations rejected).
+**Pointer:** [QA.md](reference/QA.md) B5 · [ARCHITECTURE.md](ARCHITECTURE.md) §8 (model-emitted citations rejected).
 
 ---
 

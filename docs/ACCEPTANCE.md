@@ -242,7 +242,7 @@ make bench         # optional; refreshes submission/latency_bench.json
 
 - Speak-from canon (demo spine + never-say): `round2/R2S5.md`
 - Runbook (stand + one-liners + port swap): `docs/JUDGE_RUNBOOK.md`
-- Kill-shot framing: `docs/KILL_SHOT.md · docs/SUBMIT.md`
+- Kill-shot framing: `docs/reference/KILL_SHOT.md · docs/SUBMIT.md`
 - Hostile Q&A drill: `docs/HOSTILE_QA_DRILL.md`
 - Architecture freezes (truth): `docs/ARCHITECTURE.md`
 - Acceptance matrix: **this file** (`docs/ACCEPTANCE.md`)

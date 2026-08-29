@@ -3,7 +3,7 @@
 
 > Accenture Innovation Challenge 2026 · Round 2 · dense hybrid (R2S1–R2S4)  
 > **ETERNAL:** Default = UNSUPPORTED · entitlement = set-membership (zero LLM) · exact R×S matrix · one graph · hard gate on actions · FNR as typed format · two-pending-actions (R1 Edit + R3 Escalate **held**, never “blocked”) · `UNKNOWN` never → `SUPPORTED` · bias async-only · refuse-to-claim (about *us*)  
-> Sources: `docs/ARCHITECTURE.md` · `docs/NARRATIVE.md` · `docs/QA.md` · `docs/ps.md` · Stages 1–4 absorbed in this FINAL (locks deleted after merge).
+> Sources: `docs/ARCHITECTURE.md` · `docs/reference/NARRATIVE.md` · `docs/reference/QA.md` · `docs/ps.md` · Stages 1–4 absorbed in this FINAL (locks deleted after merge).
 
 | Official deliverable (`docs/ps.md`) | Artifact |
 |---|---|

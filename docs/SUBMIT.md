@@ -1,40 +1,36 @@
-# How to submit — ControlPlane.ai Round 2
+# Submit — ControlPlane.ai Round 2
 
-Accenture Innovation Challenge 2026 · Team ControlPlane · PS #1  
-**Known-good tag:** `v0.2.0-round2` (@ `551de81`)
+**Tag:** `v0.2.0-round2` · **Branch:** `main`
 
-## What organizers ask (`docs/ps.md`)
+## Upload / hand in
 
-| # | Deliverable | What we submit |
+| # | Organizer ask | Our artifact |
 |---|---|---|
-| 1 | Detailed Business Proposal | `submission/ControlPlane_Round2_Proposal.pdf` (canon MD: `round2/CONTROLPLANE_R2_FINAL.md`) |
-| 2 | Working Prototype | Live demo of this repo (Docker or local) — core gate + console |
-| 3 | Pitch Presentation | `submission/ControlPlane_Round2_Pitch.pptx` (speak-from: `round2/R2S5.md`) |
+| 1 | Detailed business proposal | `submission/ControlPlane_Round2_Proposal.pdf` |
+| 2 | Working prototype | Live demo of this repository |
+| 3 | Pitch presentation | `submission/ControlPlane_Round2_Pitch.pptx` |
 
-## Before you upload / present
+Official brief: [`ps.md`](ps.md) (+ PDFs in this folder).
+
+## Verify before upload
 
 ```bash
 source .venv/bin/activate
-bash scripts/preflight-lite.sh          # must PASS
-make run                                # http://127.0.0.1:8787
-# or: docker compose up --build       # http://localhost:8080
+bash scripts/preflight-lite.sh
+make run
+# http://127.0.0.1:8787/?scenario=refund&mode=enforce&autorun=1
 ```
 
-Prove once:
-- Refund → **Edit** + **Escalate** (held, never “blocked”)
-- Flip analyst→Edit, hr_partner→Pass
-- Latency only from `submission/latency_bench.json` (not marketing)
+| Check | Pass means |
+|---|---|
+| Refund | Edit + Escalate (held) |
+| Flip | analyst Edit → hr_partner Pass |
+| Latency | Only quote `submission/latency_bench.json` |
 
-## Room kit (one flow)
+## Present
 
-1. Open console Clearance  
-2. Speak beats from `round2/R2S5.md`  
-3. Click path in `docs/JUDGE_RUNBOOK.md`  
-4. Defend with `docs/HOSTILE_QA_DRILL.md`  
-5. Optional depth: `docs/ARCHITECTURE.md`, `docs/KILL_SHOT.md`
+1. [`../round2/R2S5.md`](../round2/R2S5.md) — speak  
+2. [`JUDGE_RUNBOOK.md`](JUDGE_RUNBOOK.md) — click  
+3. [`HOSTILE_QA_DRILL.md`](HOSTILE_QA_DRILL.md) — defend  
 
-## Do not submit / do not open on stage
-
-- `.venv/`, `graphify-out/`, `__pycache__/`
-- Any Adaptoid / agent folders (removed from this tree)
-- Claiming Lane-2 NLI, invented FNR %, or `p95=40ms`
+Never say the refund was “blocked.” Say **held and escalated with the evidence packet.**

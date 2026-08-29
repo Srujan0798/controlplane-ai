@@ -10,6 +10,9 @@ hits=$(find . -type f \( -name '* 2.md' -o -name '* 2.*' -o -name '* copy.*' \) 
   ! -path '*/node_modules/*' \
   ! -path '*/__pycache__/*' \
   ! -path '*/graphify-out/*' \
+  ! -path '*/.data/*' \
+  ! -path '*/.superpowers/*' \
+  ! -path '*/.pytest_cache/*' \
   2>/dev/null || true)
 if [ -n "$hits" ]; then
   echo "FAIL: dupe artifacts present (FM-23)"
