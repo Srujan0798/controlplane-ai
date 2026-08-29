@@ -8,6 +8,7 @@
     { id: "matrix", href: "/matrix", label: "Matrix" },
     { id: "architecture", href: "/architecture", label: "Architecture" },
     { id: "runbook", href: "/runbook", label: "Runbook" },
+    { id: "print", href: "/print", label: "Print" },
   ];
 
   const SCENARIOS = {

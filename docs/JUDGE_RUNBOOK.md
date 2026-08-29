@@ -108,7 +108,11 @@ Full hostile Q&A: [QA.md](QA.md). Drill sheet (one-liners + curls): [HOSTILE_QA_
 
 ---
 
-## Tag / release (do not run unless human asks)
+## Tag / release
+
+Annotated tag **`v0.2.0-round2`** already created on known-good dry-run commit. Do not recreate unless retagging intentionally.
+
+### Historical note (do not run unless human asks)
 
 When the human is ready (not automatic). Match [`EVENT_DAY_CHECKLIST.md`](EVENT_DAY_CHECKLIST.md):
 

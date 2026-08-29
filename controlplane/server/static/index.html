@@ -16,14 +16,6 @@
   <script src="/static/js/bay.js"></script>
 </head>
 <body>
-  <!--
-    THESIS: Admission control as a flight-strip bay — pending ACTIONs are physical strips that flap to their actuator; refuse metric-dashboard hero.
-    OWN-WORLD: Graphite bay, cream paper strips, matte-black flap faces, condensed mono letters, safety-orange Admit, amber lamps; raised by split-flap cascade + hardware orange key.
-    STORY: Judge chooses scenario, hits Admit, watches strips cascade into Edit + Escalate with matrix cells and downloadable receipts.
-    FIRST VIEWPORT: Left desk (scenario + orange Admit); right bay with empty strip slots; after run, two dominant strips own the bay.
-    FORM: ATC strip bay (assigned #4, seed 27b2e849) + split-flap cascade raise + orange action key raise.
-    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
-  -->
   <a class="skip" href="#bay">Skip to strips</a>
   <div class="shell">
     <header class="rail">
@@ -31,12 +23,13 @@
       <span class="mode-stamp">Operate</span>
       <nav class="nav" aria-label="Operate">
         <a href="/" data-nav="clearance">Clearance</a>
-        <a href="/static/policies.html" data-nav="policies">Policies</a>
-        <a href="/static/metrics.html" data-nav="metrics">Metrics</a>
-        <a href="/static/audit.html" data-nav="audit">Audit</a>
-        <a href="/static/matrix.html" data-nav="matrix">Matrix</a>
-        <a href="/static/architecture.html" data-nav="architecture">Architecture</a>
-        <a href="/static/runbook.html" data-nav="runbook">Runbook</a>
+        <a href="/policies" data-nav="policies">Policies</a>
+        <a href="/metrics" data-nav="metrics">Metrics</a>
+        <a href="/audit" data-nav="audit">Audit</a>
+        <a href="/matrix" data-nav="matrix">Matrix</a>
+        <a href="/architecture" data-nav="architecture">Architecture</a>
+        <a href="/runbook" data-nav="runbook">Runbook</a>
+        <a href="/print" data-nav="print">Print</a>
       </nav>
       <div class="rail-status">
         <span class="lamp" id="lamp" aria-hidden="true"></span>
@@ -94,7 +87,7 @@
           <div class="meter"><b id="mFnr">—</b><small>Labeled FNR</small></div>
           <div class="meter"><b id="mLat">—</b><small>Last ms</small></div>
         </div>
-        <p class="lat-truth">Targets ≤40ms p50 / ≤200ms p95 · measured gate p50≈0.074 / p95≈0.134 · Last ms is this run</p>
+        <p class="lat-truth">Targets ≤40ms p50 / ≤200ms p95 · measured gate p50≈0.073 / p95≈0.09 · Last ms is this run</p>
       </aside>
 
       <main class="bay" id="bay" aria-live="polite">
@@ -282,7 +275,7 @@
         <div class="compare-links">
           ${esc(data.mode)} ·
           <a href="/v1/controlplane/requests/${encodeURIComponent(data.request_id)}/audit.jsonl">Download audit.jsonl</a>
-          · <a href="/static/audit.html?request=${encodeURIComponent(data.request_id)}">Open in Audit</a>
+          · <a href="/audit?request=${encodeURIComponent(data.request_id)}">Open in Audit</a>
         </div>
       `;
     }

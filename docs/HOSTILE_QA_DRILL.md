@@ -66,7 +66,7 @@ curl -s -X POST 'http://127.0.0.1:8787/v1/controlplane/demo/refund?mode=enforce'
 **Live proof:** Cite checked-in bench or live metrics:
 
 ```bash
-# Measured (n=200, TestClient): gate p50≈0.07 ms, p95≈0.13 ms — see submission/latency_bench.json
+# Measured (n=200, TestClient): gate p50≈0.073 ms, p95≈0.09 ms — see submission/latency_bench.json
 python3 -c "import json; print(json.load(open('submission/latency_bench.json'))['gate_latency_ms'])"
 
 curl -s 'http://127.0.0.1:8787/v1/controlplane/metrics' | python3 -m json.tool

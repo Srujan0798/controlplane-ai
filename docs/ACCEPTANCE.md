@@ -10,7 +10,7 @@ Confidence is mechanical; do not write claims you cannot reproduce.
 
 ```
 git rev-parse HEAD
-# 55ec77fb15380636888975f1098043d69ba5faac   ← last verified 2026-08-29 final close
+# 5960561bd223abed013e4a7c6ba5122fe05dd443   ← refresh after each verify; tag v0.2.0-round2 @ 551de81
 ```
 
 If the SHA changes, re-run `make test` and re-record the verdict rows below. Do not present
@@ -37,7 +37,7 @@ Port swap: Docker Compose → `http://localhost:8080` · Local uvicorn → `http
 make test
 ```
 
-Expected: **135 passed**, 2 skipped (final close 2026-08-29). No failures, no `blocked` in refund language.
+Expected: **135 passed**, 2 skipped. No failures, no `blocked` in refund language.
 If anything red → fix, do not present.
 
 **Proves:**
@@ -242,7 +242,7 @@ make bench         # optional; refreshes submission/latency_bench.json
 
 - Speak-from canon (demo spine + never-say): `round2/R2S5.md`
 - Runbook (stand + one-liners + port swap): `docs/JUDGE_RUNBOOK.md`
-- Kill-shot framing: `docs/KILL_SHOT.md`
+- Kill-shot framing: `docs/KILL_SHOT.md · docs/SUBMIT.md`
 - Hostile Q&A drill: `docs/HOSTILE_QA_DRILL.md`
 - Architecture freezes (truth): `docs/ARCHITECTURE.md`
 - Acceptance matrix: **this file** (`docs/ACCEPTANCE.md`)

@@ -1,107 +1,92 @@
 # ControlPlane.ai
 
 **Admission-control layer for AI that acts.**  
-Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1
+Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1 · tag `v0.2.0-round2`
 
-Every AI response is a set of **claims requesting permission to act**. ControlPlane captures provenance **outside** the model at context-assembly time (`STEP → SPAN → CLAIM → ACTION`), binds claims to that provenance set, checks entitlement (ACL), and decides with a **frozen blast-radius matrix**.
+Every AI response is a set of **claims requesting permission to act**. Provenance is captured **outside** the model (`STEP → SPAN → CLAIM → ACTION`). Unproven or unauthorized claims cannot authorize irreversible actions.
 
-Lane 1 is deterministic only — no LLM on the critical path.
+Lane 1 is deterministic — no LLM on the critical path.
 
-## Official deliverables (`docs/ps.md`)
+---
 
-| Ask | Artifact |
+## Submit (start here)
+
+→ **[`docs/SUBMIT.md`](docs/SUBMIT.md)**
+
+| Deliverable | Artifact |
 |---|---|
-| **1. Detailed Business Proposal** | [`round2/CONTROLPLANE_R2_FINAL.md`](round2/CONTROLPLANE_R2_FINAL.md) · PDF: [`submission/ControlPlane_Round2_Proposal.pdf`](submission/ControlPlane_Round2_Proposal.pdf) |
-| **2. Working Prototype** | [`controlplane/`](controlplane/) · judge console · [`examples/`](examples/) · [`tests/`](tests/) |
-| **3. Pitch Presentation** | [`round2/R2S5.md`](round2/R2S5.md) · deck: [`submission/ControlPlane_Round2_Pitch.pptx`](submission/ControlPlane_Round2_Pitch.pptx) |
+| Proposal | [`submission/ControlPlane_Round2_Proposal.pdf`](submission/ControlPlane_Round2_Proposal.pdf) · canon [`round2/CONTROLPLANE_R2_FINAL.md`](round2/CONTROLPLANE_R2_FINAL.md) |
+| Prototype | this repo — console below |
+| Pitch | [`submission/ControlPlane_Round2_Pitch.pptx`](submission/ControlPlane_Round2_Pitch.pptx) · speak [`round2/R2S5.md`](round2/R2S5.md) |
 
-## One-command judge demo
+---
 
-```bash
-docker compose up --build
-# open http://localhost:8080
-```
-
-Or locally (use **8787** if 8080 is already taken):
+## Run the prototype
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest -q
-uvicorn controlplane.server.app:create_app --factory --host 127.0.0.1 --port 8787
+bash scripts/preflight-lite.sh
+make run
 # open http://127.0.0.1:8787
+# autorun: http://127.0.0.1:8787/?scenario=refund&mode=enforce&autorun=1
 ```
 
-## What judges will see
+Docker: `docker compose up --build` → http://localhost:8080
 
-| Surface | URL / command |
-|---|---|
-| Enterprise console | http://127.0.0.1:8787 (or :8080 via Docker) |
-| OpenAI-compatible gate | `POST /v1/chat/completions` |
-| Live refund demo API | `POST /v1/controlplane/demo/refund?mode=enforce` |
-| Shadow / FNR metrics | `GET /v1/controlplane/metrics` |
-| Policy packs | `GET /v1/controlplane/policies` |
-| Audit export | `GET /v1/controlplane/requests/{id}/audit.jsonl` |
-
-### Curl — OpenAI shape
+**Expected (refund):** `show_text` → **Edit** · `issue_refund` → **Escalate** (held with evidence packet — never “blocked”).
 
 ```bash
-curl -s http://127.0.0.1:8787/v1/chat/completions \
-  -H 'content-type: application/json' \
-  -d '{"model":"controlplane-demo","messages":[{"role":"user","content":"Issue refund under clause 7.2"}],"scenario":"refund","mode":"enforce"}' \
-  | python3 -m json.tool
+python3 examples/refund_trace_demo.py
+python3 examples/knowledge_flip_demo.py   # Edit → Pass when principal changes
 ```
 
-Expected: user-visible text surgically edited; irreversible refund **held** (`Escalate`); `controlplane` extension carries the evidence ledger.
+---
 
-### CLI fixtures
+## Architecture (one line)
 
-```bash
-python3 examples/refund_trace_demo.py       # R1 Edit + R3 Escalate (HELD)
-python3 examples/multi_usecase_demo.py      # support / copilot / decision-support
-python3 examples/knowledge_flip_demo.py     # entitlement principal-flip
+```text
+STEP → SPAN → CLAIM → ACTION
+Recorder → Binder → Entitlement → Interlock (frozen MATRIX)
 ```
 
-## Project hierarchy
+Full system of record: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+
+---
+
+## Repo map (single flow)
 
 ```text
 SEBI/
-├── README.md · AGENTS.md · HANDOFF.md
-├── pyproject.toml · Makefile · Dockerfile · docker-compose.yml
-├── controlplane/          ← gate + FastAPI + static console
-├── policies/              ← YAML policy packs
-├── examples/ · tests/ · scripts/
-├── submission/            ← PDF / PPTX / bench / SBOM
-├── docs/                  ← ARCHITECTURE, runbook, acceptance, QA
-├── round2/                ← FINAL + R2S5 (pitch/proposal canon)
-├── work/reports/          ← wave evidence (already shipped)
-├── plan/EXECUTION.md      ← wave status
-└── orchestrator/          ← preflight-lite.sh
+├── README.md · AGENTS.md · LICENSE · docs/SUBMIT.md
+├── controlplane/     # gate + FastAPI + Operate console
+├── policies/         # YAML packs
+├── tests/ · examples/ · scripts/
+├── submission/       # PDF · PPTX · latency_bench.json · SBOM
+├── round2/           # CONTROLPLANE_R2_FINAL.md · R2S5.md
+└── docs/             # ARCHITECTURE · JUDGE_RUNBOOK · HOSTILE_QA · ACCEPTANCE · …
 ```
 
-## Document map
-
-| Audience | Open |
+| Need | Open |
 |---|---|
-| Judges / submit | `round2/CONTROLPLANE_R2_FINAL.md` + console + `submission/` |
-| Pitch morning-of | `round2/R2S5.md` + `docs/JUDGE_RUNBOOK.md` |
-| Hostile Q&A | `docs/HOSTILE_QA_DRILL.md` · depth: `docs/QA.md` |
-| Engineers | this README + `controlplane/` + `docs/ARCHITECTURE.md` + `AGENTS.md` |
-| Event day | `docs/EVENT_DAY_CHECKLIST.md` · `docs/ACCEPTANCE.md` |
-| Final checklist | `docs/FINAL-STEPS.md` |
-| Phase-2 only | `docs/PHASE2-FROM-RESEARCH.md` (not for stand) |
-| Kill-shot | `docs/KILL_SHOT.md` |
-| Gaps inventory | `docs/PRIZE_WIN_MATRIX.md` |
-| License | `LICENSE` (MIT) |
-| Do **not** present | `graphify-out/`, `.worktrees/`, `work/reports/` (internal only) |
+| Submit / how | [`docs/SUBMIT.md`](docs/SUBMIT.md) |
+| Stand script | [`docs/JUDGE_RUNBOOK.md`](docs/JUDGE_RUNBOOK.md) |
+| Hostile Q&A | [`docs/HOSTILE_QA_DRILL.md`](docs/HOSTILE_QA_DRILL.md) · depth [`docs/QA.md`](docs/QA.md) |
+| Architecture | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Acceptance | [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) |
+| Event checklist | [`docs/EVENT_DAY_CHECKLIST.md`](docs/EVENT_DAY_CHECKLIST.md) |
+| Kill-shot | [`docs/KILL_SHOT.md`](docs/KILL_SHOT.md) |
+| Official PS | [`docs/ps.md`](docs/ps.md) + PDFs in `docs/` |
 
-## What shipped on this tree
+---
 
-- Provenance recorder + binder + entitlement + frozen interlock matrix
-- Versioned YAML policy packs (`policies/`)
-- Shadow mode + publishable FNR/FPR counters
-- FastAPI OpenAI-compatible reverse proxy + judge console
-- Docker Compose + GitHub Actions CI
-- Fail-closed regressions (`tests/test_fail_closed.py`)
+## What we built
 
-**Branch:** `main` — single source of truth after merge of `feature/round2-controlplane`.
+- Provenance ledger outside the model (hash-chained)
+- Deterministic binding + entitlement (ACL set-membership)
+- Frozen blast-radius matrix · dual-action refund (Edit + Escalate)
+- Clause 7.2 absence → UNSUPPORTED → held money path
+- FastAPI OpenAI-compatible gate · Operate console (Clearance → Print)
+- Policy packs · shadow metrics · signed audits · Docker + CI
+
+Team: Choda Srujan Sai · Dhrithika · IIT Gandhinagar

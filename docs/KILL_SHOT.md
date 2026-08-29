@@ -59,7 +59,7 @@ If a competitor says it *watches AI outputs* — it is in the wrong category. If
 |---|---|
 | "We **blocked** the refund." | "Refund **held** and **escalated** with the evidence packet." |
 | "Clause 7.2 caps / denies / doesn't cover." | "**Clause 7.2 does not exist.** Absence → `UNSUPPORTED`." |
-| "40 ms p95." | "**≤40 ms p50 / ≤200 ms p95 targets.** Measured gate: p50≈0.074 ms, p95≈0.134 ms (n=200, `submission/latency_bench.json`)." |
+| "40 ms p95." | "**≤40 ms p50 / ≤200 ms p95 targets.** Measured gate: p50≈0.073 ms, p95≈0.09 ms (n=200, `submission/latency_bench.json`)." |
 | "Customer lost money." | "**Company wrongly paid out.** Customer did not lose money. Found Friday." |
 | "We eliminate hallucinations." | "Ungrounded claims **cannot authorise actions**. We publish what we miss." |
 
@@ -109,4 +109,4 @@ Port swap: Docker Compose → `http://localhost:8080` · Local uvicorn → `http
 - Architecture freezes (truth): `docs/ARCHITECTURE.md` §2 (graph), §4 (rule engine), §5 (latency), §7 (FNR)
 - Hostile Q&A drill (room defense): `docs/HOSTILE_QA_DRILL.md`
 - Runbook (stand): `docs/JUDGE_RUNBOOK.md` — Never-say table
-- Latency bench (measured): `submission/latency_bench.json` — n=200, gate p50≈0.074 ms / p95≈0.134 ms
+- Latency bench (measured): `submission/latency_bench.json` — n=200, gate p50≈0.073 ms / p95≈0.09 ms
