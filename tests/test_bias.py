@@ -79,3 +79,26 @@ def test_gate_public_dict_includes_bias_probe():
     assert 0 < probe["acl_skew"] < 1
     # refund fixture: 1 hr-confidential of 5 spans
     assert abs(probe["acl_skew"] - 0.2) < 1e-9
+
+
+def test_counterfactual_flip_rate_with_wilson_ci():
+    from controlplane.bias import FlipWindow, counterfactual_flip
+
+    win = FlipWindow(max_n=50)
+
+    def decide_fn(attr: str) -> str:
+        # Synthetic: one protected attr flips Edit → Pass
+        return "Pass" if attr == "group_b" else "Edit"
+
+    out = counterfactual_flip(
+        decide_fn,
+        baseline_attr="group_a",
+        perturbed_attrs=["group_b", "group_c"],
+        window=win,
+    )
+    assert out["flips"] == 1
+    assert out["n"] == 1
+    assert out["flip_rate"] == 1.0
+    assert len(out["wilson_95"]) == 2
+    assert out["baseline"]["decision"] == "Edit"
+    assert any(p["flipped"] for p in out["perturbations"])
