@@ -10,13 +10,21 @@ from controlplane.bias import probe_acl_skew
 from controlplane.binder import bind_claims
 from controlplane.entitlement import audit_claim
 from controlplane.interlock import decide
+from controlplane.lanes import (
+    LANE1_DEADLINE_MS,
+    LANE2_DEADLINE_MS,
+    merge_bindings,
+    run_lanes,
+)
 from controlplane.ledger import EvidenceLedger
 from controlplane.models import (
     Action,
     Actuator,
+    Binding,
     Claim,
     Decision,
     EntitlementFinding,
+    Verdict,
 )
 from controlplane.holdback import admit_for_decisions
 from controlplane.policy import PolicyRegistry
@@ -38,6 +46,7 @@ class GateResult:
     """True when mode=enforce AND at least one holding actuator fired."""
     would_hold: bool
     response_overlay: dict[str, Any] = field(default_factory=dict)
+    lanes: dict[str, Any] | None = None
 
     def public_dict(self) -> dict[str, Any]:
         return {
@@ -110,22 +119,31 @@ class GateResult:
             "responsibility": {
                 "bias_probe": probe_acl_skew(self.ledger),
             },
+            "lanes": self.lanes,
         }
 
 
 class ControlPlaneGate:
     """Enterprise admission-control gate.
 
-    Lane 1 only: deterministic membership, ACL, matrix. No LLM on this path.
+    Lane 1: deterministic membership, ACL, matrix. No LLM on this path.
+    Lane 2: injectable near-line NLI adapter (default no-op).
+    Lane 3: async bias/shadow — not on the critical path.
     """
 
     def __init__(
         self,
         policies: PolicyRegistry | None = None,
         metrics: MetricsStore | None = None,
+        nli_adapter: Any | None = None,
+        lane2_deadline_ms: float | None = None,
     ) -> None:
         self.policies = policies or PolicyRegistry()
         self.metrics = metrics or MetricsStore()
+        self._nli_adapter = nli_adapter
+        self._lane2_deadline_ms = (
+            LANE2_DEADLINE_MS if lane2_deadline_ms is None else lane2_deadline_ms
+        )
         self._history: list[GateResult] = []
 
     def run_prepared(
@@ -149,19 +167,55 @@ class ControlPlaneGate:
                 "fixture_map is rejected in enforce mode unless allow_fixtures=True"
             )
 
-        bind_claims(ledger, claims, fixture_map=fixture_map)
-        # PII Rule A: unbound sensitive entities in the ungated response force
-        # the Contradicted column (Block at R2/R3). Spans already in the ledger
-        # cover entitled disclosures; absence is the leak signal.
-        if ungated_text:
-            from controlplane.pii import apply_pii_rule_a
+        def _lane1() -> dict[str, Any]:
+            bind_claims(ledger, claims, fixture_map=fixture_map)
+            # PII Rule A: unbound sensitive entities in the ungated response force
+            # the Contradicted column (Block at R2/R3). Spans already in the ledger
+            # cover entitled disclosures; absence is the leak signal.
+            if ungated_text:
+                from controlplane.pii import apply_pii_rule_a
 
-            apply_pii_rule_a(
-                ledger,
-                ungated_text,
-                action_ids=[a.action_id for a in actions],
+                apply_pii_rule_a(
+                    ledger,
+                    ungated_text,
+                    action_ids=[a.action_id for a in actions],
+                )
+            findings_local = {cid: audit_claim(ledger, cid) for cid in ledger.claims}
+            return {"bindings": dict(ledger.bindings), "findings": findings_local}
+
+        bundle = run_lanes(
+            lane1=_lane1,
+            lane2=self._nli_adapter,
+            lane3=lambda: probe_acl_skew(ledger),
+            lane1_deadline_ms=LANE1_DEADLINE_MS,
+            lane2_deadline_ms=self._lane2_deadline_ms,
+        )
+        if bundle.lane1.timed_out:
+            for claim in claims:
+                if claim.claim_id not in ledger.bindings:
+                    ledger.claims[claim.claim_id] = claim
+                    ledger.bindings[claim.claim_id] = Binding(
+                        claim.claim_id,
+                        (),
+                        "lane-timeout",
+                        Verdict.UNKNOWN,
+                        "lane1 deadline miss → UNKNOWN",
+                    )
+        payload = bundle.lane1.payload if isinstance(bundle.lane1.payload, dict) else {}
+        findings = payload.get("findings")
+        if not findings:
+            findings = {cid: audit_claim(ledger, cid) for cid in ledger.claims}
+
+        lane2_map = bundle.lane2.payload if isinstance(bundle.lane2.payload, dict) else None
+        if lane2_map and all(isinstance(v, Binding) for v in lane2_map.values()):
+            merged = merge_bindings(
+                ledger.bindings,
+                lane2_map,
+                lane2_timed_out=bundle.lane2.timed_out,
             )
-        findings = {cid: audit_claim(ledger, cid) for cid in ledger.claims}
+            for cid, binding in merged.items():
+                ledger.bindings[cid] = binding
+
         decisions: dict[str, Decision] = {}
         for action in actions:
             decisions[action.action_id] = decide(
@@ -194,6 +248,7 @@ class ControlPlaneGate:
             enforced=enforced,
             would_hold=would_hold,
             response_overlay=overlay,
+            lanes=bundle.as_public(),
         )
         self._history.append(result)
         if len(self._history) > 500:
