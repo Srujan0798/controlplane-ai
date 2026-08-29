@@ -81,5 +81,21 @@ class EvidenceLedger:
             prev = entry.hash
         return True
 
+    def chain_hash(self) -> str:
+        """Deterministic digest of the provenance chain, independent of request_id.
+
+        Used by T8.2 determinism: the same input must yield a byte-identical
+        ledger hash across runs and processes. request_id is excluded so the
+        decision logic (not the id) is what's tested for reproducibility.
+        """
+        prev = "GENESIS"
+        for entry in self._entries:
+            if entry.entry_type == "request_begin":
+                # request_id varies per run; skip its influence on the digest
+                prev = _sha256(prev + _canonical({"type": entry.entry_type, "payload": {}}))
+                continue
+            prev = _sha256(prev + _canonical({"type": entry.entry_type, "payload": entry.payload}))
+        return prev
+
     def get(self, entry_type: str) -> list[LedgerEntry]:
         return [e for e in self._entries if e.entry_type == entry_type]
