@@ -1,0 +1,834 @@
+- id: clean-000
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: &id001
+    - vendor-public
+  actions: &id002
+  - action_id: show_text
+    name: show_text
+    tier: R1
+    irreversibility: false
+    args: {}
+  - action_id: issue_refund
+    name: issue_refund
+    tier: R3
+    irreversibility: true
+    args:
+      amount: 184000
+      currency: INR
+      order: ORD-9
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-001
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-10 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-002
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-11 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-003
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-12 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-004
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-13 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-005
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-14 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-006
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-15 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-007
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-16 is 184000 INR.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    show_text: Escalate
+    issue_refund: Escalate
+  label: hard_negative
+- id: clean-cs-000
+  stratum: clean
+  use_case: customer-support
+  response_text: this may still be covered under the extended warranty
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: &id003
+    - vendor-public
+  actions: &id004
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-cs-001
+  stratum: clean
+  use_case: customer-support
+  response_text: this may still be covered under the extended warranty
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions: *id004
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-cs-002
+  stratum: clean
+  use_case: customer-support
+  response_text: this may still be covered under the extended warranty
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions: *id004
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-cs-003
+  stratum: clean
+  use_case: customer-support
+  response_text: this may still be covered under the extended warranty
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions: *id004
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-cs-004
+  stratum: clean
+  use_case: customer-support
+  response_text: this may still be covered under the extended warranty
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions: *id004
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-cs-005
+  stratum: clean
+  use_case: customer-support
+  response_text: this may still be covered under the extended warranty
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions: *id004
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: hn-clean-large-000
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clean-large-001
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clean-large-002
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clean-large-003
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clean-large-004
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clean-large-005
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clean-large-006
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clean-large-007
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved. Refund of ₹1,84,000 under clause 4.1 for order ORD-9.
+  spans:
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR. Exception approved by finance.
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 4.1 covers shipping delays and restocking. Approved refunds follow
+      the published vendor schedule.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions: *id002
+  expected_verdicts:
+    amount: SUPPORTED
+  expected_actuators:
+    issue_refund: Escalate
+  label: hard_negative
+- id: hn-clause-ok-000
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved under clause 7.3 for order ORD-9. Refund of ₹1,84,000.
+  spans:
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 7.3 governs special-case refunds. Clause 4.1 covers standard shipping.
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions:
+  - action_id: show_text
+    name: show_text
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: hn-clause-ok-001
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved under clause 7.3 for order ORD-9. Refund of ₹1,84,000.
+  spans:
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 7.3 governs special-case refunds. Clause 4.1 covers standard shipping.
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions:
+  - action_id: show_text
+    name: show_text
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: hn-clause-ok-002
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved under clause 7.3 for order ORD-9. Refund of ₹1,84,000.
+  spans:
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 7.3 governs special-case refunds. Clause 4.1 covers standard shipping.
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions:
+  - action_id: show_text
+    name: show_text
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: hn-clause-ok-003
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved under clause 7.3 for order ORD-9. Refund of ₹1,84,000.
+  spans:
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 7.3 governs special-case refunds. Clause 4.1 covers standard shipping.
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions:
+  - action_id: show_text
+    name: show_text
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: hn-clause-ok-004
+  stratum: clean
+  use_case: decision-support
+  response_text: Approved under clause 7.3 for order ORD-9. Refund of ₹1,84,000.
+  spans:
+  - source_id: doc:vendor
+    acl:
+    - vendor-public
+    content: Clause 7.3 governs special-case refunds. Clause 4.1 covers standard shipping.
+  - source_id: db:orders
+    acl:
+    - vendor-public
+    content: Refund amount for order ORD-9 is 184000 INR.
+  principal:
+    id: cs-agent-17
+    roles: []
+    clearance: *id001
+  actions:
+  - action_id: show_text
+    name: show_text
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-000
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-001
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-002
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-003
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-004
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-005
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-006
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
+- id: clean-r1-007
+  stratum: clean
+  use_case: customer-support
+  response_text: Returns are accepted within 30 days for unused goods.
+  spans:
+  - source_id: doc:faq
+    acl:
+    - vendor-public
+    content: Shipping typically takes 5-7 business days. Returns are accepted within
+      30 days for unused goods.
+  principal:
+    id: cs-bot-4
+    roles: []
+    clearance: *id003
+  actions:
+  - action_id: show_reply
+    name: show_reply
+    tier: R1
+    irreversibility: false
+    args: {}
+  expected_verdicts: {}
+  expected_actuators: {}
+  label: hard_negative
