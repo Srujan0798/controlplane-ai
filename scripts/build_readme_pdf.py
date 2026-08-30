@@ -38,6 +38,7 @@ def _require_reportlab():
             PageBreak,
             Paragraph,
             Preformatted,
+            Image,
             SimpleDocTemplate,
             Spacer,
             Table,
@@ -52,7 +53,8 @@ def _require_reportlab():
         "getSampleStyleSheet": getSampleStyleSheet, "inch": inch,
         "ListFlowable": ListFlowable, "ListItem": ListItem,
         "PageBreak": PageBreak, "Paragraph": Paragraph,
-        "Preformatted": Preformatted, "SimpleDocTemplate": SimpleDocTemplate,
+                    "Preformatted": Preformatted,
+            "Image": Image, "SimpleDocTemplate": SimpleDocTemplate,
         "Spacer": Spacer, "Table": Table, "TableStyle": TableStyle,
         "colors": colors, "TA_CENTER": TA_CENTER, "TA_JUSTIFY": TA_JUSTIFY,
         "TA_LEFT": TA_LEFT,
@@ -159,6 +161,18 @@ def build(out_path: Path = OUT) -> Path:
         "• <b>interlock</b> — a frozen 16-cell matrix maps (blast-tier × verdict-column) to one of five "
         "actuators. The matrix is never redrawn.<br/>"
         "• <b>shadow</b> — every decision is dual-emitted; the published FNR carries a Wilson interval.", body))
+
+    story.append(rl["Image"](
+        str(ROOT / "docs" / "reference" / "architecture.png"),
+        width=6.6 * rl["inch"], height=4.29 * rl["inch"],
+    ))
+    story.append(P(
+        "Architecture (STEP → SPAN → CLAIM → ACTION) and the frozen blast-radius matrix. "
+        "Same response, two actuators: show_text → Edit (R1) · issue_refund → Escalate, "
+        "<b>held</b> with the evidence packet — never 'blocked'.",
+        small,
+    ))
+    story.append(rl["Spacer"](1, 8))
 
     story.append(P("4. Run it in 60 seconds (clean clone)", h1))
     run_cmds = (
@@ -324,6 +338,107 @@ def build(out_path: Path = OUT) -> Path:
         "Content laws (ARCHITECTURE §10) are enforced in CI: pytest tests/test_content_laws.py.",
         small,
     ))
+
+    story.append(P("9. Buyers (target users)", h1))
+    story.append(P(
+        "Five personas this product is for, in the order the brief asks:",
+        body,
+    ))
+    buyers = [
+        ("Customer-support agents", "R1 — Edit on the user-visible reply. Strip unentitled spans (PII, internal notes) before the customer sees them. The incident output-only checkers cannot see."),
+        ("Internal copilots in regulated workflows", "R2 — Edit on reversible writes and external sends. Autonomy downgrade: draft becomes suggestion, never send."),
+        ("Decision-support & acting systems", "R3 — Escalate, held with the evidence packet, on payments, deletions, publications, regulated advice. Fail closed."),
+        ("Compliance & risk teams", "Hash-chained evidence ledger, per-route FNR with Wilson intervals, audit packets downloadable per request. Empty schema until measured."),
+        ("Platform & security teams", "OpenAI-compatible proxy + SDK hook at context assembly. Jurisdiction packs (EU / IN / GDPR) as DAG content. No model access, no weights, no fine-tune."),
+    ]
+    for name, txt in buyers:
+        story.append(P(f"• <b>{esc(name)}</b> — {esc(txt)}", body))
+    story.append(rl["Spacer"](1, 6))
+
+    story.append(P("10. Roadmap (phased, with exit criteria)", h1))
+    story.append(P(
+        "Enforcement is earned per route. Nothing goes live until shadow has produced its own counterfactual.",
+        body,
+    ))
+    roadmap = [
+        ("Phase 0 — Shadow", "weeks 0–6", "Proxy + SDK hook at context assembly; dual-emit. Deliverable: would-have-held N, of which M were true positives — not a block."),
+        ("Phase 1 — Enforce R3", "weeks 6–12", "Irreversible actions (payments, deletion, publication, regulated advice). Fail closed or escalate."),
+        ("Phase 2 — Enforce R2", "weeks 12–20", "Reversible writes and external sends. Autonomy downgrade."),
+        ("Phase 3 — FNR + loops", "from week 16", "Per-route FNR with confidence intervals; override capture; jurisdiction packs as DAG content; counterfactual bias replay."),
+    ]
+    rdata = [["Phase", "Window", "Exit criterion"]]
+    for n, w, d in roadmap:
+        rdata.append([esc(n), esc(w), esc(d)])
+    story.append(_navy_table(
+        rl, rdata,
+        [1.5 * rl["inch"], 1.1 * rl["inch"], 4.0 * rl["inch"]],
+    ))
+    story.append(rl["Spacer"](1, 8))
+
+    story.append(P("11. Risks (with mitigations)", h1))
+    story.append(P(
+        "Six risks we name out loud, because a control plane that hides its failure modes is "
+        "indistinguishable from false assurance.",
+        body,
+    ))
+    risks = [
+        ("Parametric / no-evidence answer",
+         "Declared ungrounded by construction; semantic-entropy probe runs async on the calibration lane, never on the token stream."),
+        ("Multi-hop / derived claim",
+         "Anything arithmetic or aggregative is recomputed from spans. Anything neither recomputable nor entailed → UNKNOWN. UNKNOWN never collapses to SUPPORTED."),
+        ("Over-permissioned source index",
+         "We faithfully enforce whatever ACL the source carries — and we log every entitlement decision against a named principal and a named source, so the breach is visible. We do not claim to fix your IAM."),
+        ("Prompt injection",
+         "Binding is computed by us, not asserted by the model — the model has no channel to declare a binding. The supply-chain attack that works is corpus poisoning; source ID + content hash make it forensically traceable."),
+        ("Plane failure",
+         "Fail stance is declared per blast-radius tier, not globally. R0/R1 fail open with annotation; R2/R3 fail closed or escalate. The plane is never a single point of failure for the whole product."),
+        ("Production FNR unknown",
+         "The honest answer. The only number on the slide is measured on a 168-case self-authored corpus. Production FNR is earned by stratified shadow replay; the gate report is an empty schema until measured."),
+    ]
+    rdata = [["Risk", "Mitigation"]]
+    for r, m in risks:
+        rdata.append([esc(r), esc(m)])
+    story.append(_navy_table(
+        rl, rdata,
+        [1.9 * rl["inch"], 4.6 * rl["inch"]],
+    ))
+    story.append(rl["Spacer"](1, 8))
+
+    story.append(P("12. Team", h1))
+    story.append(P(
+        "<b>Choda Srujan Sai</b> — architecture, mechanism, demo build, latency and eval. "
+        "<b>Dhrithika</b> — narrative, pitch, hostile-Q&A, presentation. "
+        "<b>IIT Gandhinagar · Team ControlPlane · Accenture Innovation Challenge 2026 · PS #1</b>",
+        body,
+    ))
+    story.append(P(
+        "Two-person team. The repo is the proof: 36 modules, 50+ tests, frozen matrix, "
+        "deterministic rebuild of every portal artifact from measured JSON.",
+        small,
+    ))
+    story.append(rl["Spacer"](1, 8))
+
+    story.append(P("13. Glossary", h1))
+    glossary = [
+        ("STEP", "tool call, retrieval, or model turn that produces spans."),
+        ("SPAN", "chunk / tool row / DB record captured at context assembly — source_id · ACL · hash · offsets. Frozen before generation."),
+        ("CLAIM", "typed atomic proposition from the output stream (numeric / structural / temporal / textual / derived)."),
+        ("ACTION", "pending side effect — tool + args + irreversibility tier."),
+        ("R-tier (blast radius)", "R0 read-only · R1 user-visible text · R2 reversible writes · R3 irreversible."),
+        ("Matrix", "frozen 16-cell f(R, S) → actuator. Transcribed from the canon, never redrawn."),
+        ("Set-membership", "span.acl ⊆ principal.clearance — pure rule, zero LLM."),
+        ("Default UNSUPPORTED", "a claim must earn SUPPORTED. Absence of evidence is not conflicting evidence."),
+        ("Held ≠ blocked", "the refund is held and escalated with the evidence packet, never 'blocked'. Spoken word and grid agree."),
+        ("Wilson CI", "95% confidence interval on a proportion — the only honest way to publish rates from a finite corpus."),
+    ]
+    gdata = [["Term", "Definition"]]
+    for t, d in glossary:
+        gdata.append([esc(t), esc(d)])
+    story.append(_navy_table(
+        rl, gdata,
+        [1.6 * rl["inch"], 4.9 * rl["inch"]],
+    ))
+    story.append(rl["Spacer"](1, 8))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     rl["SimpleDocTemplate"](

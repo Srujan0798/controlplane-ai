@@ -26,6 +26,7 @@ def _require_reportlab():
             PageBreak,
             Paragraph,
             Preformatted,
+            Image,
             SimpleDocTemplate,
             Spacer,
             Table,
@@ -48,6 +49,7 @@ def _require_reportlab():
         "PageBreak": PageBreak,
         "Paragraph": Paragraph,
         "Preformatted": Preformatted,
+        "Image": Image,
         "SimpleDocTemplate": SimpleDocTemplate,
         "Spacer": Spacer,
         "Table": Table,
@@ -219,6 +221,16 @@ def build(md_path: Path = SRC, out_path: Path = OUT) -> Path:
             flush_table()
             in_code = True
             code_buf = []
+            i += 1
+            continue
+
+        img_match = re.match(r"!\[([^\]]*)\]\(([^)]+)\)", line.strip())
+        if img_match:
+            path = img_match.group(2)
+            img_path = ROOT / path
+            if img_path.exists():
+                story.append(rl["Image"](str(img_path), width=6.6 * rl["inch"], height=4.29 * rl["inch"]))
+                story.append(rl["Spacer"](1, 8))
             i += 1
             continue
 

@@ -889,7 +889,7 @@ function notes(s, text) {
     "Guardrails match banned surface forms. Clause 7.2 is a well-formed sentence, so they admit it. Groundedness checkers average and cannot see who is asking, so they miss both the missing clause and the HR span. Confidence fails by definition: the failure mode is confidently wrong. The judge asks, does this look right? We ask, which span proves it? You cannot block, edit or escalate on eighty-seven."
   );
 
-  eyebrow(s, "07 · WHY NOT", 1.04, 1.00, 10);
+  eyebrow(s, "08 · WHY NOT", 1.04, 1.00, 10);
   headline(s, [
     { text: "THEY INSPECT THE OUTPUT. WE QUERY THE " },
     { text: "EVIDENCE", accent: true },
@@ -976,7 +976,7 @@ function notes(s, text) {
     "A hedged warranty guess on a support reply is not the same object as an ungrounded clause authorising a payment. Treat them as one score and you either over-flag the first — the plane gets switched off — or under-flag the second. Same plane. Support streams with an annotation. The copilot's partner email is edited. The refund is held and escalated. Proof still scales with consequence."
   );
 
-  eyebrow(s, "08 · MULTI-USE-CASE", 1.04, 1.00, 12);
+  eyebrow(s, "09 · MULTI-USE-CASE", 1.04, 1.00, 12);
   headline(s, [
     { text: "TRANSCRIBED. NEVER " },
     { text: "REDRAWN", accent: true },
@@ -1097,19 +1097,19 @@ function notes(s, text) {
 // =====================================================================
 {
   const s = pres.addSlide();
-  chrome(s, "09 // ROADMAP");
+  chrome(s, "11 // ROADMAP");
   notes(s,
-    "At forty thousand interactions a week, uniform deep checking is how planes get disabled. Budget follows blast radius. We will not put a savings percentage on this slide — that number is knowable only on your traffic. What is knowable now: a missing clause cannot authorise a payout; an HR span cannot ride along to the wrong caller; dead compute is a walk backward on the same graph, not an estimate. Shadow first. Enforce R3 next. We hook context assembly — that is real integration, and it is why the design works."
+    "At tens of thousands of interactions a week (directional), uniform deep checking is how planes get disabled. Budget follows blast radius. We will not put a savings percentage on this slide — that number is knowable only on your traffic. What is knowable now: a missing clause cannot authorise a payout; an HR span cannot ride along to the wrong caller; dead compute is a walk backward on the same graph, not an estimate. Shadow first. Enforce R3 next. We hook context assembly — that is real integration, and it is why the design works."
   );
 
-  eyebrow(s, "10 · BUSINESS CASE + ROADMAP", 1.04, 1.00, 14);
+  eyebrow(s, "11 · BUSINESS CASE + ROADMAP", 1.04, 1.00, 14);
   headline(s, [
     { text: "BUDGET FOLLOWS " },
     { text: "BLAST RADIUS", accent: true },
     { text: "." },
   ], { x: 1.04, y: 1.32, w: 12.2, h: 0.52, size: 28 });
 
-  s.addText("~40,000 / week", {
+  s.addText("Tens of thousands / week  (directional)", {
     x: 13.40, y: 1.28, w: 5.56, h: 0.48,
     fontFace: FONT, fontSize: 24, bold: true, color: C.cream, align: "right", margin: 0,
   });
@@ -1188,12 +1188,12 @@ function notes(s, text) {
 // =====================================================================
 {
   const s = pres.addSlide();
-  chrome(s, "10 // FNR");
+  chrome(s, "12 // FNR");
   notes(s,
     "We do not claim to eliminate hallucinations. The honest claim has a shape: on this route we catch a measured percent of ungrounded claims at forty milliseconds p50 — and here is the measured percent we don't. Every team will claim detection. Publishing our own false-negative rate is the move none of them will make. The blanks stay blank until we measure. Derived claims are the residual risk we will say out loud. UNKNOWN never becomes SUPPORTED. That one rule is the boundary between a control plane and false assurance."
   );
 
-  eyebrow(s, "11 · RISKS WE PUBLISH", 1.04, 1.00, 12);
+  eyebrow(s, "12 · RISKS WE PUBLISH", 1.04, 1.00, 12);
   headline(s, [
     { text: "WE PUBLISH OUR OWN " },
     { text: "MISS RATE", accent: true },
@@ -1259,12 +1259,12 @@ function notes(s, text) {
 // =====================================================================
 {
   const s = pres.addSlide();
-  chrome(s, "11 // MEASURED");
+  chrome(s, "13 // MEASURED");
   notes(s,
     `This is the honesty slide. Every number here is measured by make eval and make bench on a ${M.nCases}-case self-authored corpus — no production traffic. Ungrounded FNR is ${M.fnr} with a Wilson interval of ${M.fnrLo} to ${M.fnrHi}. Passable-action FPR is ${M.fpr} with a ${M.fprHi} upper bound. The hard-negative hold rate is ${M.hn} — we over-flag, and we name that as the next milestone rather than hide it. Gate latency over ${M.nBench} runs is p50 ${M.p50}ms, p95 ${M.p95}ms, p99 ${M.p99}ms. Published miss: ${M.missIds}. Then the refusals, about us and never about competitors: we do not claim eliminated hallucinations, zero integration, zero added latency, one accuracy number, or production-scale proof. In the demo the refund was held and escalated with the evidence packet.`
   );
 
-  eyebrow(s, "12 · WHAT WE MEASURED  ·  AND WHAT WE REFUSE TO CLAIM", 1.04, 1.00, 14);
+  eyebrow(s, "13 · WHAT WE MEASURED  ·  AND WHAT WE REFUSE TO CLAIM", 1.04, 1.00, 14);
   headline(s, [
     { text: `${M.nCases} CASES. ` },
     { text: "SELF-AUTHORED", accent: true },
@@ -1333,16 +1333,88 @@ function notes(s, text) {
 }
 
 // =====================================================================
-// SLIDE 13 — ASK / CLOSE
+
+// =====================================================================
+// SLIDE — TEAM (inserted between MATRIX and ROADMAP)
 // =====================================================================
 {
   const s = pres.addSlide();
-  chrome(s, "12 // ASK", true);
+  chrome(s, "10 // TEAM");
+  notes(s,
+    "Two-person team. Srujan owns architecture, mechanism, the demo build, and the latency and eval numbers. Dhrithika owns narrative, the pitch, and hostile-Q&A defense. Both can draw the matrix from memory and answer B1 and B5 without hesitating. The repo is the proof: 36 modules, 50+ tests, frozen matrix, deterministic rebuild of every portal artifact from measured JSON."
+  );
+
+  eyebrow(s, "10 · TEAM", 1.04, 1.00, 8);
+  headline(s, [
+    { text: "THE TEAM THAT " },
+    { text: "BUILT IT", accent: true },
+    { text: "." },
+  ], { x: 1.04, y: 1.34, w: 17.9, h: 0.62, size: 32 });
+  s.addText("Two people. One graph. Every portal artifact regenerated from measured JSON.", {
+    x: 1.04, y: 1.98, w: 17.9, h: 0.36,
+    fontFace: FONT, fontSize: 17, color: C.warm, margin: 0,
+  });
+
+  const team = [
+    {
+      name: "CHODA SRUJAN SAI",
+      role: "ARCHITECTURE  ·  MECHANISM  ·  DEMO",
+      bio: "Designs the interlock, builds the gate, runs the load bench. Owns the latency and eval numbers and the reproducible rebuild of every portal artifact.",
+      tag: "controlplane/interlock.py  ·  scripts/load_bench.py  ·  scripts/build_*_pdf.py",
+    },
+    {
+      name: "DHRITHIKA",
+      role: "NARRATIVE  ·  PITCH  ·  HOSTILE Q&A",
+      bio: "Owns the story arc and the room defense. Leads the hostile-Q&A drill (B1 and B5 hardest) and keeps the vocabulary disciplined (admit, authorise, hold — never watch, detect, trust).",
+      tag: "round2/R2S5.md  ·  docs/JUDGE_RUNBOOK.md  ·  docs/reference/QA.md",
+    },
+  ];
+  team.forEach((m, i) => {
+    const x = 1.04 + i * 9.10;
+    card(s, x, 2.78, 8.86, 5.20, C.panel, C.rust, 1.1);
+    rustBar(s, x, 2.78, 8.86);
+    s.addText(m.name, {
+      x: x + 0.30, y: 3.00, w: 8.26, h: 0.42,
+      fontFace: FONT, fontSize: 22, bold: true, color: C.cream, charSpacing: 1.2, margin: 0,
+    });
+    s.addText(m.role, {
+      x: x + 0.30, y: 3.52, w: 8.26, h: 0.32,
+      fontFace: FONT, fontSize: 13, color: C.rust, charSpacing: 1.6, margin: 0,
+    });
+    s.addText(m.bio, {
+      x: x + 0.30, y: 3.98, w: 8.26, h: 1.80,
+      fontFace: FONT, fontSize: 15, color: C.warm, margin: 0, valign: "top",
+    });
+    s.addText(m.tag, {
+      x: x + 0.30, y: 6.10, w: 8.26, h: 1.70,
+      fontFace: FMONO, fontSize: 12, color: C.muted, margin: 0, valign: "top",
+    });
+  });
+
+  card(s, 1.04, 8.18, 17.92, 2.18);
+  s.addText("IIT GANDHINAGAR  ·  TEAM CONTROLPLANE  ·  ACCENTURE INNOVATION CHALLENGE 2026  ·  PS #1", {
+    x: 1.36, y: 8.42, w: 17.3, h: 0.36,
+    fontFace: FONT, fontSize: 15, bold: true, color: C.cream, charSpacing: 1.4, margin: 0,
+  });
+  s.addText("Public GitHub: github.com/Srujan0798/controlplane-ai  ·  branch main  ·  frozen tag v0.2.0-round2.", {
+    x: 1.36, y: 8.86, w: 17.3, h: 0.36,
+    fontFace: FONT, fontSize: 14, color: C.warm, margin: 0,
+  });
+  s.addText("Every artifact in /submission regenerates from the live JSON. make verify is the source of truth — if a number is not in submission/latency_bench.json, it does not exist.", {
+    x: 1.36, y: 9.28, w: 17.3, h: 0.78,
+    fontFace: FONT, fontSize: 14, color: C.muted, margin: 0, valign: "top",
+  });
+}
+// SLIDE 15 — ASK / CLOSE
+// =====================================================================
+{
+  const s = pres.addSlide();
+  chrome(s, "14 // ASK", true);
   notes(s,
     "We are asking to take this into shadow on one support route and one acting route. Enforcement is earned per route. The first artefact you get is the counterfactual — would have held N, of which M were true positives — not a block. That system was never asked to prove anything. Now nothing acts until it can prove it should."
   );
 
-  eyebrow(s, "12 · ASK", 1.04, 1.15, 8);
+  eyebrow(s, "14 · ASK", 1.04, 1.15, 8);
   s.addText("CONTROLPLANE.AI", {
     x: 1.04, y: 1.55, w: 17.9, h: 0.40,
     fontFace: FONT, fontSize: 16, color: C.muted, charSpacing: 3, margin: 0,

@@ -147,6 +147,9 @@ Exact frozen 16-cell R×S — transcribed, never redrawn, **no route parameter**
 
 Never collapse into one response-level verdict. **Never say “blocked” about the refund.** Same unsupported+categorical claim yields R1→Edit on a draft and R3→Escalate on a payment — proof scales with consequence; the matrix is not renamed severity.
 
+![Architecture & R×S matrix](docs/reference/architecture.png)
+*Visual reference — same matrix, color-coded by actuator. Centrepiece cells (R3 × Unsupported+categorical, R1 × Contradicted, R2 × Unsupported+categorical) highlighted.*
+
 ---
 
 ## 4. Prototype
