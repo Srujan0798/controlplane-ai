@@ -19,6 +19,7 @@ graphify-out/
 
 # Local agent + editor scratch
 .claude/
+.codex/
 .worktrees/
 .superpowers/
 .DS_Store
