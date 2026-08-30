@@ -1,13 +1,7 @@
 # Reference (depth — not required to submit)
 
-These support the pitch/proposal. **Stand path does not need them.**
+Judge-facing stand docs live one level up (`ARCHITECTURE.md`, `SUBMIT.md`,
+`JUDGE_RUNBOOK.md`, `HOSTILE_QA_DRILL.md`, `ACCEPTANCE.md`).
 
-| File | Use |
-|---|---|
-| `NARRATIVE.md` | Positioning / spoken lines (sourced into R2S5) |
-| `QA.md` | Long-form hostile answers (drill sheet is enough on stage) |
-| `ASSUMPTIONS.md` | Explicit Round 2 assumptions |
-| `THREAT_MODEL.md` | STRIDE notes |
-| `KILL_SHOT.md` | Competitive one-pager |
-
-Submit / stand: `../SUBMIT.md` → `../JUDGE_RUNBOOK.md` → `../HOSTILE_QA_DRILL.md`
+`internal/` is the **INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE.**
+Agent dispatch only. Not a portal upload. Not part of the product claim.

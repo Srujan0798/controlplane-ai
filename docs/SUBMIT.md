@@ -29,15 +29,7 @@ Gate (paste/upload): http://127.0.0.1:8787/gate
 
 **Expected:** `show_text` → **Edit** · `issue_refund` → **Escalate** (**held** with evidence packet — never “blocked”).
 
-## Verify before upload
-
-```bash
-source .venv/bin/activate
-bash scripts/preflight-lite.sh
-make run
-# http://127.0.0.1:8787/?scenario=refund&mode=enforce&autorun=1
-# Gate (paste/upload): http://127.0.0.1:8787/gate
-```
+## Checks before upload
 
 | Check | Pass means |
 |---|---|
@@ -45,13 +37,12 @@ make run
 | Amount bind | `numeric` (not fixture) |
 | Flip | analyst Edit → hr_partner Pass |
 | Eval / latency | Only quote `make eval` / `submission/latency_bench.json` |
+| Number freeze | `make verify` green |
 
-## Present
+## Room path
 
 1. [`../round2/R2S5.md`](../round2/R2S5.md) — speak  
 2. [`JUDGE_RUNBOOK.md`](JUDGE_RUNBOOK.md) — click  
 3. [`HOSTILE_QA_DRILL.md`](HOSTILE_QA_DRILL.md) — defend  
 
 Never say the refund was “blocked.” Say **held and escalated with the evidence packet.**
-
-`AGENT_ASSIGNMENT_STEPS.md` and `BRUTAL_AGENT_PROMPTS.md` are **internal engineering** dispatch notes. They are not portal uploads and are not part of the product claim.

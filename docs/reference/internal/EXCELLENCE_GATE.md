@@ -1,3 +1,7 @@
+# INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE
+
+**Not a portal upload. Not part of the product claim.** Operator excellence checklist only.
+
 # Excellence Gate — 100/100 means this, not “pytest green”
 
 **Rule:** An agent may say **DONE** only if every row in the task’s Excellence Checklist is **YES** with pasted command output.  

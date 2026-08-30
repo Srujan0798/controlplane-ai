@@ -1,3 +1,7 @@
+# INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE
+
+**Not a portal upload. Not part of the product claim.** Agent execution board only.
+
 # Execution board — Round 2 elevation
 
 **Hand this to agents.** Every task below is self-contained: it names the files it

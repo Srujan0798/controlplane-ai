@@ -1,4 +1,6 @@
-> **INTERNAL ENGINEERING** — operator checklist for agent dispatch. Not part of the product claim or the five portal uploads.
+# INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE
+
+**Not a portal upload. Not part of the product claim.** Operator dispatch for implementer agents only. Judges: use README.md and the five portal artifacts.
 
 # Agent assignment steps — portal 100 + prize ~99
 

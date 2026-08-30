@@ -1,4 +1,6 @@
-> **INTERNAL ENGINEERING** — agent dispatch prompts. Not part of the product claim or the five portal uploads.
+# INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE
+
+**Not a portal upload. Not part of the product claim.** Agent dispatch only. Judges: use README.md and the five portal artifacts.
 
 # Brutal agent prompts — hit 100/100 excellence (not “pytest green”)
 

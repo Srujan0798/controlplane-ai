@@ -1,3 +1,7 @@
+# INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE
+
+**Not a portal upload. Not part of the product claim.** Operator submit checklist only.
+
 # Final plan — submit & present
 
 **Repo tip:** current `main` · **Tag:** `v0.2.0-round2`  
@@ -10,8 +14,8 @@
 | File | Role | Status |
 |---|---|---|
 | `submission/ControlPlane_Round2_Proposal.pdf` | **Upload** — business proposal | Regenerated from FINAL (15 pages). Stage Check + 10 invariants = PASS. Uses “held/never blocked”. INR amounts render correctly. |
-| `submission/ControlPlane_Round2_Pitch.pptx` | **Upload** — pitch deck (13 slides) | OK: admission-control, matrix, 7.2, Escalate/Edit, no “blocked”, no “40ms p95”. |
-| `submission/latency_bench.json` | Evidence (optional attach) | gate p50≈0.073 ms · p95≈0.09 ms |
+| `submission/ControlPlane_Round2_Pitch.pptx` | **Upload** — pitch deck (13 slides) | OK: admission-control, matrix, 7.2, Escalate/Edit, never “blocked”, never “40ms p95”. |
+| `submission/latency_bench.json` | Evidence (optional attach) | n=10000; quote live file only — never 40ms as p95 |
 | `submission/sbom-pip-freeze.txt` | Supply-chain freeze | Present |
 | Live repo demo | Working prototype | `make run` / Docker |
 
