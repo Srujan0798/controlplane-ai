@@ -194,19 +194,19 @@ Third live bias route · per-response bias · production load as mechanism proof
 
 All numbers are produced by `make eval` and `make bench` and regenerate on every run — they are measured, never asserted. The capability ledger and per-route Wilson CIs live in the generated README PDF (`submission/ControlPlane_Round2_README.pdf`) and `evals/last_run.json`.
 
-**This build earns the FNR on a 168-case self-authored corpus.** The committed run reports:
+**This build earns the FNR on a 168-case self-authored corpus.** The committed run (`evals/last_run.json`) reports:
 
-- **Ungrounded FNR ≤ 4.0%** (95% Wilson upper bound; n=93 ungrounded claims; point estimate ≈1.1%).
-  We publish the upper bound — the interval is the honest claim, not the point estimate.
-- **Passable-action FPR ≤ 15.5%** (95% Wilson upper bound; n=21 passable claims).
-- **Hard-negative hold rate 64% [0.51, 0.76].** 53/168 cases are hard negatives (31.7%, above the
+- **Ungrounded FNR 1.1%** (95% Wilson CI 0.2%–5.8%; n=94 ungrounded claims; 1 published miss).
+  We publish the interval — the honest claim is the interval, not a fake-perfect 0% and not a tighter bound than the data supports.
+- **Passable-action FPR 0.0%** (95% Wilson upper bound 15.5%; n=21 passable claims).
+- **Hard-negative hold rate 64% [50.7%, 75.7%].** 53/168 cases are hard negatives (31.5%, above the
   20% floor). We over-flag — that is our named next milestone. Clean strata hold 0/13.
 - **One published miss:** `struct-miss-000` — a response citing "Clause 4.1 permits this refund"
   where the span only says clause 4.1 *covers shipping delays*. Structural symbol lookup matches →
   SUPPORTED → low-tier action slips through. We show the judge exactly which case we got wrong.
 - **No production proof.** Production FNR is unknown until shadow replay over live traffic
-  (ARCHITECTURE §7, §12). The honest claim: "on this self-authored corpus we miss ≤4.0% of ungrounded
-  low-tier claims (95% Wilson upper bound; n=93); production is unknown."
+  (ARCHITECTURE §7, §12). The honest claim: "on this self-authored corpus we miss 1.1% of ungrounded
+  claims (95% Wilson CI 0.2–5.8%; n=94); production is unknown."
 - **Refuse-to-claim:** we do not eliminate hallucinations; we do not claim drop-in integration; we do
   not claim zero added latency; we do not claim one accuracy number; we do not fill FNR with fabricated
   percentages.

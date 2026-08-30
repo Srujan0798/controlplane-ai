@@ -1,10 +1,55 @@
 // ControlPlane.ai — Round 2 pitch
-// Adapted from gaming_ai_startup_pitch_deck.js (dark technical HUD)
 // Accenture Innovation Challenge 2026 · PS #1 · Team ControlPlane
-// Run: NODE_PATH=... node submission/ControlPlane_Round2_Pitch.js
+// Rebuild: node submission/ControlPlane_Round2_Pitch.js
+// Measured numbers load from evals/last_run.json + submission/latency_bench.json.
 
+const fs = require("fs");
+const path = require("path");
 const pptxgen = require("pptxgenjs");
 const pres = new pptxgen();
+
+function _pct(x, digits) {
+  return `${(Number(x) * 100).toFixed(digits)}%`;
+}
+
+function loadMeasured() {
+  const evalPath = path.join(__dirname, "..", "evals", "last_run.json");
+  const benchPath = path.join(__dirname, "latency_bench.json");
+  const evRaw = JSON.parse(fs.readFileSync(evalPath, "utf8"));
+  const bench = JSON.parse(fs.readFileSync(benchPath, "utf8"));
+  const ev = evRaw.summary || evRaw;
+  const fnr = ev.ungrounded_fnr_wilson;
+  const fpr = ev.passable_fpr_wilson;
+  const hn = ev.hard_negative_hold_wilson;
+  const ungrounded = (ev.action_level && ev.action_level.ungrounded) || {};
+  const caution = (ev.action_level && ev.action_level.hard_negative_caution) || {};
+  const g = bench.gate_latency_ms || {};
+  if (!fnr || !fpr || !hn || g.p50 == null) {
+    throw new Error("eval/bench JSON missing required measured fields");
+  }
+  const missIds = ungrounded.miss_ids || [];
+  return {
+    nCases: ev.n_cases,
+    fnr: _pct(fnr[0], 1),
+    fnrLo: _pct(fnr[1], 1),
+    fnrHi: _pct(fnr[2], 1),
+    fpr: _pct(fpr[0], 1),
+    fprHi: _pct(fpr[2], 1),
+    hn: `${Math.round(Number(hn[0]) * 100)}%`,
+    hnLo: _pct(hn[1], 1),
+    hnHi: _pct(hn[2], 1),
+    hnTotal: caution.total,
+    hnShare: ev.n_cases ? _pct(caution.total / ev.n_cases, 1) : "n/a",
+    nUngrounded: (ungrounded.held || 0) + (ungrounded.missed || 0),
+    missIds: missIds.join(", ") || "named in evals/last_run.json",
+    nBench: bench.n,
+    p50: Number(g.p50).toFixed(2),
+    p95: Number(g.p95).toFixed(2),
+    p99: Number(g.p99).toFixed(2),
+  };
+}
+
+const M = loadMeasured();
 
 pres.defineLayout({ name: "BASED_WIDE", width: 20, height: 11.25 });
 pres.layout = "BASED_WIDE";
@@ -1128,7 +1173,7 @@ function notes(s, text) {
     x: 1.36, y: 7.74, w: 17.3, h: 0.36,
     fontFace: FONT, fontSize: 15, bold: true, color: C.cream, margin: 0,
   });
-  s.addText("Measured gate (submission/latency_bench.json, n=10000): p50≈0.43 ms · p95≈0.51 ms — under target; quote measured vs targets separately.", {
+  s.addText(`Measured gate (submission/latency_bench.json, n=${M.nBench}): p50=${M.p50} ms · p95=${M.p95} ms — under target; quote measured vs targets separately.`, {
     x: 1.36, y: 8.12, w: 17.3, h: 0.36,
     fontFace: FONT, fontSize: 14, color: C.amber, margin: 0,
   });
@@ -1154,7 +1199,7 @@ function notes(s, text) {
     { text: "MISS RATE", accent: true },
     { text: "." },
   ], { x: 1.04, y: 1.32, w: 17.9, h: 0.52, size: 28 });
-  s.addText("Per route. Not what we caught — what we missed. Gate report: empty schema. The emptiness is the claim.", {
+  s.addText(`Per route. Not what we caught — what we missed. Schema empty until earned. This build: ${M.fnr} FNR (${M.fnrLo}–${M.fnrHi}) on a self-authored corpus — next slide.`, {
     x: 1.04, y: 1.88, w: 17.9, h: 0.32,
     fontFace: FONT, fontSize: 15, color: C.warm, margin: 0,
   });
@@ -1216,12 +1261,12 @@ function notes(s, text) {
   const s = pres.addSlide();
   chrome(s, "11 // MEASURED");
   notes(s,
-    "This is the honesty slide. Every number here is measured by make eval and make bench on a 168-case self-authored corpus — no production traffic. Ungrounded FNR is 1.1 percent with a Wilson interval of 0.19 to 5.78. Passable-action FPR is 0.0 percent with a 15.5 percent upper bound. The hard-negative hold rate is 64 percent — we over-flag, and we name that as the next milestone rather than hide it. Gate latency over ten thousand runs is p50 0.44ms, p95 0.52ms, p99 0.64ms. Then the refusals, about us and never about competitors: we do not claim eliminated hallucinations, zero integration, zero added latency, one accuracy number, or production-scale proof. In the demo the refund was held and escalated with the evidence packet."
+    `This is the honesty slide. Every number here is measured by make eval and make bench on a ${M.nCases}-case self-authored corpus — no production traffic. Ungrounded FNR is ${M.fnr} with a Wilson interval of ${M.fnrLo} to ${M.fnrHi}. Passable-action FPR is ${M.fpr} with a ${M.fprHi} upper bound. The hard-negative hold rate is ${M.hn} — we over-flag, and we name that as the next milestone rather than hide it. Gate latency over ${M.nBench} runs is p50 ${M.p50}ms, p95 ${M.p95}ms, p99 ${M.p99}ms. Published miss: ${M.missIds}. Then the refusals, about us and never about competitors: we do not claim eliminated hallucinations, zero integration, zero added latency, one accuracy number, or production-scale proof. In the demo the refund was held and escalated with the evidence packet.`
   );
 
   eyebrow(s, "12 · WHAT WE MEASURED  ·  AND WHAT WE REFUSE TO CLAIM", 1.04, 1.00, 14);
   headline(s, [
-    { text: "168 CASES. " },
+    { text: `${M.nCases} CASES. ` },
     { text: "SELF-AUTHORED", accent: true },
     { text: ". NO PRODUCTION TRAFFIC." },
   ], { x: 1.04, y: 1.32, w: 17.9, h: 0.52, size: 28 });
@@ -1230,16 +1275,16 @@ function notes(s, text) {
     fontFace: FONT, fontSize: 15, color: C.warm, margin: 0,
   });
 
-  panel(s, 1.04, 2.32, 10.15, 5.32, "▸ MEASURED — evals/last_run.json", "168 CASES · SELF-AUTHORED");
+  panel(s, 1.04, 2.32, 10.15, 5.32, "▸ MEASURED — evals/last_run.json", `${M.nCases} CASES · SELF-AUTHORED`);
   ascii(s, 1.32, 2.98, 9.60, 4.40, [
-    "corpus                    168 cases, self-authored",
+    `corpus                    ${M.nCases} cases, self-authored`,
     "production traffic        none",
-    "ungrounded FNR            1.1%   95% CI 0.19% - 5.78%",
-    "passable-action FPR       0.0%   95% upper bound 15.5%",
-    "hard-negative hold rate   64%    95% CI 50.7% - 75.7%",
-    "gate latency  n=10000     p50 0.44ms",
-    "                          p95 0.52ms",
-    "                          p99 0.64ms",
+    `ungrounded FNR            ${M.fnr}   95% CI ${M.fnrLo} - ${M.fnrHi}`,
+    `passable-action FPR       ${M.fpr}   95% upper bound ${M.fprHi}`,
+    `hard-negative hold rate   ${M.hn}    95% CI ${M.hnLo} - ${M.hnHi}`,
+    `gate latency  n=${M.nBench}     p50 ${M.p50}ms`,
+    `                          p95 ${M.p95}ms`,
+    `                          p99 ${M.p99}ms`,
   ], C.warm, 14);
 
   card(s, 1.04, 7.86, 10.15, 2.16, C.hiFill, C.rust, 1.0);
@@ -1248,11 +1293,11 @@ function notes(s, text) {
     x: 1.34, y: 8.06, w: 9.55, h: 0.30,
     fontFace: FONT, fontSize: 12, color: C.muted, charSpacing: 1.4, margin: 0,
   });
-  s.addText("Hard-negative hold rate 64% — we over-flag.", {
+  s.addText(`Hard-negative hold rate ${M.hn} — we over-flag.`, {
     x: 1.34, y: 8.44, w: 9.55, h: 0.42,
     fontFace: FONT, fontSize: 20, bold: true, color: C.cream, margin: 0,
   });
-  s.addText("Measured, published, and named as the next milestone. 53/168 cases are hard negatives (31.7%). Clean strata hold 0/13.", {
+  s.addText(`Measured, published, and named as the next milestone. ${M.hnTotal}/${M.nCases} cases are hard negatives (${M.hnShare}). Published miss: ${M.missIds}.`, {
     x: 1.34, y: 8.94, w: 9.55, h: 0.95,
     fontFace: FONT, fontSize: 15, color: C.warm, margin: 0, valign: "top",
   });
@@ -1277,7 +1322,7 @@ function notes(s, text) {
   ], C.warm, 15);
 
   divider(s, 11.72, 6.72, 7.00);
-  s.addText("What we do claim is bounded: 168 self-authored cases, every rate published with its Wilson interval. Production is unknown until shadow replay.", {
+  s.addText(`What we do claim is bounded: ${M.nCases} self-authored cases, every rate published with its Wilson interval. Production is unknown until shadow replay.`, {
     x: 11.72, y: 6.98, w: 7.00, h: 1.30,
     fontFace: FONT, fontSize: 15, color: C.warm, margin: 0, valign: "top",
   });
@@ -1341,7 +1386,7 @@ function notes(s, text) {
 }
 
 pres.writeFile({
-  fileName: require("path").join(__dirname, "ControlPlane_Round2_Pitch.pptx"),
+  fileName: path.join(__dirname, "ControlPlane_Round2_Pitch.pptx"),
 }).then(() => {
   console.log("wrote submission/ControlPlane_Round2_Pitch.pptx");
 }).catch((err) => {

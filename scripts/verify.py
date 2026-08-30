@@ -45,14 +45,23 @@ def _run(cmd, *, check=True):
 def _pdf_fnr_text() -> str:
     try:
         from pypdf import PdfReader
-    except ImportError:
-        print("pypdf not available; skipping PDF drift check")
-        return ""
+    except ImportError as e:
+        raise SystemExit(
+            "FATAL: pypdf is required for README PDF drift guard "
+            "(pip install -e '.[dev]'). "
+            f"ImportError: {e}"
+        ) from e
     if not README_PDF.exists():
-        return ""
-    return "\n".join(
-        (p.extract_text() or "") for p in PdfReader(str(README_PDF)).pages
-    )
+        raise SystemExit(
+            f"FATAL: {README_PDF} missing — run `python3 scripts/build_readme_pdf.py`"
+        )
+    text = "\n".join((p.extract_text() or "") for p in PdfReader(str(README_PDF)).pages)
+    if not text.strip():
+        raise SystemExit(
+            "FATAL: README PDF has no extractable text — regenerate with "
+            "`python3 scripts/build_readme_pdf.py`"
+        )
+    return text
 
 
 def _drift_guard() -> None:
@@ -68,7 +77,6 @@ def _drift_guard() -> None:
     eval_summary = eval_data.get("summary", eval_data)
 
     pdf_text = _pdf_fnr_text()
-    assert pdf_text, "could not read README PDF text (run `make readme` first)"
     # Guard BOTH headline gate metrics, not just FNR (the earlier FNR-only guard
     # was too weak — GATE.md 3.5 requires every number in the PDF to be traceable).
     fnr = eval_summary.get("ungrounded_fnr_wilson") or [0.0, 0.0, 0.0]
