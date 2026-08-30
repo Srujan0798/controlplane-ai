@@ -106,12 +106,9 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
 $('loadScenario').addEventListener('click', () => {
-    $('text').value = "Approved. Refund of INR 1,84,000 issued under clause 7.2 of the vendor agreement. Customer account flagged for goodwill override.";
     $('principal').value = 'cs-agent-17';
     $('clearance').value = 'vendor-public';
     $('actionTier').value = 'R3';
-    $('status').textContent = 'refund scenario loaded — press Run gate';
-    // Pre-populate spans via the file input trick: create a JSON blob
     const spansBlob = {
         spans: [
             {source_id: "doc:vendor-agreement-v3", acl: ["vendor-public"], content: "Clause 4.1 covers shipping delays and restocking. Approved refunds follow the published vendor schedule."},
@@ -127,6 +124,11 @@ $('loadScenario').addEventListener('click', () => {
     dt.items.add(new File([blob], 'spans.json', {type: 'application/json'}));
     fileInput.files = dt.files;
     fileInput.dispatchEvent(new Event('change', {bubbles: true}));
+    // Defer text assignment until after async file handler completes (80ms safe margin)
+    setTimeout(() => {
+        $('text').value = "Approved. Refund of INR 1,84,000 issued under clause 7.2 of the vendor agreement. Customer account flagged for goodwill override.";
+        $('status').textContent = 'refund scenario loaded — press Run gate';
+    }, 80);
   });
 
 $('file').addEventListener('change', async (e) => {
