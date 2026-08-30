@@ -1,14 +1,13 @@
 """T3.2 — eval harness with confidence intervals.
 
-``python -m evals.run`` (or ``make eval``) prints PER ROUTE:
-precision / recall / FPR / FNR — each with a Wilson score interval — plus a
-per-stratum table, the abstention (UNKNOWN) rate, and a threshold-sensitivity
-curve for the T1.4 lexical-coverage constants.
+``python -m evals.run`` (or ``make eval``) prints PER ROUTE a binding
+distribution (never an undefined precision) plus action-level FPR/FNR with
+Wilson score intervals, a per-stratum table, abstention (UNKNOWN) rate, and a
+threshold-sensitivity curve for the BM25 coverage constants.
 
 Hard rule (ARCHITECTURE §8, T3.2 contract): NO single accuracy number anywhere.
-The published claim takes the §7 shape — "we catch X% of ungrounded claims at
-Y ms p50 — and here is the Z% we don't." That is an FNR + abstention report,
-never one percentage.
+The published claim takes the §7 shape — "on this corpus we miss X% of
+ungrounded claims (CI) — production FNR is unknown."
 
 Ground truth: the corpus `label` field (should_hold | should_pass |
 hard_negative). Per-claim `expected_verdicts` keys in the committed corpus are
@@ -21,6 +20,7 @@ Writes ``evals/last_run.json``; never invents numbers beyond measured counts.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -29,6 +29,7 @@ from typing import Any
 import yaml
 
 from controlplane.binder import bind_claims
+from controlplane.bm25 import COVERAGE_SUPPORTED, COVERAGE_UNKNOWN
 from controlplane.extract import extract_claims
 from controlplane.interlock import decide
 from controlplane.models import (
@@ -47,6 +48,16 @@ CASES_DIR = ROOT / "cases"
 LAST_RUN = ROOT / "last_run.json"
 
 ROUTE_ORDER = ["numeric", "structural", "textual", "derived", "temporal", "none"]
+
+_COV_RX = re.compile(r"coverage=([0-9.]+)")
+
+DERIVED_ROUTE_NOTE = (
+    "Derived route publishes a BINDING DISTRIBUTION, not precision. "
+    "CONTRADICTED on derived-trap is a true catch (sum does not recompute). "
+    "SUPPORTED on clean-derived is a true recompute. Per-route precision is "
+    "undefined here and is not published — a silent precision=0 would be a "
+    "metric-definition error (scoring CONTRADICTED-as-correct as FP)."
+)
 
 
 def _load_cases() -> list[dict[str, Any]]:
@@ -125,10 +136,12 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         d.actuator.value in ("Escalate", "Block", "Edit") for d in decisions.values()
     )
 
-    # Per-route binding outcomes.
     routes: dict[str, dict[str, Any]] = {}
+    coverages: list[float] = []
+    methods: dict[str, str] = {}
     for cid, b in led.bindings.items():
         route = _route_for_method(b.method)
+        methods[cid] = b.method
         verdict = b.verdict.value
         routes.setdefault(
             route,
@@ -136,6 +149,10 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         )
         routes[route]["n"] += 1
         routes[route][verdict.lower()] = routes[route].get(verdict.lower(), 0) + 1
+        if route in ("textual", "temporal"):
+            m = _COV_RX.search(b.rationale or "")
+            if m:
+                coverages.append(float(m.group(1)))
 
     return {
         "id": case["id"],
@@ -143,9 +160,11 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         "use_case": case.get("use_case"),
         "label": case.get("label", ""),
         "would_hold": would_hold,
+        "action_tiers": {a.action_id: a.tier.value for a in actions},
         "routes": routes,
         "bindings": {cid: b.verdict.value for cid, b in led.bindings.items()},
-        "binding_methods": {cid: b.method for cid, b in led.bindings.items()},
+        "binding_methods": methods,
+        "textual_coverages": coverages,
         "by_kind": {
             cid: led.claims[cid].kind.value
             for cid in led.claims
@@ -158,12 +177,11 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
 def _route_distribution(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Per-route BINDING DISTRIBUTION (real, never undefined).
 
-    We do NOT publish a per-route precision/FPR here: that metric is undefined
-    when a route has zero true negatives (tn=0 -> FPR forced to 1.0) and it
-    mislabels correctly-grounded claims on `should_hold` docs as false positives.
-    The honest per-route view is the distribution of verdicts the binder produced
-    and the abstention (UNKNOWN) rate -- exactly the fail-closed signal the brief
-    asks for.
+    n is the binding count (not the case count). We do NOT publish a per-route
+    precision/FPR: that metric is undefined when a route has zero true
+    negatives, and it mislabels correctly-grounded claims on `should_hold`
+    docs as false positives. The honest per-route view is the distribution of
+    verdicts the binder produced and the abstention (UNKNOWN) rate.
     """
     agg: dict[str, dict[str, int]] = defaultdict(
         lambda: {"n": 0, "supported": 0, "unsupported": 0, "unknown": 0, "contradicted": 0}
@@ -171,7 +189,7 @@ def _route_distribution(results: list[dict[str, Any]]) -> dict[str, dict[str, An
     for r in results:
         for route, blk in r["routes"].items():
             a = agg[route]
-            a["n"] += 1
+            a["n"] += int(blk.get("n") or 0)
             for v in ("supported", "unsupported", "unknown", "contradicted"):
                 a[v] += blk.get(v, 0)
     out: dict[str, dict[str, Any]] = {}
@@ -188,6 +206,8 @@ def _route_distribution(results: list[dict[str, Any]]) -> dict[str, dict[str, An
             "contradicted": a["contradicted"],
             "abstention_rate": round(abstr, 4),
         }
+        if route == "derived":
+            out[route]["note"] = DERIVED_ROUTE_NOTE
     return out
 
 
@@ -208,15 +228,18 @@ def _action_level(results: list[dict[str, Any]]) -> dict[str, Any]:
     irr_hold = irr_pass = 0
     sh_hold = sh_miss = 0
     hn_hold = hn_total = 0
+    miss_ids: list[str] = []
     for r in results:
         label = r["label"]
         held = r["would_hold"]
-        is_irr = any("R3" in tid or "R2" in tid for tid in r["actuators"])
+        tiers = r.get("action_tiers") or {}
+        is_irr = any(str(t) in ("R2", "R3") for t in tiers.values())
         if label == "should_hold":
             if held:
                 sh_hold += 1
             else:
                 sh_miss += 1
+                miss_ids.append(r["id"])
         elif label == "should_pass":
             if is_irr:
                 irr_pass += 1 if not held else 0
@@ -239,8 +262,17 @@ def _action_level(results: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "passable": {"fp": pass_hold, "tn": pass_pass, "fpr": fpr},
         "irreversible_fail_closed": {"held": irr_hold, "passed": irr_pass},
-        "ungrounded": {"held": sh_hold, "missed": sh_miss, "fnr": fnr},
-        "hard_negative_caution": {"held": hn_hold, "total": hn_total, "hold_rate": hn_rate},
+        "ungrounded": {
+            "held": sh_hold,
+            "missed": sh_miss,
+            "miss_ids": miss_ids,
+            "fnr": fnr,
+        },
+        "hard_negative_caution": {
+            "held": hn_hold,
+            "total": hn_total,
+            "hold_rate": hn_rate,
+        },
     }
 
 
@@ -263,65 +295,66 @@ def _stratum_table(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
 
 
 def _threshold_calibration(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Sweep candidate COVERAGE_SUPPORTED values over textual bindings.
+    """Sweep candidate coverage thresholds over measured textual coverages.
 
-    Reports abstention rate (UNKNOWN share) as the threshold tightens — the
-    FP/FN curve T3.2 + T5.3 require before a threshold ships. No threshold is
-    asserted as a tuned constant; we only publish the sensitivity.
+    Same stored coverages, different cut-points — a real FP/FN-adjacent curve
+    (abstention vs support share), not a hypothetical row of nulls. No
+    threshold is asserted as ground truth; they ship only after shadow replay.
     """
-    textual = [
-        (b.method, b.verdict.value)
-        for r in results
-        for b in ()
-    ]  # placeholder; replaced below
-    # Recompute from raw verdicts we already captured (binding_methods + bindings).
-    cov_rows: list[dict[str, Any]] = []
-    # Collect (is_positive_doc, route) already in per-route; instead derive from
-    # textual route verdicts via stored bindings.
-    textual_cases: list[tuple[bool, str]] = []  # (verdict, label_pos)
-    for r in results:
-        label_pos = r["label"] == "should_hold"
-        for route, blk in r["routes"].items():
-            if route != "textual":
-                continue
-            # approximate coverage by treating SUPPORTED as high-coverage positive
-            textual_cases.append((blk["supported"] > 0, label_pos))
-    total = len(textual_cases) or 1
-    for thr_label, kept in (
-        ("sup>=1_observed", True),
-    ):
-        # Observed behaviour: supportive textual bindings at current thresholds.
-        pos = sum(1 for sup, _ in textual_cases if sup)
-        abstain = sum(1 for sup, _ in textual_cases if not sup)
-        cov_rows.append(
+    coverages = [c for r in results for c in (r.get("textual_coverages") or [])]
+    total = len(coverages)
+    rows: list[dict[str, Any]] = []
+    sweeps = (
+        (COVERAGE_SUPPORTED, COVERAGE_UNKNOWN, "observed committed constants"),
+        (0.80, 0.45, "tighter — measured on this corpus only; ship after shadow replay"),
+        (0.60, 0.30, "looser — measured on this corpus only; ship after shadow replay"),
+    )
+    for sup_t, unk_t, note in sweeps:
+        n_sup = sum(1 for c in coverages if c >= sup_t)
+        n_unk = sum(1 for c in coverages if unk_t <= c < sup_t)
+        n_unsup = total - n_sup - n_unk
+        rows.append(
             {
-                "coverage_supported": 0.72,  # current BM25 constant
-                "coverage_unknown": 0.38,  # current BM25 constant
+                "coverage_supported": sup_t,
+                "coverage_unknown": unk_t,
                 "textual_bound": total,
-                "supported_count": pos,
-                "abstention_rate": round(abstain / total, 4),
-                "note": "observed at committed constants; resweep with shadow replay before shipping",
+                "supported_count": n_sup,
+                "unknown_count": n_unk,
+                "unsupported_count": n_unsup,
+                "abstention_rate": round(n_unk / total, 4) if total else 0.0,
+                "note": note,
             }
         )
-    # Add a second illustrative row so the sensitivity is a *curve*, not a point.
-    cov_rows.append(
-        {
-            "coverage_supported": 0.80,
-            "coverage_unknown": 0.45,
-            "textual_bound": total,
-            "supported_count": None,
-            "abstention_rate": None,
-            "note": "hypothetical tighter threshold — measured only via shadow replay (T5.3)",
-        }
-    )
-    return cov_rows
+    return rows
 
 
-def build_report() -> dict[str, Any]:
-    cases = _load_cases()
-    if not cases:
-        raise RuntimeError("No eval cases found under evals/cases/")
-    results = [run_case(c) for c in cases]
+def _corpus_block(results: list[dict[str, Any]], action: dict[str, Any]) -> dict[str, Any]:
+    n = len(results)
+    hn_total = action["hard_negative_caution"]["total"]
+    missed = action["ungrounded"]["missed"]
+    held = action["ungrounded"]["held"]
+    return {
+        "self_authored": True,
+        "production_fnr": "unknown",
+        "n_cases": n,
+        "hard_negative_n": hn_total,
+        "hard_negative_share": (hn_total / n) if n else 0.0,
+        "ungrounded_n": missed + held,
+        "miss_ids": list(action["ungrounded"]["miss_ids"]),
+        "fnr_definition": (
+            "action-level: should_hold cases the gate did not hold "
+            "(Edit/Escalate/Block)"
+        ),
+        "fpr_definition": (
+            "action-level: should_pass R0/R1 cases the gate held; "
+            "hard negatives and R2/R3 fail-closed holds are not FPR"
+        ),
+        "wilson": "95% Wilson score interval on the binomial proportion",
+        "published_fnr_source": "eval-corpus",
+    }
+
+
+def _summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     per_route = _route_distribution(results)
     per_stratum = _stratum_table(results)
     action = _action_level(results)
@@ -330,6 +363,8 @@ def build_report() -> dict[str, Any]:
     )
     total_bindings = sum(len(r["bindings"]) for r in results)
     calibration = _threshold_calibration(results)
+    corpus = _corpus_block(results, action)
+    hn_share = corpus["hard_negative_share"]
 
     return {
         "n_cases": len(results),
@@ -345,60 +380,119 @@ def build_report() -> dict[str, Any]:
         "ungrounded_fnr_wilson": list(action["ungrounded"]["fnr"]),
         "hard_negative_hold_rate": action["hard_negative_caution"]["hold_rate"][0],
         "hard_negative_hold_wilson": list(action["hard_negative_caution"]["hold_rate"]),
+        "hard_negative_n": corpus["hard_negative_n"],
+        "hard_negative_share": hn_share,
         "threshold_calibration": calibration,
+        "corpus": corpus,
+        "published_fnr_source": "eval-corpus",
+        "production_fnr": "unknown",
+        "derived_route_note": DERIVED_ROUTE_NOTE,
         "note": (
             "No single accuracy number. Per-route binding DISTRIBUTION + abstention; "
             "action-level FPR/FNR take the ARCHITECTURE §7 shape (the gate metric). "
-            "Corpus is self-authored with hard negatives; numbers are measured on this run only."
+            "Corpus is self-authored with hard negatives; numbers are measured on "
+            "this run only. Production FNR is unknown."
         ),
     }
 
 
-def _fmt_ci(triple: tuple[float, float, float]) -> str:
+def _compute() -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    cases = _load_cases()
+    if not cases:
+        raise RuntimeError("No eval cases found under evals/cases/")
+    results = [run_case(c) for c in cases]
+    return _summarize(results), results
+
+
+def build_report() -> dict[str, Any]:
+    rep, _ = _compute()
+    return rep
+
+
+def _fmt_ci(triple: tuple[float, float, float] | list[float]) -> str:
     p, lo, hi = triple
     return f"{p:.1%} (95% CI {lo:.1%}–{hi:.1%})"
 
 
+def _print_report(rep: dict[str, Any]) -> None:
+    print(f"cases: {rep['n_cases']}  bindings: {rep['n_bindings']}")
+    print(
+        f"abstention (UNKNOWN): {rep['abstention_unknown']} "
+        f"({rep['abstention_rate']:.1%} of bindings)"
+    )
+    print("corpus: self-authored  production FNR: UNKNOWN")
+    print(
+        f"hard negatives: {rep['hard_negative_n']}/{rep['n_cases']} "
+        f"= {rep['hard_negative_share']:.1%}  (≥20% floor)"
+    )
+    print("\n-- per-route BINDING DISTRIBUTION (supported/unknown/contradicted/unsupported) --")
+    for route, m in rep["per_route"].items():
+        extra = ""
+        if route == "derived":
+            extra = "  [distribution, not precision — see README]"
+        print(
+            f"  {route:10s} n={m['n']:4d}  sup={m['supported']:3d}  unk={m['unknown']:3d}  "
+            f"contrad={m['contradicted']:3d}  unsup={m['unsupported']:3d}  "
+            f"abstain={m['abstention_rate']:.1%}{extra}"
+        )
+    print("\n-- ACTION-LEVEL (the §7 gate metric) --")
+    a = rep["action_level"]
+    u = a["ungrounded"]
+    miss_ids = ",".join(u.get("miss_ids") or []) or "(none)"
+    print(
+        f"published FNR (ungrounded, this corpus): {_fmt_ci(rep['ungrounded_fnr_wilson'])}  "
+        f"missed={u['missed']}/{u['missed'] + u['held']}  ids={miss_ids}"
+    )
+    print("production FNR: UNKNOWN")
+    print(
+        f"  passable-action false-hold (FPR): {_fmt_ci(rep['passable_fpr_wilson'])}  "
+        f"-> we wrongly hold {rep['passable_fpr']:.1%} of clean R0/R1 responses"
+    )
+    print(
+        f"  irreversible actions escalated (fail-closed, by design): "
+        f"held={a['irreversible_fail_closed']['held']} "
+        f"passed={a['irreversible_fail_closed']['passed']}"
+    )
+    print(
+        f"  fail-closed caution on hard-negatives: {_fmt_ci(rep['hard_negative_hold_wilson'])}  "
+        f"(held but defensible — not a false positive)"
+    )
+    print("\n-- per-stratum holds --")
+    for stratum, s in sorted(rep["per_stratum"].items()):
+        print(
+            f"  {stratum:24s} n={s['n']:3d}  should_hold={s['should_hold']:3d}  "
+            f"held={s['would_hold']:3d}  hard_neg={s['hard_negative']:2d}"
+        )
+    print("\n-- threshold sensitivity (ship only after shadow replay, T5.3) --")
+    for row in rep["threshold_calibration"]:
+        print(
+            f"  cov_sup={row['coverage_supported']}  "
+            f"abstention={row['abstention_rate']}  "
+            f"sup={row['supported_count']} unk={row['unknown_count']}  "
+            f"{row['note']}"
+        )
+
+
 def main() -> int:
     try:
-        rep = build_report()
+        rep, results = _compute()
     except RuntimeError as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
-    print(f"cases: {rep['n_cases']}  bindings: {rep['n_bindings']}")
-    print(f"abstention (UNKNOWN): {rep['abstention_unknown']} "
-          f"({rep['abstention_rate']:.1%} of bindings)")
-    print("\n-- per-route BINDING DISTRIBUTION (supported/unknown/contradicted/unsupported) --")
-    for route, m in rep["per_route"].items():
-        print(
-            f"  {route:10s} n={m['n']:4d}  sup={m['supported']:3d}  unk={m['unknown']:3d}  "
-            f"contrad={m['contradicted']:3d}  unsup={m['unsupported']:3d}  "
-            f"abstain={m['abstention_rate']:.1%}"
-        )
-    print("\n-- ACTION-LEVEL (the §7 gate metric) --")
-    a = rep["action_level"]
-    print(f"  ungrounded catch (FNR): {_fmt_ci(rep['ungrounded_fnr_wilson'])}  "
-          f"-> we HOLD {1 - rep['ungrounded_fnr']:.1%} of ungrounded responses")
-    print(f"  passable-action false-hold (FPR): {_fmt_ci(rep['passable_fpr_wilson'])}  "
-          f"-> we wrongly hold {rep['passable_fpr']:.1%} of clean R0/R1 responses")
-    print(f"  irreversible actions escalated (fail-closed, by design): "
-          f"held={a['irreversible_fail_closed']['held']} passed={a['irreversible_fail_closed']['passed']}")
-    print(f"  fail-closed caution on hard-negatives: {_fmt_ci(rep['hard_negative_hold_wilson'])}  "
-          f"(held but defensible — not a false positive)")
-    print("\n-- per-stratum holds --")
-    for stratum, s in sorted(rep["per_stratum"].items()):
-        print(f"  {stratum:24s} n={s['n']:3d}  should_hold={s['should_hold']:3d}  "
-              f"held={s['would_hold']:3d}  hard_neg={s['hard_negative']:2d}")
-    print("\n-- threshold sensitivity (ship only after shadow replay, T5.3) --")
-    for row in rep["threshold_calibration"]:
-        print(f"  cov_sup={row['coverage_supported']}  "
-              f"abstention={row['abstention_rate']}  {row['note']}")
+    _print_report(rep)
 
-    payload = {"summary": rep, "results": [
-        {k: v for k, v in r.items() if k not in ("binding_methods",)}
-        for r in (run_case(c) for c in _load_cases())
-    ]}
+    payload = {
+        "summary": rep,
+        "results": [
+            {
+                k: v
+                for k, v in r.items()
+                if k not in ("binding_methods", "textual_coverages", "action_tiers")
+            }
+            for r in results
+        ],
+    }
     LAST_RUN.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(f"\nwrote {LAST_RUN}")
     return 0

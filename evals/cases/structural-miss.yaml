@@ -1,3 +1,7 @@
+# Published miss class: structural symbol match ≠ assertion entailment.
+# Span mentions clause 4.1 (covers shipping); response claims it *permits a refund*.
+# Binder returns SUPPORTED on the symbol; R1 fail-open → Pass. Label is should_hold.
+# Production rate of this class is UNKNOWN — one labelled instance is not a field FNR.
 - id: struct-miss-000
   stratum: structural-miss
   use_case: decision-support

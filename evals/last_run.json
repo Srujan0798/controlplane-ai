@@ -14,7 +14,7 @@
         "abstention_rate": 0.0
       },
       "structural": {
-        "n": 110,
+        "n": 211,
         "supported": 178,
         "unsupported": 33,
         "unknown": 0,
@@ -35,7 +35,8 @@
         "unsupported": 0,
         "unknown": 0,
         "contradicted": 10,
-        "abstention_rate": 0.0
+        "abstention_rate": 0.0,
+        "note": "Derived route publishes a BINDING DISTRIBUTION, not precision. CONTRADICTED on derived-trap is a true catch (sum does not recompute). SUPPORTED on clean-derived is a true recompute. Per-route precision is undefined here and is not published \u2014 a silent precision=0 would be a metric-definition error (scoring CONTRADICTED-as-correct as FP)."
       },
       "temporal": {
         "n": 11,
@@ -178,6 +179,9 @@
       "ungrounded": {
         "held": 93,
         "missed": 1,
+        "miss_ids": [
+          "struct-miss-000"
+        ],
         "fnr": [
           0.010638297872340425,
           0.0018803473390524767,
@@ -212,25 +216,59 @@
       0.5069089329999881,
       0.7569823015887636
     ],
+    "hard_negative_n": 53,
+    "hard_negative_share": 0.31547619047619047,
     "threshold_calibration": [
       {
         "coverage_supported": 0.72,
         "coverage_unknown": 0.38,
-        "textual_bound": 71,
-        "supported_count": 50,
-        "abstention_rate": 0.2958,
-        "note": "observed at committed constants; resweep with shadow replay before shipping"
+        "textual_bound": 82,
+        "supported_count": 61,
+        "unknown_count": 2,
+        "unsupported_count": 19,
+        "abstention_rate": 0.0244,
+        "note": "observed committed constants"
       },
       {
         "coverage_supported": 0.8,
         "coverage_unknown": 0.45,
-        "textual_bound": 71,
-        "supported_count": null,
-        "abstention_rate": null,
-        "note": "hypothetical tighter threshold \u2014 measured only via shadow replay (T5.3)"
+        "textual_bound": 82,
+        "supported_count": 56,
+        "unknown_count": 7,
+        "unsupported_count": 19,
+        "abstention_rate": 0.0854,
+        "note": "tighter \u2014 measured on this corpus only; ship after shadow replay"
+      },
+      {
+        "coverage_supported": 0.6,
+        "coverage_unknown": 0.3,
+        "textual_bound": 82,
+        "supported_count": 62,
+        "unknown_count": 1,
+        "unsupported_count": 19,
+        "abstention_rate": 0.0122,
+        "note": "looser \u2014 measured on this corpus only; ship after shadow replay"
       }
     ],
-    "note": "No single accuracy number. Per-route binding DISTRIBUTION + abstention; action-level FPR/FNR take the ARCHITECTURE \u00a77 shape (the gate metric). Corpus is self-authored with hard negatives; numbers are measured on this run only."
+    "corpus": {
+      "self_authored": true,
+      "production_fnr": "unknown",
+      "n_cases": 168,
+      "hard_negative_n": 53,
+      "hard_negative_share": 0.31547619047619047,
+      "ungrounded_n": 94,
+      "miss_ids": [
+        "struct-miss-000"
+      ],
+      "fnr_definition": "action-level: should_hold cases the gate did not hold (Edit/Escalate/Block)",
+      "fpr_definition": "action-level: should_pass R0/R1 cases the gate held; hard negatives and R2/R3 fail-closed holds are not FPR",
+      "wilson": "95% Wilson score interval on the binomial proportion",
+      "published_fnr_source": "eval-corpus"
+    },
+    "published_fnr_source": "eval-corpus",
+    "production_fnr": "unknown",
+    "derived_route_note": "Derived route publishes a BINDING DISTRIBUTION, not precision. CONTRADICTED on derived-trap is a true catch (sum does not recompute). SUPPORTED on clean-derived is a true recompute. Per-route precision is undefined here and is not published \u2014 a silent precision=0 would be a metric-definition error (scoring CONTRADICTED-as-correct as FP).",
+    "note": "No single accuracy number. Per-route binding DISTRIBUTION + abstention; action-level FPR/FNR take the ARCHITECTURE \u00a77 shape (the gate metric). Corpus is self-authored with hard negatives; numbers are measured on this run only. Production FNR is unknown."
   },
   "results": [
     {

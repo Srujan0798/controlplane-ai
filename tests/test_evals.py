@@ -93,3 +93,87 @@ def test_last_run_json_emitted_and_readable():
     assert path.exists()
     data = json.loads(path.read_text())
     assert "summary" in data
+    summary = data["summary"]
+    assert summary.get("published_fnr_source") == "eval-corpus"
+    assert summary.get("production_fnr") == "unknown"
+
+
+def test_hard_negative_share_at_least_20_percent():
+    rep = build_report()
+    assert rep["n_cases"] >= 150
+    share = rep["hard_negative_share"]
+    assert share >= 0.20, f"hard-negative share {share:.1%} below 20% floor"
+    assert rep["hard_negative_n"] == sum(
+        s["hard_negative"] for s in rep["per_stratum"].values()
+    )
+
+
+def test_fnr_has_honest_miss_or_written_bound():
+    """Kill fake-perfect FNR=0 with no miss story."""
+    rep = build_report()
+    fnr = rep["ungrounded_fnr"]
+    ci = rep["ungrounded_fnr_wilson"]
+    assert len(ci) == 3
+    assert ci[1] <= ci[0] <= ci[2]
+    assert rep["production_fnr"] == "unknown"
+    assert rep["corpus"]["self_authored"] is True
+    misses = rep["action_level"]["ungrounded"]["miss_ids"]
+    if fnr == 0:
+        # Allowed only with an explicit production-unknown bound, never as "perfect".
+        assert "production" in rep["note"].lower()
+        assert "unknown" in rep["note"].lower()
+    else:
+        assert misses, "FNR>0 must name the miss case"
+        assert "struct-miss-000" in misses
+
+
+def test_derived_route_not_silent_precision_zero():
+    rep = build_report()
+    derived = rep["per_route"]["derived"]
+    assert derived.get("precision") is None
+    assert "note" in derived
+    assert "precision" in derived["note"].lower()
+    assert "distribution" in derived["note"].lower()
+    counted = (
+        derived["supported"]
+        + derived["contradicted"]
+        + derived["unsupported"]
+        + derived["unknown"]
+    )
+    assert derived["n"] == counted
+
+
+def test_readme_states_honesty_contract():
+    text = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+    assert "self-authored" in text
+    assert "production fnr" in text and "unknown" in text
+    assert "wilson" in text
+    assert "hard negative" in text
+    assert "20%" in text or "20 %" in text
+
+
+def test_metrics_endpoint_source_eval_corpus():
+    """GET /v1/controlplane/metrics publishes eval-corpus FNR after last_run exists."""
+    from fastapi.testclient import TestClient
+
+    from controlplane.server.app import create_app
+
+    app = create_app()
+    c = TestClient(app)
+    resp = c.get("/v1/controlplane/metrics")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data.get("published_fnr") is not None
+    assert data.get("published_fnr_source") == "eval-corpus"
+    assert "published_fnr_ci" in data
+    assert data.get("production_fnr") == "unknown"
+
+
+def test_threshold_calibration_is_a_real_sweep():
+    rep = build_report()
+    cal = rep["threshold_calibration"]
+    assert len(cal) >= 2
+    for row in cal:
+        assert row["abstention_rate"] is not None
+        assert row["supported_count"] is not None
+        assert 0.0 <= row["abstention_rate"] <= 1.0 + 1e-9

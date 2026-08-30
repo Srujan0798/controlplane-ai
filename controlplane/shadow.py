@@ -136,6 +136,7 @@ class MetricsStore:
         self._eval_fpr: float | None = None
         self._eval_fpr_ci: list[float] | None = None
         self._eval_n: int = 0
+        self._eval_source: str = "eval-corpus"
 
     def load_eval_metrics(self, eval_json_path: str | Path) -> None:
         """T3.2: seed publishable FNR/FPR from the eval corpus results.
@@ -158,6 +159,7 @@ class MetricsStore:
             self._eval_fpr = fpr[0]
             self._eval_fpr_ci = list(fpr[1:3])
         self._eval_n = summary.get("n_cases", 0) or 0
+        self._eval_source = summary.get("published_fnr_source") or "eval-corpus"
 
     def record(self, **kwargs: Any) -> None:
         with self._lock:
@@ -176,11 +178,13 @@ class MetricsStore:
             if snap["published_fnr"] is None and self._eval_fnr is not None:
                 snap["published_fnr"] = self._eval_fnr
                 snap["published_fnr_ci"] = self._eval_fnr_ci
-                snap["published_fnr_source"] = "eval-corpus"
+                snap["published_fnr_source"] = self._eval_source or "eval-corpus"
                 snap["published_fnr_n"] = self._eval_n
+                snap["production_fnr"] = "unknown"
             if snap["published_fpr"] is None and self._eval_fpr is not None:
                 snap["published_fpr"] = self._eval_fpr
                 snap["published_fpr_ci"] = self._eval_fpr_ci
+                snap["published_fpr_source"] = self._eval_source or "eval-corpus"
             snap["gate_latency_ms"] = self._gate_latency_ms
             snap["gate_latency_count"] = self._gate_latency_count
             if self._gate_latency_count:
