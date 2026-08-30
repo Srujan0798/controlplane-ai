@@ -1,3 +1,5 @@
+> **INTERNAL ENGINEERING** — agent dispatch prompts. Not part of the product claim or the five portal uploads.
+
 # Brutal agent prompts — hit 100/100 excellence (not “pytest green”)
 
 **Repo:** https://github.com/Srujan0798/controlplane-ai (`main` only)  

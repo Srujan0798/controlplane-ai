@@ -3,17 +3,31 @@
 **Public GitHub (only branch judges need):** https://github.com/Srujan0798/controlplane-ai (`main`)  
 **Frozen rollback tag:** `v0.2.0-round2`
 
-## Portal — five fields
+## Portal uploads (five fields)
 
-| # | Organizer field | Artifact |
+| # | Portal field | Artifact |
 |---|---|---|
 | 1 | Public GitHub link | https://github.com/Srujan0798/controlplane-ai |
-| 2 | Prototype video (`.mp4`) | `submission/ControlPlane_Round2_Prototype.mp4` |
-| 3 | README document (`.pdf`) | `submission/ControlPlane_Round2_README.pdf` |
-| 4 | Detailed business proposal (`.pdf`) | `submission/ControlPlane_Round2_Proposal.pdf` |
-| 5 | Pitch presentation (`.pptx`) | `submission/ControlPlane_Round2_Pitch.pptx` |
+| 2 | Prototype video | [`../submission/ControlPlane_Round2_Prototype.mp4`](../submission/ControlPlane_Round2_Prototype.mp4) |
+| 3 | README document (PDF) | [`../submission/ControlPlane_Round2_README.pdf`](../submission/ControlPlane_Round2_README.pdf) |
+| 4 | Business proposal (PDF) | [`../submission/ControlPlane_Round2_Proposal.pdf`](../submission/ControlPlane_Round2_Proposal.pdf) |
+| 5 | Pitch deck (PPTX) | [`../submission/ControlPlane_Round2_Pitch.pptx`](../submission/ControlPlane_Round2_Pitch.pptx) |
 
 Official brief: [`ps.md`](ps.md).
+
+## Run in 60 seconds
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+bash scripts/preflight-lite.sh
+make run
+```
+
+Then: http://127.0.0.1:8787/?scenario=refund&mode=enforce&autorun=1  
+Gate (paste/upload): http://127.0.0.1:8787/gate
+
+**Expected:** `show_text` → **Edit** · `issue_refund` → **Escalate** (**held** with evidence packet — never “blocked”).
 
 ## Verify before upload
 
@@ -39,3 +53,5 @@ make run
 3. [`HOSTILE_QA_DRILL.md`](HOSTILE_QA_DRILL.md) — defend  
 
 Never say the refund was “blocked.” Say **held and escalated with the evidence packet.**
+
+`AGENT_ASSIGNMENT_STEPS.md` and `BRUTAL_AGENT_PROMPTS.md` are **internal engineering** dispatch notes. They are not portal uploads and are not part of the product claim.

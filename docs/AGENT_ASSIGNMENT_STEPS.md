@@ -1,3 +1,5 @@
+> **INTERNAL ENGINEERING** — operator checklist for agent dispatch. Not part of the product claim or the five portal uploads.
+
 # Agent assignment steps — portal 100 + prize ~99
 
 **Repo:** https://github.com/Srujan0798/controlplane-ai (`main` only — never push a second branch)  

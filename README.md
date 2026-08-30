@@ -1,12 +1,10 @@
 # ControlPlane.ai
 
 **Admission-control layer for AI that acts.**  
-Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1  
+Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1
 
-**Public repo (single branch `main`):** https://github.com/Srujan0798/controlplane-ai  
-**Tag:** `v0.2.0-round2` (frozen baseline; `main` is the elevation tip judges should open)
-
-Every AI response is a set of **claims requesting permission to act**. Provenance is captured **outside** the model (`STEP → SPAN → CLAIM → ACTION`). Unproven claims cannot authorize irreversible actions. Lane 1 is deterministic — no LLM on the critical path.
+**Public GitHub:** https://github.com/Srujan0798/controlplane-ai  
+**Branch:** `main` only · **Tag:** `v0.2.0-round2` (frozen baseline)
 
 ---
 
@@ -24,7 +22,9 @@ Full checklist: [`docs/SUBMIT.md`](docs/SUBMIT.md) · Canon: [`round2/CONTROLPLA
 
 ---
 
-## 2. Run
+## 2. Run in 60 seconds
+
+Python 3.11+.
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
@@ -33,12 +33,11 @@ bash scripts/preflight-lite.sh   # must PASS
 make run                         # http://127.0.0.1:8787
 ```
 
-Autorun refund demo:  
-http://127.0.0.1:8787/?scenario=refund&mode=enforce&autorun=1
+Then open: http://127.0.0.1:8787/?scenario=refund&mode=enforce&autorun=1
+
+**Expected:** `show_text` → **Edit** · `issue_refund` → **Escalate** (**held** with evidence packet — never “blocked”).
 
 Docker: `docker compose up --build` → http://localhost:8080
-
-**Expected:** `show_text` → **Edit** · `issue_refund` → **Escalate** (held — never “blocked”).
 
 ```bash
 python3 examples/refund_trace_demo.py
@@ -47,7 +46,13 @@ python3 examples/knowledge_flip_demo.py
 
 ---
 
-## 3. Room flow (one path)
+## 3. What this is
+
+Every AI response is a set of **claims requesting permission to act**. Provenance is captured **outside** the model (`STEP → SPAN → CLAIM → ACTION`). Unproven claims cannot authorize irreversible actions. Lane 1 is deterministic — no LLM on the critical path.
+
+---
+
+## 4. Room flow (one path)
 
 | Step | Open |
 |---|---|
@@ -59,7 +64,7 @@ python3 examples/knowledge_flip_demo.py
 
 ---
 
-## 4. Architecture
+## 5. Architecture
 
 ```text
 STEP → SPAN → CLAIM → ACTION
@@ -70,15 +75,17 @@ Built: hash-chained ledger · ACL entitlement · dual-action refund · FastAPI O
 
 ---
 
-## 5. Layout
+## 6. Layout
 
 ```text
-README.md · AGENTS.md · LICENSE
+README.md · LICENSE
 controlplane/   policies/   tests/   examples/   scripts/
-submission/     # PDF · PPTX · latency_bench.json · SBOM
+submission/     # portal files: mp4 · README.pdf · Proposal.pdf · Pitch.pptx
 round2/         # FINAL proposal · R2S5 pitch
-docs/           # SUBMIT · JUDGE_RUNBOOK · HOSTILE_QA · ARCHITECTURE · ACCEPTANCE · ps.md
+docs/           # judge path: SUBMIT · JUDGE_RUNBOOK · HOSTILE_QA · ARCHITECTURE · ACCEPTANCE · ps.md
 docs/reference/ # optional depth (not required to submit)
 ```
+
+`AGENTS.md` and files such as `docs/AGENT_ASSIGNMENT_STEPS.md` / `docs/BRUTAL_AGENT_PROMPTS.md` are **internal engineering** notes. They are not part of the product claim or the five portal uploads.
 
 Team: Choda Srujan Sai · Dhrithika · IIT Gandhinagar
