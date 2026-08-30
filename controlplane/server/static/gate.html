@@ -144,6 +144,14 @@ $('run').addEventListener('click', async () => {
   if (!text) { $('status').textContent = 'paste or upload text first'; return; }
   $('status').textContent = 'running gate…';
   const tier = $('actionTier').value;
+  // If a spans file is loaded, include it in the request
+  const file = $('file').files[0];
+  let spans = undefined;
+  if (file) {
+    try {
+      spans = JSON.parse(await file.text()).spans;
+    } catch(e) { /* ignore parse errors */ }
+  }
   const body = {
     response_text: text,
     principal_id: $('principal').value || 'judge-demo',
@@ -153,6 +161,7 @@ $('run').addEventListener('click', async () => {
       { action_id: 'issue_action', name: 'Issue the action', tier: tier, irreversibility: (tier === 'R3') }
     ]
   };
+  if (spans) body.spans = spans;
   try {
     const res = await fetch('/v1/controlplane/analyze', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
