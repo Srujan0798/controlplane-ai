@@ -1,3 +1,7 @@
+# INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE
+
+**Not a portal upload. Not part of the product claim.** Operator production script for the prototype video. Judges: ignore.
+
 # Prototype Video Script — ControlPlane.ai (T7.5)
 
 1920x1080, screen capture + voiceover, target 3:30–4:00. Prototype, not pitch.

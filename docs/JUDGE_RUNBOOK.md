@@ -95,7 +95,7 @@ make bench         # optional; refreshes submission/latency_bench.json
 
 | Forbidden | Say instead |
 |---|---|
-| **“40 ms p95”** / “forty millisecond p95” | **Targets:** ≤40 ms **p50** / ≤200 ms **p95**. **Measured** gate (`submission/latency_bench.json`, n=200): p50≈**0.074 ms**, p95≈**0.134 ms**. Never quote 40 ms as p95. |
+| **“40 ms p95”** / “forty millisecond p95” | **Targets:** ≤40 ms **p50** / ≤200 ms **p95**. **Measured** gate — see `submission/latency_bench.json` (n=10000). Never quote 40 ms as p95. |
 | **“We eliminate hallucinations.”** | Ungrounded claims cannot **authorise actions**; we publish what we miss (FNR shape). |
 | **“Zero added latency.”** / “zero integration.” | We never make the model feel slow; we make the **action** wait. Integration is the moat — days, not zero. |
 | **“Blocked” the refund** | **Held / Escalated** with the evidence packet. |
@@ -236,7 +236,7 @@ curl -s http://127.0.0.1:8787/healthz
 | Target | What it does |
 |---|---|
 | `make test` | `pytest -q` |
-| `make bench` | Load bench → updates latency numbers (`CONTROLPLANE_RPM=100000`, `scripts/load_bench.py -n 200`) |
+| `make bench` | Load bench → updates latency numbers (`CONTROLPLANE_RPM=100000`, `scripts/load_bench.py -n 10000`) |
 | `make run` | Local uvicorn on **127.0.0.1:8787** |
 | `make judge` | Prints [JUDGE_RUNBOOK.md](JUDGE_RUNBOOK.md) path, Docker **8080** / local **8787** tips, health + refund curls, latency bench summary |
 | `make e2e` | `pytest -q tests/test_e2e_console.py` |

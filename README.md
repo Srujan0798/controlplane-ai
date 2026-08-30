@@ -6,6 +6,10 @@ Accenture Innovation Challenge 2026 · Round 2 · Team ControlPlane · PS #1
 **Public GitHub:** https://github.com/Srujan0798/controlplane-ai  
 **Branch:** `main` only · **Frozen tag:** `v0.2.0-round2`
 
+[![CI](https://github.com/Srujan0798/controlplane-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/Srujan0798/controlplane-ai/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
+
 ---
 
 ## 1. Portal uploads (five fields)
