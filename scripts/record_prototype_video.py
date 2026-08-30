@@ -92,22 +92,45 @@ def main() -> int:
             page.goto((cards / name).as_uri())
             page.wait_for_timeout(int(hold * 1000))
 
-        # Live gate — type slowly so the judge sees the paste
+        # Live gate — load the refund scenario so clause 7.2 shows UNSUPPORTED
         page.goto(f"{BASE}/gate", wait_until="networkidle")
         page.wait_for_timeout(2500)
-        page.click("#text")
-        page.fill("#text", "")
-        page.type("#text", UNGATED, delay=18)
-        page.wait_for_timeout(2000)
-        if page.locator("#actionTier").count():
-            page.select_option("#actionTier", "R3")
-        page.wait_for_timeout(1200)
+        # Click the scenario loader button first (pre-fills text + spans + principal)
+        page.click("#loadScenario")
+        page.wait_for_timeout(800)
         page.click("#run")
         page.wait_for_timeout(5000)
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_timeout(12000)
         page.evaluate("window.scrollTo(0, 0)")
         page.wait_for_timeout(4000)
+
+        # Verify what's on screen: clause_72 should be UNSUPPORTED (not SUPPORTED)
+        verification = page.evaluate("""async () => {
+            const raw = document.getElementById('raw')?.textContent || '';
+            try {
+                const d = JSON.parse(raw);
+                const claims = d.claims || [];
+                const clauseClaim = claims.find(c => c.claim_id === 'clause_72');
+                const decisions = d.decisions || {};
+                const refundDec = decisions['issue_action'] || decisions['issue_refund'];
+                return {
+                    clause_72_verdict: clauseClaim ? (clauseClaim.binding?.verdict || 'NONE') : 'NOT_FOUND',
+                    refund_actuator: refundDec?.actuator || 'NOT_FOUND',
+                    decision_count: Object.keys(decisions).length,
+                    claims_count: claims.length
+                };
+            } catch(e) {
+                return {error: e.message};
+            }
+        }""")
+        print(f"Live gate verification: {verification}")
+        if verification.get('clause_72_verdict') == 'SUPPORTED':
+            print("WARNING: clause_72 shows SUPPORTED — expected UNSUPPORTED. Check spans loaded correctly.")
+        if verification.get('refund_actuator') == 'Escalate':
+            print("OK: refund → Escalate (held)")
+        elif verification.get('refund_actuator') == 'Pass':
+            print("WARNING: refund → Pass — expected Escalate")
 
         # Also hit refund demo JSON briefly via overlay page
         demo = page.evaluate(
@@ -149,8 +172,13 @@ pre{{background:#121a30;padding:24px;border-radius:12px;font-size:20px;line-heig
         if last.exists():
             data = json.loads(last.read_text())
             s = data.get("summary") or data
-            fnr = s.get("published_fnr", s.get("fnr", "n/a"))
-            ci = s.get("published_fnr_wilson_95") or s.get("published_fnr_ci") or ""
+            uw = s.get("ungrounded_fnr_wilson")
+            if uw and len(uw) >= 3:
+                fnr = f"{uw[0]:.1%}"
+                ci = f"{uw[1]:.1%}–{uw[2]:.1%}"
+            else:
+                fnr = s.get("published_fnr", s.get("fnr", "n/a"))
+                ci = s.get("published_fnr_wilson_95") or s.get("published_fnr_ci") or ""
         nums = cards / "02b_numbers.html"
         _write_card(
             nums,

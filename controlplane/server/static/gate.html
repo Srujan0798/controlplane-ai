@@ -81,6 +81,7 @@
     </div>
 
     <button id="run">Run gate ▶</button>
+    <button id="loadScenario" style="margin-top:10px;background:#2a3a5c;color:var(--muted);border:1px solid #3a4a6c;width:auto;padding:8px 16px;font-size:14px;cursor:pointer;">Load refund scenario (demo)</button>
     <div id="status">idle</div>
   </div>
 
@@ -103,6 +104,30 @@
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+$('loadScenario').addEventListener('click', () => {
+    $('text').value = "Approved. Refund of INR 1,84,000 issued under clause 7.2 of the vendor agreement. Customer account flagged for goodwill override.";
+    $('principal').value = 'cs-agent-17';
+    $('clearance').value = 'vendor-public';
+    $('actionTier').value = 'R3';
+    $('status').textContent = 'refund scenario loaded — press Run gate';
+    // Pre-populate spans via the file input trick: create a JSON blob
+    const spansBlob = {
+        spans: [
+            {source_id: "doc:vendor-agreement-v3", acl: ["vendor-public"], content: "Clause 4.1 covers shipping delays and restocking. Approved refunds follow the published vendor schedule."},
+            {source_id: "db:orders", acl: ["vendor-public"], content: "Refund amount for order ORD-9 is 184000 INR."},
+            {source_id: "doc:hr-exception-desk", acl: ["hr-confidential"], content: "Internal exception desk: customer account flagged for goodwill override."},
+            {source_id: "doc:faq", acl: ["vendor-public"], content: "Return window is 30 days for unused goods."},
+            {source_id: "db:crm", acl: ["vendor-public"], content: "Ticket T-441 opened Tuesday; no policy citation attached."}
+        ]
+    };
+    const blob = new Blob([JSON.stringify(spansBlob)], {type: 'application/json'});
+    const fileInput = $('file');
+    const dt = new DataTransfer();
+    dt.items.add(new File([blob], 'spans.json', {type: 'application/json'}));
+    fileInput.files = dt.files;
+    fileInput.dispatchEvent(new Event('change', {bubbles: true}));
+  });
 
 $('file').addEventListener('change', async (e) => {
   const f = e.target.files[0];
