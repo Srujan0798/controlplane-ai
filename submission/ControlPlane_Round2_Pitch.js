@@ -59,22 +59,22 @@ pres.title = "ControlPlane.ai — Round 2 Pitch";
 pres.subject = "Admission-control layer for AI that acts · Accenture Innovation Challenge 2026 · PS #1";
 
 const C = {
-  bgBase: "120806",
-  bgBaseAlt: "0A0504",
-  bgWarm: "2A120C",
-  panel: "1A0D0A",
-  border: "3A1E16",
-  borderHi: "5A2E20",
-  rust: "D9482A",
-  cream: "F2E3D5",
-  muted: "7A5D4E",
-  warm: "C9B5A3",
-  amber: "F2C572",
-  hiFill: "2A140F",
+  bgBase: "0B0F1A",
+  bgBaseAlt: "060A14",
+  bgWarm: "12182A",
+  panel: "0F1525",
+  border: "1E2A3D",
+  borderHi: "2D3A52",
+  rust: "C9A227",
+  cream: "F5F0EB",
+  muted: "8892B0",
+  warm: "D0C8B8",
+  amber: "D4AF37",
+  hiFill: "162032",
 };
 
-const FONT = "Arial";
-const FMONO = "Courier New";
+const FONT = "Segoe UI";
+const FMONO = "SF Mono";
 const SW = 20.0;
 const SH = 11.25;
 

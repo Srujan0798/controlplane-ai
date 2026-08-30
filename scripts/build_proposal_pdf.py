@@ -93,10 +93,12 @@ def build(md_path: Path = SRC, out_path: Path = OUT) -> Path:
     title = rl["ParagraphStyle"](
         "TitleCP",
         parent=styles["Title"],
-        fontSize=18,
-        leading=22,
-        spaceAfter=8,
+        fontSize=22,
+        leading=26,
+        spaceAfter=10,
         alignment=rl["TA_CENTER"],
+        textColor=rl["colors"].HexColor("#1A2A3D"),
+        fontName="Helvetica-Bold",
     )
     h1 = rl["ParagraphStyle"](
         "H1CP", parent=styles["Heading1"], fontSize=14, leading=18, spaceBefore=16, spaceAfter=8
@@ -110,10 +112,12 @@ def build(md_path: Path = SRC, out_path: Path = OUT) -> Path:
     body = rl["ParagraphStyle"](
         "BodyCP",
         parent=styles["Normal"],
-        fontSize=9.5,
-        leading=13,
+        fontSize=10,
+        leading=14,
         alignment=rl["TA_JUSTIFY"],
         spaceAfter=6,
+        textColor=rl["colors"].HexColor("#2A2A35"),
+        fontName="Helvetica",
     )
     quote = rl["ParagraphStyle"](
         "QuoteCP",
