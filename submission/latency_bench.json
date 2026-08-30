@@ -248,7 +248,7 @@
     "n_requests": 10000,
     "machine": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
     "cpu": "arm",
-    "hostname": "macs-MacBook-Pro.local",
+    "hostname": "submitter-workstation",
     "python": "3.14.3",
     "workload": "frozen refund demo (extract\u2192bind\u2192entitle\u2192interlock, R1+R3, 2 actions)",
     "concurrency_levels": [

@@ -1,11 +1,7 @@
-# INTERNAL ENGINEERING BOARD — NOT PRODUCT SURFACE
+# Internal engineering only
 
-**Not a portal upload. Not part of the product claim.** These files are operator/agent dispatch notes.
+Agent assignment / excellence / brutal-review prompts live here so they do **not**
+clutter the judge-facing `docs/` stand.
 
-| File | Role |
-|---|---|
-| `EXCELLENCE_GATE.md` | DONE definition for implementers |
-| `BRUTAL_AGENT_PROMPTS.md` | Agent dispatch prompts |
-| `AGENT_ASSIGNMENT_STEPS.md` | Dispatch order |
-
-Judges: return to the repository README and the five portal artifacts under `submission/`.
+Product surface: `README.md`, `docs/SUBMIT.md`, `docs/ARCHITECTURE.md`,
+`docs/JUDGE_RUNBOOK.md`, `docs/HOSTILE_QA_DRILL.md`, `submission/`.
