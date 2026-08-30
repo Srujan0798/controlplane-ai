@@ -254,8 +254,29 @@ def build(out_path: Path = OUT) -> Path:
         story.append(P("Run <font face='Courier' size='9'>make bench</font> to populate submission/latency_bench.json.", body))
 
     story.append(P(
-        "Refund language in this system is <b>held / escalated with an evidence packet</b> — never "
+        "Refund language in this system is <b>held and escalated with the evidence packet</b> — never "
         "'blocked'. Irreversible actions are not released without provenance.", body))
+
+    # --- Honest reading of the numbers (corpus provenance + limits)
+    fnr_h = ev.get("ungrounded_fnr_wilson") or [0.0106383, 0.0018803, 0.0578243]
+    fpr_h = ev.get("passable_fpr_wilson") or [0.0, 0.0, 0.1546438]
+    hn_h = ev.get("hard_negative_hold_wilson") or [0.6415094, 0.5069089, 0.7569823]
+    n_h = ev.get("n_cases", 168)
+    story.append(P("6.1 Honest reading of these numbers", h1))
+    story.append(P(
+        f"Measured on a <b>{n_h}-case self-authored corpus</b>. Ungrounded FNR "
+        f"<b>{fnr_h[0]:.1%}</b> (95% CI {fnr_h[1]:.2%}–{fnr_h[2]:.2%}), passable FPR "
+        f"<b>{fpr_h[0]:.1%}</b> (95% upper bound {fpr_h[2]:.1%}). Hard-negative hold rate is "
+        f"<b>{hn_h[0]:.0%}</b> ({hn_h[0]:.1%}, 95% Wilson CI {hn_h[1]:.1%}–{hn_h[2]:.1%}) — we "
+        f"over-flag, we measured it, and it is our named next milestone. No production traffic; "
+        f"production FNR is unknown. The corpus ships in the repo so you can attack it.", body))
+
+    # --- Refuse-to-claim (about us, not competitors)
+    story.append(P("6.2 What we refuse to claim", h1))
+    story.append(P(
+        "This list is about <b>us</b>, not about anyone else. <b>We do not claim:</b> "
+        "elimination of hallucinations · zero integration cost · zero added latency · "
+        "one accuracy number · production-scale proof.", body))
 
     # --- Repo map
     story.append(P("7. Repo map", h1))

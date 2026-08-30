@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-cov>=4,<7"]
+dev = ["pytest>=8.0", "pytest-cov>=4,<7", "pypdf>=4.0"]
 e2e = ["playwright"]
 pdf = ["reportlab"]
 

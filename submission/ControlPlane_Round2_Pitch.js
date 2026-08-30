@@ -1210,11 +1210,89 @@ function notes(s, text) {
 }
 
 // =====================================================================
+// SLIDE 12 — MEASURED / REFUSE TO CLAIM
+// =====================================================================
+{
+  const s = pres.addSlide();
+  chrome(s, "11 // MEASURED");
+  notes(s,
+    "This is the honesty slide. Every number here is measured by make eval and make bench on a 168-case self-authored corpus — no production traffic. Ungrounded FNR is 1.1 percent with a Wilson interval of 0.19 to 5.78. Passable-action FPR is 0.0 percent with a 15.5 percent upper bound. The hard-negative hold rate is 64 percent — we over-flag, and we name that as the next milestone rather than hide it. Gate latency over ten thousand runs is p50 0.44ms, p95 0.52ms, p99 0.64ms. Then the refusals, about us and never about competitors: we do not claim eliminated hallucinations, zero integration, zero added latency, one accuracy number, or production-scale proof. In the demo the refund was held and escalated with the evidence packet."
+  );
+
+  eyebrow(s, "12 · WHAT WE MEASURED  ·  AND WHAT WE REFUSE TO CLAIM", 1.04, 1.00, 14);
+  headline(s, [
+    { text: "168 CASES. " },
+    { text: "SELF-AUTHORED", accent: true },
+    { text: ". NO PRODUCTION TRAFFIC." },
+  ], { x: 1.04, y: 1.32, w: 17.9, h: 0.52, size: 28 });
+  s.addText("Every number below regenerates from `make eval` and `make bench`. Intervals, not point estimates. The miss is published, not smoothed.", {
+    x: 1.04, y: 1.88, w: 17.9, h: 0.32,
+    fontFace: FONT, fontSize: 15, color: C.warm, margin: 0,
+  });
+
+  panel(s, 1.04, 2.32, 10.15, 5.32, "▸ MEASURED — evals/last_run.json", "168 CASES · SELF-AUTHORED");
+  ascii(s, 1.32, 2.98, 9.60, 4.40, [
+    "corpus                    168 cases, self-authored",
+    "production traffic        none",
+    "ungrounded FNR            1.1%   95% CI 0.19% - 5.78%",
+    "passable-action FPR       0.0%   95% upper bound 15.5%",
+    "hard-negative hold rate   64%    95% CI 50.7% - 75.7%",
+    "gate latency  n=10000     p50 0.44ms",
+    "                          p95 0.52ms",
+    "                          p99 0.64ms",
+  ], C.warm, 14);
+
+  card(s, 1.04, 7.86, 10.15, 2.16, C.hiFill, C.rust, 1.0);
+  rustBar(s, 1.04, 7.86, 10.15);
+  s.addText("THE MISS  ·  NAMED, NOT SMOOTHED", {
+    x: 1.34, y: 8.06, w: 9.55, h: 0.30,
+    fontFace: FONT, fontSize: 12, color: C.muted, charSpacing: 1.4, margin: 0,
+  });
+  s.addText("Hard-negative hold rate 64% — we over-flag.", {
+    x: 1.34, y: 8.44, w: 9.55, h: 0.42,
+    fontFace: FONT, fontSize: 20, bold: true, color: C.cream, margin: 0,
+  });
+  s.addText("Measured, published, and named as the next milestone. 53/168 cases are hard negatives (31.7%). Clean strata hold 0/13.", {
+    x: 1.34, y: 8.94, w: 9.55, h: 0.95,
+    fontFace: FONT, fontSize: 15, color: C.warm, margin: 0, valign: "top",
+  });
+
+  card(s, 11.42, 2.32, 7.54, 7.70, C.panel, C.rust, 1.0);
+  rustBar(s, 11.42, 2.32, 7.54);
+  s.addText("WE REFUSE TO CLAIM  ·  ABOUT US, NOT COMPETITORS", {
+    x: 11.72, y: 2.52, w: 7.00, h: 0.30,
+    fontFace: FONT, fontSize: 12, color: C.muted, charSpacing: 1.2, margin: 0,
+  });
+  s.addText("We do not claim:", {
+    x: 11.72, y: 2.94, w: 7.00, h: 0.40,
+    fontFace: FONT, fontSize: 20, bold: true, color: C.cream, margin: 0,
+  });
+  ascii(s, 11.72, 3.52, 7.00, 3.10, [
+    "-  eliminated hallucinations",
+    "-  zero integration",
+    "-  zero added latency",
+    "-  one accuracy number across",
+    "   three failure modes",
+    "-  production-scale proof",
+  ], C.warm, 15);
+
+  divider(s, 11.72, 6.72, 7.00);
+  s.addText("What we do claim is bounded: 168 self-authored cases, every rate published with its Wilson interval. Production is unknown until shadow replay.", {
+    x: 11.72, y: 6.98, w: 7.00, h: 1.30,
+    fontFace: FONT, fontSize: 15, color: C.warm, margin: 0, valign: "top",
+  });
+  s.addText("In the demo, the refund was held and escalated with the evidence packet.", {
+    x: 11.72, y: 8.42, w: 7.00, h: 1.10,
+    fontFace: FONT, fontSize: 17, bold: true, color: C.amber, margin: 0, valign: "top",
+  });
+}
+
+// =====================================================================
 // SLIDE 13 — ASK / CLOSE
 // =====================================================================
 {
   const s = pres.addSlide();
-  chrome(s, "11 // ASK", true);
+  chrome(s, "12 // ASK", true);
   notes(s,
     "We are asking to take this into shadow on one support route and one acting route. Enforcement is earned per route. The first artefact you get is the counterfactual — would have held N, of which M were true positives — not a block. That system was never asked to prove anything. Now nothing acts until it can prove it should."
   );
